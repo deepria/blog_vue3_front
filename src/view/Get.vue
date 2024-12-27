@@ -25,7 +25,7 @@
         />
       </div>
 
-      <button class="button-primary" @click="fetchUser">Get Data</button>
+      <button class="button-primary" @click="get">Get Data</button>
     </div>
 
     <!-- 결과 컨테이너 -->
@@ -35,41 +35,63 @@
         <p>Error: {{ error }}</p>
       </div>
       <div v-else-if="data">
-        <p><strong>Result :</strong> {{ data }}</p>
+        <pre class="output">{{ data }}</pre>
       </div>
       <div v-else>
         <p>No Data Yet</p>
       </div>
+
+      <br/>
+      <button class="button-primary" @click="modify">Modify</button>
     </div>
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
-import { getData } from "../services/dynamoService.js";
+import {ref} from "vue";
+import {getData} from "../services/dynamoService.js";
+import {useRouter} from "vue-router";
 
 export default {
   setup() {
+    const router = useRouter();
     const part = ref("");
     const index = ref("");
     const data = ref(null);
     const error = ref(null);
 
-    const fetchUser = async () => {
+    const get = async () => {
       try {
         error.value = null;
-        data.value = await getData(part.value, index.value);
+        data.value = JSON.stringify(await getData(part.value, index.value), null, 2);
       } catch (err) {
-        error.value = "Failed to load user data.";
+        error.value = "Failed to load data.";
       }
     };
 
+    const modify = () => {
+      const obj = {
+        part: part.value,
+        index: index.value,
+        data: data.value
+      }
+      const encodedObj = encodeURI(JSON.stringify(obj))
+      router.push({
+        name: 'Modify',
+        params: {
+          obj: encodedObj
+        },
+      });
+    };
+
     return {
+      router,
       part,
       index,
       data,
       error,
-      fetchUser,
+      get,
+      modify
     };
   },
 };
@@ -118,5 +140,14 @@ export default {
   font-size: 1.2rem;
   color: var(--color-text);
   text-align: center;
+}
+
+.output {
+  margin-top: 16px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: black;
+  white-space: pre-wrap;
 }
 </style>

@@ -36,8 +36,21 @@
         />
       </div>
 
-      <div class="form-group">
-        <label for="value">Value</label>
+      <div class="radio-group">
+        <input type="radio" id="string" value="string" v-model="valueInputType"/>
+        <label for="string">
+          <span class="radio-circle"></span>
+          String
+        </label>
+        <input type="radio" id="json" value="json" v-model="valueInputType"/>
+        <label for="json">
+          <span class="radio-circle"></span>
+          JSON
+        </label>
+      </div>
+
+      <div v-if="valueInputType ==='string'" class="form-group">
+        <label for="value">Value - String</label>
         <input
             id="value"
             type="text"
@@ -47,17 +60,23 @@
         />
       </div>
 
+      <div v-else-if="valueInputType ==='json'" class="form-group">
+        <h4>Value - Json</h4>
+        <JsonInput @update-json="handleJsonUpdate"
+        :valueFromGet="value"
+        />
+      </div>
+
       <button class="button-primary" @click="put">Put Data</button>
     </div>
 
-    <!-- 결과 컨테이너 -->
     <div class="result-container">
       <h1 class="header">Result</h1>
       <div v-if="error" class="error-message">
         <p>Error: {{ error }}</p>
       </div>
-      <div v-else-if="data">
-        <p><strong>Result :</strong> {{ data }}</p>
+      <div v-else-if="res">
+        <p><strong>Result :</strong> {{ res }}</p>
       </div>
       <div v-else>
         <p>No Data Yet</p>
@@ -67,37 +86,70 @@
 </template>
 
 <script>
-import {ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {postData} from "../services/dynamoService.js";
+import JsonInput from "@/components/JsonInput.vue";
 
 export default {
-  setup() {
+  components: {
+    JsonInput
+  },
+  props: {
+    obj: {
+      type: String,
+      required: false
+    }
+  },
+  setup(props) {
+
     const part = ref("");
     const index = ref("");
     const pk = ref("");
     const value = ref("");
-    const data = ref(null);
+    const res = ref(null);
     const error = ref(null);
+    const valueInputType = ref("string");
+
+    onMounted(() => {
+      if (props.obj) {
+        const objFromGet = JSON.parse(decodeURI(props.obj))
+        console.log(JSON.stringify(objFromGet, null, 2))
+        part.value = objFromGet.part
+        index.value = objFromGet.index
+        value.value = objFromGet.data.replaceAll('\"','')
+      }
+    })
+
+    watch(valueInputType, () => {
+      value.value = ""
+    });
+
+    const handleJsonUpdate = (updatedJson) => {
+      value.value = JSON.stringify(updatedJson);
+    };
 
     const put = async () => {
       try {
         error.value = null;
-        data.value = await postData(part.value, index.value, pk.value, value.value);
+        res.value = await postData(part.value, index.value, pk.value, value.value);
       } catch (err) {
-        error.value = "Failed to load user data.";
+        error.value = "Failed to upsert data";
       }
     };
+
 
     return {
       part,
       index,
       pk,
       value,
-      data,
+      res,
       error,
+      valueInputType,
       put,
+      handleJsonUpdate,
     };
-  },
+  }
 };
 </script>
 
@@ -141,5 +193,71 @@ export default {
   font-size: 1.2rem;
   color: var(--color-text);
   text-align: center;
+}
+
+/* 라디오 버튼 컨테이너 */
+.radio-group {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* 기본 라디오 버튼 숨기기 */
+.radio-group input[type="radio"] {
+  display: none;
+}
+
+/* 커스텀 라벨 스타일 */
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* 선택된 상태 스타일 */
+.radio-group input[type="radio"]:checked + label {
+  background-color: #4caf50;
+  border-color: #4caf50;
+  color: white;
+}
+
+/* 라벨 호버 스타일 */
+.radio-group label:hover {
+  background-color: #f5f5f5;
+}
+
+/* 라디오 버튼 동그라미 스타일 */
+.radio-circle {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #4caf50;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+
+/* 선택된 상태에서 동그라미 내부 표시 */
+.radio-circle::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background-color: #4caf50;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+input[type="radio"]:checked + label .radio-circle::after {
+  opacity: 1;
 }
 </style>
