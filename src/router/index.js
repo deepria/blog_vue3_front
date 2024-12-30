@@ -20,12 +20,6 @@ const routes = [
         path: "/put", // 기본 경로
         name: "Put",
         component: Put
-    },
-    {
-        path: "/put/:obj", // 기본 경로
-        name: "Modify",
-        component: Put,
-        props: true
     }
 ];
 

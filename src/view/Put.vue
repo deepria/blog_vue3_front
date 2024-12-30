@@ -62,9 +62,7 @@
 
       <div v-else-if="valueInputType ==='json'" class="form-group">
         <h4>Value - Json</h4>
-        <JsonInput @update-json="handleJsonUpdate"
-        :valueFromGet="value"
-        />
+        <JsonInput @update-json="handleJsonUpdate"/>
       </div>
 
       <button class="button-primary" @click="put">Put Data</button>
@@ -89,18 +87,13 @@
 import {onMounted, ref, watch} from "vue";
 import {postData} from "../services/dynamoService.js";
 import JsonInput from "@/components/JsonInput.vue";
+import {dynamoStore} from "@/stores/dynamoStore.js"
 
 export default {
   components: {
     JsonInput
   },
-  props: {
-    obj: {
-      type: String,
-      required: false
-    }
-  },
-  setup(props) {
+  setup() {
 
     const part = ref("");
     const index = ref("");
@@ -111,12 +104,12 @@ export default {
     const valueInputType = ref("string");
 
     onMounted(() => {
-      if (props.obj) {
-        const objFromGet = JSON.parse(decodeURI(props.obj))
-        console.log(JSON.stringify(objFromGet, null, 2))
+      if (dynamoStore().getObj) {
+        const objFromGet = dynamoStore().getObj
+        // console.log(JSON.stringify(objFromGet, null, 2))
         part.value = objFromGet.part
         index.value = objFromGet.index
-        value.value = objFromGet.data.replaceAll('\"','')
+        value.value = objFromGet.data
       }
     })
 
@@ -132,6 +125,7 @@ export default {
       try {
         error.value = null;
         res.value = await postData(part.value, index.value, pk.value, value.value);
+        dynamoStore().clearObj()
       } catch (err) {
         error.value = "Failed to upsert data";
       }

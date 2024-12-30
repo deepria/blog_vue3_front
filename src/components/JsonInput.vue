@@ -20,16 +20,11 @@
 
 <script>
 import {ref, computed, watch, onMounted} from 'vue';
+import {dynamoStore} from "@/stores/dynamoStore.js"
 
 export default {
   name: 'KeyValueEditor',
   emits: ['update-json'], // 부모로 이벤트 전달
-  props: {
-    valueFromGet: {
-      type: String,
-      required: false
-    }
-  },
   setup(props, {emit}) {
     const keyValuePairs = ref([{key: '', value: ''}]);
     const formattedJson = computed(() => {
@@ -41,20 +36,21 @@ export default {
       });
       return result;
     });
-    console.log(JSON.stringify(props.valueFromGet, null, 2))
 
     onMounted(() => {
-      if (props.valueFromGet) {
-        const valueFromGet = JSON.parse(props.valueFromGet)
-        console.log(JSON.stringify(valueFromGet, null, 2))
-        keyValuePairs.value = [{
-          key: valueFromGet.key.value,
-          value: valueFromGet.value.value
-        }]
+      const storedData = dynamoStore().getObj?.data;
+      if (storedData) {
+        try {
+          const valueFromGet = JSON.parse(storedData);
+          keyValuePairs.value.pop();
+          Object.entries(valueFromGet).forEach(([key, value]) => {
+            keyValuePairs.value.push({key: key, value: value});
+          });
+        } catch (error) {
+          console.error('Failed to parse JSON:', error);
+        }
       }
-    })
-
-
+    });
     watch(formattedJson, (newJson) => {
       emit('update-json', newJson);
     });

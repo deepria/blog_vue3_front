@@ -51,6 +51,7 @@
 import {ref} from "vue";
 import {getData} from "../services/dynamoService.js";
 import {useRouter} from "vue-router";
+import {dynamoStore} from "@/stores/dynamoStore.js"
 
 export default {
   setup() {
@@ -75,13 +76,8 @@ export default {
         index: index.value,
         data: data.value
       }
-      const encodedObj = encodeURI(JSON.stringify(obj))
-      router.push({
-        name: 'Modify',
-        params: {
-          obj: encodedObj
-        },
-      });
+      dynamoStore().setObj(obj)
+      router.push('/put')
     };
 
     return {
