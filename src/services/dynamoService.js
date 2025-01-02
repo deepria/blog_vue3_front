@@ -64,9 +64,9 @@ export const postEntity = async () => {
     }
 };
 
-export const deleteEntity = async (id, sortKey) => {
+export const deleteEntity = async (id) => {
     try {
-        const response = await apiClient.delete(`/${id}/${sortKey}`);
+        const response = await apiClient.delete(`/${id}`);
         return response.data;
     } catch (error) {
         console.error("Error fetching user data:", error);

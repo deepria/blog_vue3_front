@@ -47,8 +47,6 @@ export default {
           children: [
             { name: "Get", path: "/list" },
             { name: "Put", path: "/save" },
-            { name: "List", path: "/List" },
-            { name: "List", path: "/List" },
           ],
         },
       ],

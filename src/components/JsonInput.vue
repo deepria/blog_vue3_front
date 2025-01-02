@@ -21,11 +21,13 @@
 <script>
 import {ref, computed, watch, onMounted} from 'vue';
 import {useDynamoStore} from "@/stores/dynamoStore.js"
+import {useRoute} from "vue-router";
 
 export default {
   name: 'KeyValueEditor',
   emits: ['update-json'], // 부모로 이벤트 전달
   setup(props, {emit}) {
+    const route = useRoute();
     const keyValuePairs = ref([{key: '', value: ''}]);
     const formattedJson = computed(() => {
       const result = {};
@@ -38,10 +40,11 @@ export default {
     });
 
     onMounted(() => {
-      const storedData = useDynamoStore().getObj?.data;
+      const isEntity = route.name !== 'Put'
+      const storedData = isEntity ? useDynamoStore().getEntity?.value : useDynamoStore().getObj?.data;
       if (storedData) {
         try {
-          const valueFromGet = JSON.parse(storedData);
+          const valueFromGet = isEntity ? storedData : JSON.parse(storedData);
           keyValuePairs.value.pop();
           Object.entries(valueFromGet).forEach(([key, value]) => {
             keyValuePairs.value.push({key: key, value: value});

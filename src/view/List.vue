@@ -44,9 +44,11 @@
           </button>
         </div>
         <div v-for="child in paginatedData" :key="child.id">
-          <pre class="output">{{ child }}</pre>
+          <pre class="output"> {{ child }} </pre>
         </div>
-
+        <br/>
+        <button class="button-primary" @click="deleteData">delete</button> &nbsp;
+        <button class="button-primary" @click="modify">modify</button>
       </div>
       <div v-else>
         <p>No Data Yet</p>
@@ -56,13 +58,14 @@
 </template>
 
 <script>
-import {getList, getById} from "../services/dynamoService.js";
+import {getList, getById, deleteEntity} from "../services/dynamoService.js";
 import {useRouter} from "vue-router";
 import {useDynamoStore} from "@/stores/dynamoStore.js"
-import {ref, computed} from "vue";
+import {ref, computed, nextTick} from "vue";
 
 export default {
   setup() {
+    const router = useRouter();
     const id = ref("");
     const data = ref([]);
     const error = ref(null);
@@ -111,6 +114,50 @@ export default {
       }
     };
 
+    const modify = () => {
+      let tempId, tempVal
+      for (const item of paginatedData.value) {
+        if (item.id) {
+          tempId = item.id
+        }
+        if (item.value) {
+          tempVal = item.value
+        }
+      }
+      const param = {
+        id: tempId,
+        value: tempVal
+      }
+      useDynamoStore().setEntity(param)
+      router.push('/save')
+    };
+
+    const deleteData = async () => {
+      try {
+        const deletePromises = [];
+
+        for (const item of paginatedData.value) {
+          if (item.id) {
+            // 비동기 삭제 작업 추가
+            deletePromises.push(deleteEntity(item.id));
+          }
+        }
+
+        // 모든 삭제 작업이 완료될 때까지 기다림
+        await Promise.all(deletePromises);
+
+        // 데이터 삭제 후 다시 가져옴
+        await get();
+
+        // 현재 페이지가 마지막 페이지를 초과하는 경우 조정
+        if (currentPage.value > totalPages.value) {
+          currentPage.value = totalPages.value || 1; // 최소 1로 유지
+        }
+      } catch (error) {
+        console.error("Error during deletion:", error);
+      }
+    };
+
     const clear = () => {
       id.value = "";
     };
@@ -132,6 +179,8 @@ export default {
       data,
       error,
       get,
+      modify,
+      deleteData,
       clear,
       currentPage,
       itemsPerPage,
@@ -197,6 +246,7 @@ export default {
   background-color: black;
   white-space: pre-wrap;
 }
+
 .pagination {
   display: flex;
   justify-content: center;

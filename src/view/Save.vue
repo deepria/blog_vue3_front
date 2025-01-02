@@ -80,13 +80,12 @@ export default {
     const res = ref("");
 
     onMounted(() => {
-      // if (useDynamoStore().getObj) {
-      //   const objFromGet = useDynamoStore().getObj
-      //   // console.log(JSON.stringify(objFromGet, null, 2))
-      //   part.value = objFromGet.part
-      //   index.value = objFromGet.index
-      //   data.value = objFromGet.data
-      // }
+      if (useDynamoStore().getEntity) {
+        const objFromGet = useDynamoStore().getEntity
+        console.log(JSON.stringify(objFromGet, null, 2))
+        id.value = objFromGet.id
+        value.value = objFromGet.value
+      }
     })
 
     watch(valueInputType, () => {
