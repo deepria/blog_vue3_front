@@ -20,7 +20,7 @@
 
 <script>
 import {ref, computed, watch, onMounted} from 'vue';
-import {dynamoStore} from "@/stores/dynamoStore.js"
+import {useDynamoStore} from "@/stores/dynamoStore.js"
 
 export default {
   name: 'KeyValueEditor',
@@ -38,7 +38,7 @@ export default {
     });
 
     onMounted(() => {
-      const storedData = dynamoStore().getObj?.data;
+      const storedData = useDynamoStore().getObj?.data;
       if (storedData) {
         try {
           const valueFromGet = JSON.parse(storedData);

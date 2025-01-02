@@ -1,16 +1,15 @@
 import apiClient from "./api";
+import {useDynamoStore} from "@/stores/dynamoStore.js";
 
-// DynamoDB에서 특정 사용자 데이터를 가져오는 함수
 export const getData = async (part, index) => {
     try {
-        const response = await apiClient.get(`/item?part=${part}&index=${index}`); // GET 요청
+        const response = await apiClient.get(`/item?part=${part}&index=${index}`);
         return response.data; // API 응답 데이터 반환
     } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error("Error fetching get data:", error);
         throw error;
     }
 };
-
 
 export const postData = async (part, index, pk, value) => {
     try {
@@ -27,3 +26,53 @@ export const postData = async (part, index, pk, value) => {
         throw error;
     }
 };
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------*/
+
+export const getList = async () => {
+    try {
+        const response = await apiClient.get('/list');
+        console.log(response)
+        return response.data; // API 응답 데이터 반환
+    } catch (error) {
+        console.error("Error fetching get list:", error);
+        throw error;
+    }
+};
+
+export const getById = async (id) => {
+    try {
+        const response = await apiClient.get(`/${id}`);
+        console.log(response)
+        return response.data; // API 응답 데이터 반환
+    } catch (error) {
+        console.error("Error fetching get list:", error);
+        throw error;
+    }
+};
+
+export const postEntity = async () => {
+    try {
+        const entity = useDynamoStore().getEntity;
+        const response = await apiClient.post('', entity);
+        useDynamoStore().clearEntity();
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        throw error;
+    }
+};
+
+export const deleteEntity = async (id, sortKey) => {
+    try {
+        const response = await apiClient.delete(`/${id}/${sortKey}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        throw error;
+    }
+};
+
+
+

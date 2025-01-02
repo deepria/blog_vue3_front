@@ -1,26 +1,38 @@
 import {createRouter, createWebHistory} from "vue-router";
 
-// 뷰 컴포넌트 가져오기
+// 뷰 컴포넌트 import
 import HomeView from "@/view/HomeView.vue";
 import Get from "@/view/Get.vue";
 import Put from "@/view/Put.vue";
+import List from "@/view/List.vue";
+import Save from "@/view/Save.vue";
 // 라우트 정의
 const routes = [
     {
-        path: "/", // 기본 경로
+        path: "/",
         name: "Home",
         component: HomeView
     },
     {
-        path: "/get", // 기본 경로
+        path: "/get",
         name: "Get",
         component: Get
     },
     {
-        path: "/put", // 기본 경로
+        path: "/put",
         name: "Put",
         component: Put
-    }
+    },
+    {
+        path: "/list",
+        name: "List",
+        component: List
+    },
+    {
+        path: "/save",
+        name: "Save",
+        component: Save
+    },
 ];
 
 // 라우터 생성

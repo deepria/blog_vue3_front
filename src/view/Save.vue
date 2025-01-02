@@ -2,36 +2,14 @@
   <div class="main-container">
     <!-- 입력 및 서브밋 컨테이너 -->
     <div class="form-container">
-      <h1 class="header">Put Data</h1>
+      <h1 class="header">Upsert Entity</h1>
       <div class="form-group">
         <label for="part">Partition Key</label>
         <input
-            id="part"
+            id="id"
             type="text"
-            v-model="part"
+            v-model="id"
             placeholder="Enter partition key"
-            class="styled-input"
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="index">Index Key</label>
-        <input
-            id="index"
-            type="text"
-            v-model="index"
-            placeholder="Enter index key"
-            class="styled-input"
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="pk">Primary Key</label>
-        <input
-            id="pk"
-            type="text"
-            v-model="pk"
-            placeholder="Enter primary key"
             class="styled-input"
         />
       </div>
@@ -50,18 +28,18 @@
       </div>
 
       <div v-if="valueInputType ==='string'" class="form-group">
-        <label for="value">Value - String</label>
+        <label for="data">Data - String</label>
         <input
-            id="value"
+            id="data"
             type="text"
             v-model="value"
-            placeholder="Enter value"
+            placeholder="Enter data"
             class="styled-input"
         />
       </div>
 
       <div v-else-if="valueInputType ==='json'" class="form-group">
-        <h4>Value - Json</h4>
+        <h4>Data - Json</h4>
         <JsonInput @update-json="handleJsonUpdate"/>
       </div>
 
@@ -85,7 +63,7 @@
 
 <script>
 import {onMounted, ref, watch} from "vue";
-import {postData} from "../services/dynamoService.js";
+import {postEntity} from "../services/dynamoService.js";
 import JsonInput from "@/components/JsonInput.vue";
 import {useDynamoStore} from "@/stores/dynamoStore.js"
 
@@ -95,22 +73,20 @@ export default {
   },
   setup() {
 
-    const part = ref("");
-    const index = ref("");
-    const pk = ref("");
+    const id = ref("");
     const value = ref("");
-    const res = ref(null);
-    const error = ref(null);
     const valueInputType = ref("string");
+    const error = ref(null);
+    const res = ref("");
 
     onMounted(() => {
-      if (useDynamoStore().getObj) {
-        const objFromGet = useDynamoStore().getObj
-        // console.log(JSON.stringify(objFromGet, null, 2))
-        part.value = objFromGet.part
-        index.value = objFromGet.index
-        value.value = objFromGet.data
-      }
+      // if (useDynamoStore().getObj) {
+      //   const objFromGet = useDynamoStore().getObj
+      //   // console.log(JSON.stringify(objFromGet, null, 2))
+      //   part.value = objFromGet.part
+      //   index.value = objFromGet.index
+      //   data.value = objFromGet.data
+      // }
     })
 
     watch(valueInputType, () => {
@@ -124,8 +100,12 @@ export default {
     const put = async () => {
       try {
         error.value = null;
-        res.value = await postData(part.value, index.value, pk.value, value.value);
-        useDynamoStore().clearObj()
+        const entity = {
+          id: id.value,
+          value: value.value,
+        }
+        useDynamoStore().setEntity(entity);
+        res.value = await postEntity();
       } catch (err) {
         error.value = "Failed to upsert data";
       }
@@ -133,13 +113,11 @@ export default {
 
 
     return {
-      part,
-      index,
-      pk,
+      id,
       value,
-      res,
       error,
       valueInputType,
+      res,
       put,
       handleJsonUpdate,
     };
