@@ -3,7 +3,7 @@ import {useDynamoStore} from "@/stores/dynamoStore.js";
 
 export const getData = async (part, index) => {
     try {
-        const response = await apiClient.get(`/item?part=${part}&index=${index}`);
+        const response = await apiClient.get(`/dynamodb/item?part=${part}&index=${index}`);
         return response.data; // API 응답 데이터 반환
     } catch (error) {
         console.error("Error fetching get data:", error);
@@ -19,7 +19,7 @@ export const postData = async (part, index, pk, value) => {
             pk: pk,
             value: value
         }
-        const response = await apiClient.post('/item', param);
+        const response = await apiClient.post('/dynamodb/item', param);
         return response.data;
     } catch (error) {
         console.error("Error fetching user data:", error);
@@ -32,7 +32,7 @@ export const postData = async (part, index, pk, value) => {
 
 export const getList = async () => {
     try {
-        const response = await apiClient.get('/list');
+        const response = await apiClient.get('/dynamodb/list');
         console.log(response)
         return response.data; // API 응답 데이터 반환
     } catch (error) {
@@ -43,7 +43,7 @@ export const getList = async () => {
 
 export const getById = async (id) => {
     try {
-        const response = await apiClient.get(`/${id}`);
+        const response = await apiClient.get(`/dynamodb/${id}`);
         console.log(response)
         return response.data; // API 응답 데이터 반환
     } catch (error) {
@@ -55,7 +55,7 @@ export const getById = async (id) => {
 export const postEntity = async () => {
     try {
         const entity = useDynamoStore().getEntity;
-        const response = await apiClient.post('', entity);
+        const response = await apiClient.post('/dynamodb', entity);
         useDynamoStore().clearEntity();
         return response.data;
     } catch (error) {
@@ -66,7 +66,7 @@ export const postEntity = async () => {
 
 export const deleteEntity = async (id) => {
     try {
-        const response = await apiClient.delete(`/${id}`);
+        const response = await apiClient.delete(`/dynamodb/${id}`);
         return response.data;
     } catch (error) {
         console.error("Error fetching user data:", error);
