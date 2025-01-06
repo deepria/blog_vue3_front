@@ -49,6 +49,13 @@ export default {
             { name: "Put", path: "/save" },
           ],
         },
+        {
+          name: "Util",
+          isOpen: false, // 드롭다운 열림 상태 관리
+          children: [
+            { name: "Upload", path: "/upload" },
+          ],
+        },
       ],
     };
   },

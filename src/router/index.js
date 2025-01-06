@@ -6,6 +6,7 @@ import Get from "@/view/Get.vue";
 import Put from "@/view/Put.vue";
 import List from "@/view/List.vue";
 import Save from "@/view/Save.vue";
+import Upload from "@/view/Upload.vue";
 // 라우트 정의
 const routes = [
     {
@@ -32,6 +33,11 @@ const routes = [
         path: "/save",
         name: "Save",
         component: Save
+    },
+    {
+        path: "/upload",
+        name: "Upload",
+        component: Upload
     },
 ];
 
