@@ -126,7 +126,6 @@ export default {
 
 <style scoped>
 .main-container {
-  display: flex;
   justify-content: space-between;
   gap: 20px;
   max-width: 900px;
@@ -137,7 +136,6 @@ export default {
 /* 양쪽 컨테이너 공통 스타일 */
 .form-container,
 .result-container {
-  flex: 1;
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

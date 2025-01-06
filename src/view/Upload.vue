@@ -33,7 +33,9 @@
       &nbsp;
       <button class="button-primary" @click="upload">Upload</button>
     </div>
-
+    <br/>
+    <br/>
+    <br/>
     <!-- 오른쪽: 디렉터리 가시화 -->
     <div class="directory-container">
       <h1 class="header">Directory Viewer</h1>
@@ -80,7 +82,7 @@ export default {
       try {
         const response = await uploadFile(selectedFile.value);
         if (response.status === 200) {
-          await postData('file', 'file:'+selectedFile.value.name, 'authKey', authKey.value);
+          await postData('file', 'file:' + selectedFile.value.name, 'authKey', authKey.value);
           selectedFile.value = null
           authKey.value = ''
           await loadDirectory();
@@ -95,7 +97,7 @@ export default {
 
     // 파일 다운로드
     const download = async (file) => {
-      const key = await getData('file', 'file:'+file.name);
+      const key = await getData('file', 'file:' + file.name);
       if (key === authKey.value) {
         try {
           await downloadFile(authKey.value, file.path, file.name);
@@ -122,7 +124,7 @@ export default {
 
     // 파일 삭제
     const deleteFileHandler = async (file) => {
-      const key = await getData('file', 'file:'+file.name);
+      const key = await getData('file', 'file:' + file.name);
       if (key === authKey.value) {
         try {
           await deleteFile(file.path);
@@ -163,7 +165,6 @@ export default {
 <style scoped>
 /* 전체 컨테이너 */
 .main-container {
-  display: flex;
   justify-content: space-between;
   gap: 30px;
   max-width: 1000px;
