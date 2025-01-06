@@ -29,7 +29,8 @@
             class="styled-input"
         />
       </div>
-
+      <button class="button-primary" @click="clear">Clear</button>
+      &nbsp;
       <button class="button-primary" @click="upload">Upload</button>
     </div>
 
@@ -39,7 +40,7 @@
       <ul class="directory-list">
         <li v-for="(file, index) in directory" :key="index">
           <span @click="download(file)">{{ file.name }}</span>
-          <button @click="remove(file.path)">X</button>
+          <button @click="remove(file)">X</button>
         </li>
       </ul>
     </div>
@@ -48,9 +49,9 @@
 
 <script>
 import {onMounted, ref, watch} from "vue";
-import {postEntity} from "../services/dynamoService.js";
-import {useDynamoStore} from "@/stores/dynamoStore.js"
+import {getData, postData} from "../services/dynamoService.js";
 import {uploadFile, downloadFile, loadFiles, deleteFile} from "@/services/fileService.js";
+import {useDynamoStore} from "@/stores/dynamoStore.js";
 
 export default {
   setup() {
@@ -78,8 +79,14 @@ export default {
     const upload = async () => {
       try {
         const response = await uploadFile(selectedFile.value);
-        selectedFile.value = null
-        await loadDirectory();
+        if (response.status === 200) {
+          await postData('file', 'file:'+selectedFile.value.name, 'authKey', authKey.value);
+          selectedFile.value = null
+          authKey.value = ''
+          await loadDirectory();
+        } else {
+          alert("File upload failed.");
+        }
       } catch (error) {
         console.error("Upload error:", error);
         alert("File upload failed.");
@@ -88,11 +95,17 @@ export default {
 
     // 파일 다운로드
     const download = async (file) => {
-      try {
-        await downloadFile(authKey.value, file.path, file.name);
-      } catch (error) {
-        console.error("Download error:", error);
-        alert("File download failed.");
+      const key = await getData('file', 'file:'+file.name);
+      if (key === authKey.value) {
+        try {
+          await downloadFile(authKey.value, file.path, file.name);
+          authKey.value = '';
+        } catch (error) {
+          console.error("Download error:", error);
+          alert("File download failed.");
+        }
+      } else {
+        alert("Authentication failed");
       }
     };
 
@@ -108,14 +121,23 @@ export default {
     };
 
     // 파일 삭제
-    const deleteFileHandler = async (filePath) => {
-      try {
-        await deleteFile(filePath);
-        // 삭제 후 파일 목록 갱신
-        await loadDirectory();
-      } catch (error) {
-        console.error("Error deleting file:", error);
+    const deleteFileHandler = async (file) => {
+      const key = await getData('file', 'file:'+file.name);
+      if (key === authKey.value) {
+        try {
+          await deleteFile(file.path);
+          authKey.value = ''
+          // 삭제 후 파일 목록 갱신
+          await loadDirectory();
+        } catch (error) {
+          console.error("Error deleting file:", error);
+        }
+      } else {
+        alert("Authentication failed");
       }
+    };
+    const clear = () => {
+      authKey.value = '';
     };
 
     // 초기 디렉터리 로드
@@ -130,7 +152,8 @@ export default {
       fileOnClick,
       upload,
       download,
-      remove: deleteFileHandler
+      remove: deleteFileHandler,
+      clear
     };
   },
 };
@@ -270,6 +293,7 @@ export default {
 .directory-list li button {
   filter: invert(0);
 }
+
 label {
   color: black; /* 원하는 색상 */
   font-size: 14px; /* 폰트 크기 조정 가능 */
