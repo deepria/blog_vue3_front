@@ -72,7 +72,7 @@ export default {
 <style scoped>
 /* 가로로 표시되는 메뉴 스타일 */
 .menu {
-  display: inline-flex; /* Flexbox로 가로 정렬 */
+  display: inline-flex !important;  /* Flexbox로 가로 정렬 */
   list-style-type: none;
   padding: 0;
   margin: 0;
