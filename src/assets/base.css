@@ -4,8 +4,8 @@
   --color-primary: #42b983; /* Vue Green */
   --color-secondary: #35495e; /* Vue Blue */
   --color-accent: #ff4081;
-  --color-background: #ffffff;
-  --color-text: #333333;
+  --color-background: #121212;
+  --color-text: #e0e0e0;
 
   /* Dark Theme Colors */
   --color-background-dark: #121212;
@@ -25,12 +25,13 @@
 *::before,
 *::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+  margin: 0.2vw;
+  padding: 0.2vw;
 }
 
 html {
   font-size: 16px;
+  -webkit-text-size-adjust: 100%; /* Prevent font scaling in mobile browsers */
 }
 
 body {
@@ -39,6 +40,8 @@ body {
   background: var(--color-background);
   color: var(--color-text);
   transition: background 0.3s, color 0.3s;
+  overflow-x: hidden; /* Prevent horizontal scroll in webviews */
+  -webkit-font-smoothing: antialiased; /* Smooth font rendering for webviews */
 }
 
 a {
@@ -51,14 +54,16 @@ a:hover {
   color: var(--color-accent);
 }
 
+/* Buttons */
 button {
   font-family: inherit;
-  font-size: inherit;
-  padding: 10px 20px;
+  font-size: 1rem;
+  padding: 12px 24px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background 0.3s, color 0.3s;
+  touch-action: manipulation; /* Optimize touch interactions */
 }
 
 button:hover {
@@ -66,11 +71,16 @@ button:hover {
   color: var(--color-background);
 }
 
+button:active {
+  transform: scale(0.98); /* Add active state feedback for touch */
+}
+
+/* Inputs */
 input {
-  padding: 10px;
+  padding: 12px;
   font-size: 1rem;
   border: 1px solid var(--color-secondary);
-  border-radius: 5px;
+  border-radius: 8px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -78,4 +88,46 @@ input {
 input:focus {
   outline: none;
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(66, 185, 131, 0.3); /* Add focus feedback */
+}
+
+/* Webview-specific optimizations */
+body,
+html {
+  height: 100%;
+  overscroll-behavior: none; /* Prevent scroll bouncing */
+}
+
+img {
+  max-width: 100%; /* Ensure images are responsive */
+  height: auto;
+  display: block;
+}
+
+textarea {
+  resize: none; /* Prevent resizing issues in webviews */
+}
+
+button,
+input,
+textarea {
+  -webkit-appearance: none; /* Normalize form elements for mobile */
+  appearance: none;
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+
+  button {
+    font-size: 0.875rem;
+    padding: 10px 20px;
+  }
+
+  input {
+    padding: 10px;
+    font-size: 0.875rem;
+  }
 }
