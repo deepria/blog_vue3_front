@@ -67,6 +67,7 @@
 
       <button class="button-primary" @click="put">Put Data</button>
     </div>
+    <br />
 
     <div class="result-container">
       <h1 class="header">Result</h1>
@@ -77,7 +78,7 @@
         <p><strong>Result :</strong> {{ res }}</p>
       </div>
       <div v-else>
-        <p>No Data Yet</p>
+        <p>No Request Yet</p>
       </div>
     </div>
   </div>
@@ -149,11 +150,12 @@ export default {
 
 <style scoped>
 .main-container {
-  justify-content: space-between;
   gap: 20px;
   max-width: 900px;
   margin: 0 auto;
   padding: 20px;
+  background-color: #121212; /* 배경 검은색 */
+  color: #ffffff; /* 기본 텍스트 흰색 */
 }
 
 /* 양쪽 컨테이너 공통 스타일 */
@@ -161,21 +163,23 @@ export default {
 .result-container {
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  min-height: 300px;
+  background-color: #1e1e1e; /* 어두운 회색 배경 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 뚜렷한 그림자 */
+  min-height: 100px;
 }
 
 /* Header 스타일 */
 .header {
   font-size: 1.8rem;
   text-align: center;
+  color: #42b983; /* Vue Green */
   margin-bottom: 20px;
 }
 
 /* 에러 메시지 */
 .error-message {
   margin-top: 15px;
-  color: var(--color-accent);
+  color: #ff4d4d; /* 에러 메시지 빨간색 */
   font-weight: bold;
   text-align: center;
 }
@@ -183,7 +187,7 @@ export default {
 /* 결과 텍스트 */
 .result-container p {
   font-size: 1.2rem;
-  color: var(--color-text);
+  color: #ffffff; /* 텍스트 흰색 */
   text-align: center;
 }
 
@@ -206,29 +210,30 @@ export default {
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  border: 1px solid #ccc;
+  border: 1px solid #555555; /* 어두운 경계선 */
   border-radius: 4px;
   cursor: pointer;
+  color: #ffffff; /* 라벨 텍스트 흰색 */
   transition: background-color 0.3s, border-color 0.3s;
 }
 
 /* 선택된 상태 스타일 */
 .radio-group input[type="radio"]:checked + label {
-  background-color: #4caf50;
-  border-color: #4caf50;
-  color: white;
+  background-color: #42b983; /* Vue Green */
+  border-color: #42b983;
+  color: #ffffff; /* 선택된 상태에서도 흰색 텍스트 유지 */
 }
 
 /* 라벨 호버 스타일 */
 .radio-group label:hover {
-  background-color: #f5f5f5;
+  background-color: #333333; /* 살짝 밝은 회색 */
 }
 
 /* 라디오 버튼 동그라미 스타일 */
 .radio-circle {
   width: 16px;
   height: 16px;
-  border: 2px solid #4caf50;
+  border: 2px solid #42b983; /* Vue Green */
   border-radius: 50%;
   display: inline-block;
   position: relative;
@@ -239,7 +244,7 @@ export default {
   content: '';
   width: 8px;
   height: 8px;
-  background-color: #4caf50;
+  background-color: #42b983; /* Vue Green */
   border-radius: 50%;
   position: absolute;
   top: 50%;

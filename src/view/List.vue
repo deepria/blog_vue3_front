@@ -17,7 +17,7 @@
       &nbsp;
       <button class="button-primary" @click="get">Get</button>
     </div>
-
+    <br/>
     <!-- 결과 컨테이너 -->
     <div class="result-container">
       <h1 class="header">Result</h1>
@@ -195,36 +195,37 @@ export default {
 
 <style scoped>
 .main-container {
-  justify-content: space-between;
   gap: 20px;
   max-width: 900px;
   margin: 0 auto;
   padding: 20px;
+  color: #ffffff; /* 기본 텍스트 흰색 */
+  background-color: #121212; /* 배경 검은색 */
 }
 
 /* 양쪽 컨테이너 공통 스타일 */
 .form-container,
 .result-container {
-  border: 1px solid var(--color-border);
+  border: 1px solid #333333; /* 어두운 회색 경계선 */
   border-radius: 10px;
   padding: 20px;
-  background: var(--color-background-soft);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  min-height: 300px;
+  background: #1e1e1e; /* 어두운 회색 배경 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 뚜렷한 그림자 */
+  min-height: 200px;
 }
 
 /* Header 스타일 */
 .header {
   font-size: 1.8rem;
   text-align: center;
-  color: var(--color-heading);
+  color: #42b983; /* Vue Green */
   margin-bottom: 20px;
 }
 
 /* 에러 메시지 */
 .error-message {
   margin-top: 15px;
-  color: var(--color-accent);
+  color: #ff4d4d; /* 에러 메시지 강조 빨간색 */
   font-weight: bold;
   text-align: center;
 }
@@ -232,19 +233,22 @@ export default {
 /* 결과 텍스트 */
 .result-container p {
   font-size: 1.2rem;
-  color: var(--color-text);
+  color: #ffffff; /* 텍스트 흰색 */
   text-align: center;
 }
 
+/* 출력 영역 */
 .output {
   margin-top: 16px;
   padding: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid #555555; /* 어두운 회색 경계선 */
   border-radius: 4px;
-  background-color: black;
+  background-color: #121212; /* 배경 검은색 */
+  color: #ffffff; /* 텍스트 흰색 */
   white-space: pre-wrap;
 }
 
+/* 페이지네이션 */
 .pagination {
   display: flex;
   justify-content: center;
@@ -253,7 +257,28 @@ export default {
   gap: 10px;
 }
 
+/* 페이지네이션 버튼 */
 .pagination button {
   padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #42b983; /* Vue Green */
+  color: #ffffff; /* 버튼 텍스트 흰색 */
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s;
+}
+
+.pagination button:hover {
+  background-color: #3a9d74; /* 약간 더 어두운 Vue Green */
+}
+
+.pagination button:active {
+  transform: scale(0.98); /* 클릭 시 약간 축소 효과 */
+}
+
+.pagination button[disabled] {
+  background-color: #555555; /* 비활성화 버튼 회색 */
+  cursor: not-allowed;
+  color: #aaaaaa; /* 비활성화 텍스트 흐린 회색 */
 }
 </style>

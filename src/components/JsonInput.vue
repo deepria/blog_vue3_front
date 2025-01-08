@@ -80,8 +80,10 @@ export default {
 
 <style scoped>
 .key-value-editor {
-  width: 400px;
+  max-width: 900px;
   margin: 0 auto;
+  color: #ffffff; /* 기본 텍스트 흰색 */
+  background-color: #1e1e1e; /* 배경 검은색 */
 }
 
 .key-value-row {
@@ -93,27 +95,47 @@ export default {
 .input {
   flex: 1;
   padding: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid #555555; /* 어두운 회색 경계선 */
   border-radius: 4px;
+  background-color: #1e1e1e; /* 어두운 회색 배경 */
+  color: #ffffff; /* 텍스트 흰색 */
+}
+
+.input::placeholder {
+  color: #aaaaaa; /* Placeholder 색상 */
+}
+
+.input:focus {
+  border-color: #42b983; /* Vue Green */
+  outline: none;
+  box-shadow: 0 0 5px rgba(66, 185, 131, 0.3); /* 포커스 시 시각적 피드백 */
 }
 
 .output {
   margin-top: 16px;
   padding: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid #555555; /* 어두운 회색 경계선 */
   border-radius: 4px;
-  background-color: black;
-  white-space: pre-wrap;
+  background-color: #000000; /* 배경 검은색 */
+  color: #ffffff; /* 텍스트 흰색 */
+  white-space: pre-wrap; /* 텍스트 줄바꿈 유지 */
 }
 
 button {
   padding: 4px 8px;
   border: none;
   border-radius: 4px;
+  background-color: #42b983; /* Vue Green */
+  color: #ffffff; /* 버튼 텍스트 흰색 */
   cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s;
 }
 
 button:hover {
-  background-color: #ddd;
+  background-color: #3a9d74; /* 약간 더 어두운 Vue Green */
+}
+
+button:active {
+  transform: scale(0.98); /* 클릭 시 약간 축소 효과 */
 }
 </style>

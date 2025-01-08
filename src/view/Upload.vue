@@ -25,7 +25,7 @@
             type="text"
             id="authKey"
             v-model="authKey"
-            placeholder="Enter Authentication Key"
+            placeholder="Enter password for permission"
             class="styled-input"
         />
       </div>
@@ -178,11 +178,11 @@ export default {
 .upload-container,
 .directory-container {
   flex: 1;
-  border: 2px solid #333333;
+  border: 2px solid #333333; /* 어두운 회색 경계선 */
   border-radius: 12px;
   padding: 20px;
-  background: #121212; /* 어두운 영역 */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  background: #1e1e1e; /* 어두운 회색 배경 */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* 뚜렷한 그림자 */
 }
 
 /* 헤더 스타일 */
@@ -191,7 +191,7 @@ export default {
   text-align: center;
   margin-bottom: 20px;
   color: #42b983; /* Vue Green */
-  border-bottom: 2px solid #333333;
+  border-bottom: 2px solid #333333; /* 구분선 */
   padding-bottom: 10px;
 }
 
@@ -204,7 +204,7 @@ export default {
   width: 100%;
   padding: 10px;
   margin-top: 8px;
-  border: 1px solid #555555;
+  border: 1px solid #555555; /* 어두운 회색 경계선 */
   border-radius: 6px;
   font-size: 14px;
   background-color: #121212; /* 입력 필드 배경 검은색 */
@@ -218,6 +218,7 @@ export default {
 
 .styled-input:focus {
   border-color: #42b983; /* Vue Green */
+  background-color: #1a1a1a; /* 포커스 시 약간 밝은 배경 */
   outline: none;
   box-shadow: 0 0 5px rgba(66, 185, 131, 0.3);
 }
@@ -255,20 +256,21 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  border: 1px solid #555555;
+  border: 1px solid #555555; /* 어두운 회색 경계선 */
   border-radius: 6px;
   margin-bottom: 10px;
   background-color: #1e1e1e; /* 어두운 배경 */
-  transition: background-color 0.3s ease;
+  color: #e0e0e0; /* 텍스트 약간 밝은 회색 */
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .directory-list li:hover {
-  background-color: #333333;
+  background-color: #333333; /* 밝은 회색 배경 */
+  transform: scale(1.02); /* 약간 확대 효과 */
 }
 
 .directory-list li span {
   font-size: 14px;
-  color: #ffffff; /* 텍스트 흰색 */
   cursor: pointer;
   text-decoration: underline;
 }
@@ -286,11 +288,20 @@ export default {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.1s;
 }
 
 .directory-list li button:hover {
   background-color: #cc0000; /* 더 어두운 빨간색 */
+}
+
+.directory-list li button:active {
+  transform: scale(0.95); /* 클릭 시 축소 효과 */
+}
+
+.directory-list li button:focus {
+  outline: 2px solid #ff4d4d; /* 빨간색 외곽선 */
+  outline-offset: 2px;
 }
 
 /* 모바일 최적화 */
@@ -298,6 +309,7 @@ export default {
   .main-container {
     flex-direction: column;
     gap: 20px;
+    padding: 10px 20px; /* 좁은 화면에서 여백 추가 */
   }
 }
 </style>
