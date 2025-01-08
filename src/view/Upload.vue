@@ -33,15 +33,13 @@
       &nbsp;
       <button class="button-primary" @click="upload">Upload</button>
     </div>
-    <br/>
-    <br/>
-    <br/>
+
     <!-- 오른쪽: 디렉터리 가시화 -->
     <div class="directory-container">
       <h1 class="header">Directory Viewer</h1>
       <ul class="directory-list">
         <li v-for="(file, index) in directory" :key="index">
-          <span @click="download(file)">{{ file.name.length > 15? file.name.slice(0,15)+'...' : file.name }}</span>
+          <span @click="download(file)">{{ file.name.length > 15 ? file.name.slice(0, 15) + '...' : file.name }}</span>
           <button @click="remove(file)">X</button>
         </li>
       </ul>
@@ -165,23 +163,26 @@ export default {
 <style scoped>
 /* 전체 컨테이너 */
 .main-container {
-  justify-content: space-between;
+  display: flex;
+  flex-wrap: wrap;
   gap: 30px;
   max-width: 1000px;
   margin: 40px auto;
   padding: 20px;
   font-family: Arial, sans-serif;
+  color: #ffffff; /* 모든 텍스트 색상 흰색 */
+  background-color: #121212; /* 기본 배경 검은색 */
 }
 
 /* 업로드 및 디렉터리 컨테이너 */
 .upload-container,
 .directory-container {
   flex: 1;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #333333;
   border-radius: 12px;
   padding: 20px;
-  background: #f9f9f9;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: #121212; /* 어두운 영역 */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* 헤더 스타일 */
@@ -189,8 +190,8 @@ export default {
   font-size: 1.8rem;
   text-align: center;
   margin-bottom: 20px;
-  color: #333;
-  border-bottom: 2px solid #e0e0e0;
+  color: #42b983; /* Vue Green */
+  border-bottom: 2px solid #333333;
   padding-bottom: 10px;
 }
 
@@ -203,39 +204,43 @@ export default {
   width: 100%;
   padding: 10px;
   margin-top: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid #555555;
   border-radius: 6px;
   font-size: 14px;
+  background-color: #121212; /* 입력 필드 배경 검은색 */
+  color: #ffffff; /* 텍스트 색상 흰색 */
   box-sizing: border-box;
 }
 
-.styled-input:focus {
-  border-color: #007bff;
-  outline: none;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+.styled-input::placeholder {
+  color: #aaaaaa; /* Placeholder 색상 */
 }
 
-/* 버튼 스타일 (파란 버튼) */
+.styled-input:focus {
+  border-color: #42b983; /* Vue Green */
+  outline: none;
+  box-shadow: 0 0 5px rgba(66, 185, 131, 0.3);
+}
+
+/* 버튼 스타일 (Vue Green) */
 .button-primary {
   display: inline-block;
   padding: 12px 20px;
   font-size: 14px;
-  background-color: #007bff;
-  color: #fff;
+  background-color: #42b983; /* Vue Green */
+  color: #ffffff; /* 버튼 텍스트 흰색 */
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  filter: invert(0); /* 반전 효과 무시 */
+  transition: background-color 0.3s ease, transform 0.1s;
 }
 
 .button-primary:hover {
-  background-color: #0056b3;
+  background-color: #3a9d74; /* 약간 더 어두운 Vue Green */
 }
 
-.button-primary:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.button-primary:active {
+  transform: scale(0.98); /* 클릭 시 약간 축소 */
 }
 
 /* 디렉터리 리스트 */
@@ -250,53 +255,49 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #555555;
   border-radius: 6px;
   margin-bottom: 10px;
-  background-color: #f9f9f9;
+  background-color: #1e1e1e; /* 어두운 배경 */
   transition: background-color 0.3s ease;
 }
 
 .directory-list li:hover {
-  background-color: #f1f1f1;
+  background-color: #333333;
 }
 
 .directory-list li span {
   font-size: 14px;
-  color: #333;
+  color: #ffffff; /* 텍스트 흰색 */
   cursor: pointer;
   text-decoration: underline;
 }
 
 .directory-list li span:hover {
-  color: #007bff;
+  color: #42b983; /* Vue Green */
 }
 
-/* 삭제 버튼 (빨간 버튼) */
+/* 삭제 버튼 (빨간색) */
 .directory-list li button {
   padding: 6px 12px;
   font-size: 12px;
-  background-color: #ff4d4d;
-  color: #fff;
+  background-color: #ff4d4d; /* 삭제 버튼 빨간색 */
+  color: #ffffff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  filter: invert(0); /* 반전 효과 무시 */
 }
 
 .directory-list li button:hover {
-  background-color: #cc0000;
+  background-color: #cc0000; /* 더 어두운 빨간색 */
 }
 
-/* 흑백 제외된 버튼 */
-.button-primary,
-.directory-list li button {
-  filter: invert(0);
-}
-
-label {
-  color: black; /* 원하는 색상 */
-  font-size: 14px; /* 폰트 크기 조정 가능 */
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+  .main-container {
+    flex-direction: column;
+    gap: 20px;
+  }
 }
 </style>

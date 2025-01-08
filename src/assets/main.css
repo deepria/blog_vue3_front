@@ -5,6 +5,13 @@
   padding: 20px;
 }
 
+/* Responsive Container */
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+}
+
 /* Header Styling */
 .header {
   text-align: center;
@@ -14,6 +21,8 @@
 .header h1 {
   font-size: 2.5rem;
   color: var(--color-primary);
+  line-height: 1.2;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* 가독성 향상 */
 }
 
 /* Form and Button Styling */
@@ -25,6 +34,8 @@
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
+  font-size: 0.9rem;
+  color: var(--color-text); /* 배경 대비 적절한 텍스트 색상 */
 }
 
 .form-group input {
@@ -33,10 +44,14 @@
   font-size: 1rem;
   border: 1px solid var(--color-secondary);
   border-radius: 5px;
+  background-color: var(--color-background); /* 배경색 지정 */
+  color: var(--color-text); /* 텍스트 색상 */
 }
 
 .form-group input:focus {
   border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 185, 131, 0.3); /* 추가 시각적 피드백 */
 }
 
 .button-primary {
@@ -52,4 +67,14 @@
 
 .button-primary:hover {
   background: var(--color-secondary);
+}
+
+.button-primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(53, 73, 94, 0.3); /* 추가 피드백 */
+  transform: scale(1.02); /* 살짝 확대 */
+}
+
+.button-primary:active {
+  transform: scale(0.98); /* 터치 피드백 */
 }
