@@ -22,7 +22,6 @@
 <script>
 import {ref, onMounted} from "vue";
 import uwu from "@/assets/uwu.mp4"
-import api from "@/services/api.js";
 
 export default {
   name: "HomeView",
