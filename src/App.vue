@@ -78,12 +78,18 @@ export default {
   margin: 0;
   gap: 20px; /* 메뉴 항목 간 간격 */
   align-items: center; /* 수직 정렬 */
+  color: #ffffff; /* 메뉴 텍스트 흰색 */
 }
 
 .menu-item {
   position: relative; /* 드롭다운의 기준 위치 */
   font-size: 18px;
   font-weight: bold;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  color: #42b983; /* 메뉴 항목 호버 시 Vue Green */
 }
 
 /* 드롭다운 스타일 */
@@ -96,12 +102,12 @@ export default {
   position: absolute; /* 부모 요소와 독립적인 위치 */
   top: 100%; /* 부모 요소 바로 아래에 배치 */
   left: 0;
-  background-color: #ffffff;
-  border: 1px solid #ccc;
+  background-color: #1e1e1e; /* 드롭다운 배경 어두운 회색 */
+  border: 1px solid #333333; /* 어두운 회색 경계선 */
   padding: 10px;
   margin: 0;
   width: 150px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5); /* 뚜렷한 그림자 */
   border-radius: 4px;
   z-index: 1000; /* 다른 요소 위에 표시 */
 }
@@ -114,11 +120,12 @@ export default {
 
 .dropdown li a {
   text-decoration: none;
-  color: #333;
+  color: #e0e0e0; /* 드롭다운 항목 텍스트 밝은 회색 */
+  transition: color 0.3s ease;
 }
 
 .dropdown li a:hover {
-  color: #42b983;
+  color: #42b983; /* Vue Green */
 }
 
 /* 드롭다운 애니메이션 */
