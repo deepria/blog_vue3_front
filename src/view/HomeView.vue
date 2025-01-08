@@ -1,13 +1,6 @@
 <template>
-  <div class="main">
-    <video
-        ref="videoPlayer"
-        :src="video"
-        autoplay
-        muted
-        loop
-        class="video"
-    ></video>
+  <div>
+   <img src="@/assets/uwu.gif" alt="uwu"/>
   </div>
   <div class="container">
     <ul>
@@ -25,13 +18,9 @@
 
 <script>
 import { ref, onMounted } from "vue";
-import uwu from "@/assets/uwu.mp4";
-
 export default {
   name: "HomeView",
   setup() {
-    const video = uwu;
-    const videoPlayer = ref(null);
 
     const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -81,8 +70,6 @@ export default {
     });
 
     return {
-      video,
-      videoPlayer,
       articles,
       headlines,
     };
@@ -91,12 +78,6 @@ export default {
 </script>
 
 <style scoped>
-.main {
-  .video {
-    width: 100%;
-  }
-}
-
 .container {
   position: relative;
   width: 100%;
