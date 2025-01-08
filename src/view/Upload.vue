@@ -41,7 +41,7 @@
       <h1 class="header">Directory Viewer</h1>
       <ul class="directory-list">
         <li v-for="(file, index) in directory" :key="index">
-          <span @click="download(file)">{{ file.name }}</span>
+          <span @click="download(file)">{{ file.name.length > 15? file.name.slice(0,15)+'...' : file.name }}</span>
           <button @click="remove(file)">X</button>
         </li>
       </ul>
@@ -117,7 +117,7 @@ export default {
         const response = await loadFiles();
         directory.value = response.data; // 파일 목록 업데이트
       } catch (error) {
-        console.error("Directory load error:", error);
+        console.error("Directory load error:", JSON.stringify(error,null,2));
         alert("Failed to load directory.");
       }
     };
