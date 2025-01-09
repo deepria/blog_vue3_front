@@ -1,66 +1,3 @@
-<template>
-  <div class="main-container">
-    <!-- 입력 및 서브밋 컨테이너 -->
-    <div class="form-container">
-      <h1 class="header">Upsert Entity</h1>
-      <div class="form-group">
-        <label for="part">Partition Key</label>
-        <input
-            id="id"
-            type="text"
-            v-model="id"
-            placeholder="Enter partition key"
-            class="styled-input"
-        />
-      </div>
-
-      <div class="radio-group">
-        <input type="radio" id="string" value="string" v-model="valueInputType"/>
-        <label for="string">
-          <span class="radio-circle"></span>
-          String
-        </label>
-        <input type="radio" id="json" value="json" v-model="valueInputType"/>
-        <label for="json">
-          <span class="radio-circle"></span>
-          JSON
-        </label>
-      </div>
-
-      <div v-if="valueInputType ==='string'" class="form-group">
-        <label for="data">Data - String</label>
-        <input
-            id="data"
-            type="text"
-            v-model="value"
-            placeholder="Enter data"
-            class="styled-input"
-        />
-      </div>
-
-      <div v-else-if="valueInputType ==='json'" class="form-group">
-        <h4>Data - Json</h4>
-        <JsonInput @update-json="handleJsonUpdate"/>
-      </div>
-
-      <button class="button-primary" @click="put">Put Data</button>
-    </div>
-    <br/>
-    <div class="result-container">
-      <h1 class="header">Result</h1>
-      <div v-if="error" class="error-message">
-        <p>Error: {{ error }}</p>
-      </div>
-      <div v-else-if="res">
-        <p><strong>Result :</strong> {{ res }}</p>
-      </div>
-      <div v-else>
-        <p>No Data Yet</p>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script>
 import {onMounted, ref, watch} from "vue";
 import {postEntity} from "../services/dynamoService.js";
@@ -123,6 +60,69 @@ export default {
   }
 };
 </script>
+
+<template>
+  <div class="main-container">
+    <!-- 입력 및 서브밋 컨테이너 -->
+    <div class="form-container">
+      <h1 class="header">Upsert Entity</h1>
+      <div class="form-group">
+        <label for="part">Partition Key</label>
+        <input
+            id="id"
+            type="text"
+            v-model="id"
+            placeholder="Enter partition key"
+            class="styled-input"
+        />
+      </div>
+
+      <div class="radio-group">
+        <input type="radio" id="string" value="string" v-model="valueInputType"/>
+        <label for="string">
+          <span class="radio-circle"></span>
+          String
+        </label>
+        <input type="radio" id="json" value="json" v-model="valueInputType"/>
+        <label for="json">
+          <span class="radio-circle"></span>
+          JSON
+        </label>
+      </div>
+
+      <div v-if="valueInputType ==='string'" class="form-group">
+        <label for="data">Data - String</label>
+        <input
+            id="data"
+            type="text"
+            v-model="value"
+            placeholder="Enter data"
+            class="styled-input"
+        />
+      </div>
+
+      <div v-else-if="valueInputType ==='json'" class="form-group">
+        <h4>Data - Json</h4>
+        <JsonInput @update-json="handleJsonUpdate"/>
+      </div>
+
+      <button class="button-primary" @click="put">Put Data</button>
+    </div>
+    <br/>
+    <div class="result-container">
+      <h1 class="header">Result</h1>
+      <div v-if="error" class="error-message">
+        <p>Error: {{ error }}</p>
+      </div>
+      <div v-else-if="res">
+        <p><strong>Result :</strong> {{ res }}</p>
+      </div>
+      <div v-else>
+        <p>No Data Yet</p>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 /* 메인 컨테이너 */

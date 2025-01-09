@@ -1,22 +1,3 @@
-<template>
-  <div class="key-value-editor">
-    <div v-for="(pair, index) in keyValuePairs" :key="index" class="key-value-row">
-      <input
-          v-model="pair.key"
-          placeholder="Enter key"
-          class="input"
-      />
-      <input
-          v-model="pair.value"
-          placeholder="Enter value"
-          class="input"
-      />
-      <button @click="removeRow(index)">Delete</button>
-    </div>
-    <button @click="addRow">Add Row</button>
-    <pre class="output">{{ formattedJson }}</pre>
-  </div>
-</template>
 
 <script>
 import {ref, computed, watch, onMounted} from 'vue';
@@ -77,6 +58,26 @@ export default {
   },
 };
 </script>
+
+<template>
+  <div class="key-value-editor">
+    <div v-for="(pair, index) in keyValuePairs" :key="index" class="key-value-row">
+      <input
+          v-model="pair.key"
+          placeholder="Enter key"
+          class="input"
+      />
+      <input
+          v-model="pair.value"
+          placeholder="Enter value"
+          class="input"
+      />
+      <button @click="removeRow(index)">Delete</button>
+    </div>
+    <button @click="addRow">Add Row</button>
+    <pre class="output">{{ formattedJson }}</pre>
+  </div>
+</template>
 
 <style scoped>
 .key-value-editor {

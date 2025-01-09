@@ -1,52 +1,3 @@
-<template>
-  <div class="main-container">
-    <!-- 왼쪽: 파일 업로드 및 다운로드 설정 -->
-    <div class="upload-container">
-      <h1 class="header">File Upload & Download</h1>
-
-      <!-- 파일 업로드 -->
-      <div class="form-group">
-        <label for="fileUpload">Select File</label>
-        <input
-            type="file"
-            id="fileUpload"
-            @change="handleFileChange"
-            class="styled-input"
-        />
-        <p v-if="selectedFile" class="file-info">
-          Selected File: {{ selectedFile.name }} ({{ selectedFile.size }} bytes)
-        </p>
-      </div>
-
-      <!-- 다운로드 설정 -->
-      <div class="form-group">
-        <label for="authKey">Authentication Key</label>
-        <input
-            type="text"
-            id="authKey"
-            v-model="authKey"
-            placeholder="Enter password for permission"
-            class="styled-input"
-        />
-      </div>
-      <button class="button-primary" @click="clear">Clear</button>
-      &nbsp;
-      <button class="button-primary" @click="upload">Upload</button>
-    </div>
-
-    <!-- 오른쪽: 디렉터리 가시화 -->
-    <div class="directory-container">
-      <h1 class="header">Directory Viewer</h1>
-      <ul class="directory-list">
-        <li v-for="(file, index) in directory" :key="index">
-          <span @click="download(file)">{{ file.name.length > 15 ? file.name.slice(0, 15) + '...' : file.name }}</span>
-          <button @click="remove(file)">X</button>
-        </li>
-      </ul>
-    </div>
-  </div>
-</template>
-
 <script>
 import {onMounted, ref, watch} from "vue";
 import {getData, postData} from "../services/dynamoService.js";
@@ -159,6 +110,54 @@ export default {
 };
 </script>
 
+<template>
+  <div class="main-container">
+    <!-- 왼쪽: 파일 업로드 및 다운로드 설정 -->
+    <div class="upload-container">
+      <h1 class="header">File Upload & Download</h1>
+
+      <!-- 파일 업로드 -->
+      <div class="form-group">
+        <label for="fileUpload">Select File</label>
+        <input
+            type="file"
+            id="fileUpload"
+            @change="handleFileChange"
+            class="styled-input"
+        />
+        <p v-if="selectedFile" class="file-info">
+          Selected File: {{ selectedFile.name }} ({{ selectedFile.size }} bytes)
+        </p>
+      </div>
+
+      <!-- 다운로드 설정 -->
+      <div class="form-group">
+        <label for="authKey">Authentication Key</label>
+        <input
+            type="text"
+            id="authKey"
+            v-model="authKey"
+            placeholder="Enter password for permission"
+            class="styled-input"
+        />
+      </div>
+      <button class="button-primary" @click="clear">Clear</button>
+      &nbsp;
+      <button class="button-primary" @click="upload">Upload</button>
+    </div>
+
+    <!-- 오른쪽: 디렉터리 가시화 -->
+    <div class="directory-container">
+      <h1 class="header">Directory Viewer</h1>
+      <ul class="directory-list">
+        <li v-for="(file, index) in directory" :key="index">
+          <span @click="download(file)">{{ file.name.length > 15 ? file.name.slice(0, 15) + '...' : file.name }}</span>
+          <button @click="remove(file)">X</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 /* 전체 컨테이너 */

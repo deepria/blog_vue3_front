@@ -1,3 +1,49 @@
+<script>
+import {ref} from "vue";
+import {getData} from "../services/dynamoService.js";
+import {useRouter} from "vue-router";
+import {useDynamoStore} from "@/stores/dynamoStore.js"
+
+export default {
+  setup() {
+    const router = useRouter();
+    const part = ref("");
+    const index = ref("");
+    const data = ref(null);
+    const error = ref(null);
+
+    const get = async () => {
+      try {
+        error.value = null;
+        data.value = JSON.stringify(await getData(part.value, index.value), null, 2);
+      } catch (err) {
+        error.value = "Failed to load data.";
+      }
+    };
+
+    const modify = () => {
+      const obj = {
+        part: part.value,
+        index: index.value,
+        data: data.value
+      }
+      useDynamoStore().setObj(obj)
+      router.push('/put')
+    };
+
+    return {
+      router,
+      part,
+      index,
+      data,
+      error,
+      get,
+      modify
+    };
+  },
+};
+</script>
+
 <template>
   <div class="main-container">
     <!-- 입력 및 서브밋 컨테이너 -->
@@ -46,52 +92,6 @@
     </div>
   </div>
 </template>
-
-<script>
-import {ref} from "vue";
-import {getData} from "../services/dynamoService.js";
-import {useRouter} from "vue-router";
-import {useDynamoStore} from "@/stores/dynamoStore.js"
-
-export default {
-  setup() {
-    const router = useRouter();
-    const part = ref("");
-    const index = ref("");
-    const data = ref(null);
-    const error = ref(null);
-
-    const get = async () => {
-      try {
-        error.value = null;
-        data.value = JSON.stringify(await getData(part.value, index.value), null, 2);
-      } catch (err) {
-        error.value = "Failed to load data.";
-      }
-    };
-
-    const modify = () => {
-      const obj = {
-        part: part.value,
-        index: index.value,
-        data: data.value
-      }
-      useDynamoStore().setObj(obj)
-      router.push('/put')
-    };
-
-    return {
-      router,
-      part,
-      index,
-      data,
-      error,
-      get,
-      modify
-    };
-  },
-};
-</script>
 
 <style scoped>
 .main-container {

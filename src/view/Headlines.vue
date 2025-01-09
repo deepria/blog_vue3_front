@@ -1,16 +1,3 @@
-<template>
-  <div class="main">
-  </div>
-  <div class="container">
-    <div
-        v-for="(text, index) in headlines"
-        :key="index"
-        class="falling-text"
-    >
-      {{ text }}
-    </div>
-  </div>
-</template>
 <script>
 import {ref, onMounted} from "vue";
 
@@ -72,6 +59,21 @@ export default {
 }
 ;
 </script>
+
+<template>
+  <div class="main">
+  </div>
+  <div class="container">
+    <div
+        v-for="(text, index) in headlines"
+        :key="index"
+        class="falling-text"
+    >
+      {{ text }}
+    </div>
+  </div>
+</template>
+
 <style scoped>
 .main {
   .video {

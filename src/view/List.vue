@@ -1,62 +1,3 @@
-<template>
-  <div class="main-container">
-    <!-- 입력 및 서브밋 컨테이너 -->
-    <div class="form-container">
-      <h1 class="header">Get Entity</h1>
-      <div class="form-group">
-        <label for="id">ID</label>
-        <input
-            id="id"
-            type="text"
-            v-model="id"
-            placeholder="Enter ID"
-            class="styled-input"
-        />
-      </div>
-      <button class="button-primary" @click="clear">Clear</button>
-      &nbsp;
-      <button class="button-primary" @click="get">Get</button>
-    </div>
-    <br/>
-    <!-- 결과 컨테이너 -->
-    <div class="result-container">
-      <h1 class="header">Result</h1>
-      <div v-if="error" class="error-message">
-        <p>Error: {{ error }}</p>
-      </div>
-      <div v-else-if="paginatedData.length">
-        <!-- 페이징 버튼 -->
-        <div class="pagination">
-          <button
-              class="button-primary"
-              @click="prevPage"
-              :disabled="currentPage === 1"
-          >
-            Previous
-          </button>
-          <span>Page {{ currentPage }} of {{ totalPages }}</span>
-          <button
-              class="button-primary"
-              @click="nextPage"
-              :disabled="currentPage === totalPages"
-          >
-            Next
-          </button>
-        </div>
-        <div v-for="child in paginatedData" :key="child.id">
-          <pre class="output"> {{ child }} </pre>
-        </div>
-        <br/>
-        <button class="button-primary" @click="deleteData">delete</button> &nbsp;
-        <button class="button-primary" @click="modify">modify</button>
-      </div>
-      <div v-else>
-        <p>No Data Yet</p>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script>
 import {getList, getById, deleteEntity} from "../services/dynamoService.js";
 import {useRouter} from "vue-router";
@@ -192,6 +133,65 @@ export default {
   },
 };
 </script>
+
+<template>
+  <div class="main-container">
+    <!-- 입력 및 서브밋 컨테이너 -->
+    <div class="form-container">
+      <h1 class="header">Get Entity</h1>
+      <div class="form-group">
+        <label for="id">ID</label>
+        <input
+            id="id"
+            type="text"
+            v-model="id"
+            placeholder="Enter ID"
+            class="styled-input"
+        />
+      </div>
+      <button class="button-primary" @click="clear">Clear</button>
+      &nbsp;
+      <button class="button-primary" @click="get">Get</button>
+    </div>
+    <br/>
+    <!-- 결과 컨테이너 -->
+    <div class="result-container">
+      <h1 class="header">Result</h1>
+      <div v-if="error" class="error-message">
+        <p>Error: {{ error }}</p>
+      </div>
+      <div v-else-if="paginatedData.length">
+        <!-- 페이징 버튼 -->
+        <div class="pagination">
+          <button
+              class="button-primary"
+              @click="prevPage"
+              :disabled="currentPage === 1"
+          >
+            Previous
+          </button>
+          <span>Page {{ currentPage }} of {{ totalPages }}</span>
+          <button
+              class="button-primary"
+              @click="nextPage"
+              :disabled="currentPage === totalPages"
+          >
+            Next
+          </button>
+        </div>
+        <div v-for="child in paginatedData" :key="child.id">
+          <pre class="output"> {{ child }} </pre>
+        </div>
+        <br/>
+        <button class="button-primary" @click="deleteData">delete</button> &nbsp;
+        <button class="button-primary" @click="modify">modify</button>
+      </div>
+      <div v-else>
+        <p>No Data Yet</p>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .main-container {

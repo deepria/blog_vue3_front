@@ -1,23 +1,6 @@
-<template>
-  <div>
-   <img src="@/assets/uwu.gif" alt="uwu"/>
-  </div>
-  <div class="container">
-    <ul>
-      <li v-for="(article, index) in headlines" :key="index" class="falling-text">
-        <div class="content">
-          <img :src="article.image" alt="Article Image" v-if="article.image" loading="lazy" />
-          <h3><a :href="article.link" target="_blank">{{ article.title }}</a></h3>
-          <p>{{ article.description }}</p>
-          <small>{{ article.pubDate }}</small>
-        </div>
-      </li>
-    </ul>
-  </div>
-</template>
-
 <script>
-import { ref, onMounted } from "vue";
+import {ref, onMounted} from "vue";
+
 export default {
   name: "HomeView",
   setup() {
@@ -76,6 +59,24 @@ export default {
   },
 };
 </script>
+
+<template>
+  <div>
+    <img src="@/assets/uwu.gif" alt="uwu"/>
+  </div>
+  <div class="container">
+    <ul>
+      <li v-for="(article, index) in headlines" :key="index" class="falling-text">
+        <div class="content">
+          <img :src="article.image" alt="Article Image" v-if="article.image" loading="lazy"/>
+          <h3><a :href="article.link" target="_blank">{{ article.title }}</a></h3>
+          <p>{{ article.description }}</p>
+          <small>{{ article.pubDate }}</small>
+        </div>
+      </li>
+    </ul>
+  </div>
+</template>
 
 <style scoped>
 .container {

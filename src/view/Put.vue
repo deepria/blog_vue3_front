@@ -1,3 +1,67 @@
+<script>
+import {onMounted, ref, watch} from "vue";
+import {postData} from "../services/dynamoService.js";
+import JsonInput from "@/components/JsonInput.vue";
+import {useDynamoStore} from "@/stores/dynamoStore.js"
+
+export default {
+  components: {
+    JsonInput
+  },
+  setup() {
+
+    const part = ref("");
+    const index = ref("");
+    const pk = ref("");
+    const value = ref("");
+    const res = ref(null);
+    const error = ref(null);
+    const valueInputType = ref("string");
+
+    onMounted(() => {
+      if (useDynamoStore().getObj) {
+        const objFromGet = useDynamoStore().getObj
+        // console.log(JSON.stringify(objFromGet, null, 2))
+        part.value = objFromGet.part
+        index.value = objFromGet.index
+        value.value = objFromGet.data
+      }
+    })
+
+    watch(valueInputType, () => {
+      value.value = ""
+    });
+
+    const handleJsonUpdate = (updatedJson) => {
+      value.value = JSON.stringify(updatedJson);
+    };
+
+    const put = async () => {
+      try {
+        error.value = null;
+        res.value = await postData(part.value, index.value, pk.value, value.value);
+        useDynamoStore().clearObj()
+      } catch (err) {
+        error.value = "Failed to upsert data";
+      }
+    };
+
+
+    return {
+      part,
+      index,
+      pk,
+      value,
+      res,
+      error,
+      valueInputType,
+      put,
+      handleJsonUpdate,
+    };
+  }
+};
+</script>
+
 <template>
   <div class="main-container">
     <!-- 입력 및 서브밋 컨테이너 -->
@@ -83,70 +147,6 @@
     </div>
   </div>
 </template>
-
-<script>
-import {onMounted, ref, watch} from "vue";
-import {postData} from "../services/dynamoService.js";
-import JsonInput from "@/components/JsonInput.vue";
-import {useDynamoStore} from "@/stores/dynamoStore.js"
-
-export default {
-  components: {
-    JsonInput
-  },
-  setup() {
-
-    const part = ref("");
-    const index = ref("");
-    const pk = ref("");
-    const value = ref("");
-    const res = ref(null);
-    const error = ref(null);
-    const valueInputType = ref("string");
-
-    onMounted(() => {
-      if (useDynamoStore().getObj) {
-        const objFromGet = useDynamoStore().getObj
-        // console.log(JSON.stringify(objFromGet, null, 2))
-        part.value = objFromGet.part
-        index.value = objFromGet.index
-        value.value = objFromGet.data
-      }
-    })
-
-    watch(valueInputType, () => {
-      value.value = ""
-    });
-
-    const handleJsonUpdate = (updatedJson) => {
-      value.value = JSON.stringify(updatedJson);
-    };
-
-    const put = async () => {
-      try {
-        error.value = null;
-        res.value = await postData(part.value, index.value, pk.value, value.value);
-        useDynamoStore().clearObj()
-      } catch (err) {
-        error.value = "Failed to upsert data";
-      }
-    };
-
-
-    return {
-      part,
-      index,
-      pk,
-      value,
-      res,
-      error,
-      valueInputType,
-      put,
-      handleJsonUpdate,
-    };
-  }
-};
-</script>
 
 <style scoped>
 .main-container {
