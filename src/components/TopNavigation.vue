@@ -72,7 +72,7 @@ export default {
 /* 가로로 표시되는 메뉴 스타일 */
 .navi {
   display: flex !important; /* Flexbox로 가로 정렬 */
-  list-style-type: none;
+  list-style: none;
   padding: 0;
   margin: 0;
   gap: 20px; /* 메뉴 항목 간 간격 */
