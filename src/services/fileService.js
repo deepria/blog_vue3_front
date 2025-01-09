@@ -21,12 +21,16 @@ export const downloadFile = async (authKey, downloadPath, fileName) => {
         });
         if (response.status === 200) {
             const blob = new Blob([response.data]);
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = fileName;
-            a.click();
-            URL.revokeObjectURL(url);
+            if (navigator.userAgent.includes("Android")) {
+                downloadBlob(blob, fileName)
+            } else {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = fileName;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
         } else {
             throw new Error(`Download failed with status ${response.status}.`);
         }
@@ -35,6 +39,16 @@ export const downloadFile = async (authKey, downloadPath, fileName) => {
         throw error;
     }
 };
+
+function downloadBlob(blob, fileName) {
+    const reader = new FileReader();
+    reader.onload = function () {
+        const base64Data = reader.result.split(",")[1];
+        // Android Interface로 데이터 전달
+        Android.downloadBlob(base64Data, fileName);
+    };
+    reader.readAsDataURL(blob);
+}
 
 // 파일 업로드
 export const uploadFile = async (selectedFile) => {
