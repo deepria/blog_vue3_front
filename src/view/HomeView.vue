@@ -61,9 +61,9 @@ export default {
 </script>
 
 <template>
-  <div>
-    <img src="@/assets/uwu.gif" alt="uwu"/>
-  </div>
+<!--  <div>-->
+<!--    <img src="@/assets/uwu.gif" alt="uwu"/>-->
+<!--  </div>-->
   <div class="container">
     <ul>
       <li v-for="(article, index) in headlines" :key="index" class="falling-text">
