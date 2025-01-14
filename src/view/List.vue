@@ -114,6 +114,12 @@ export default {
         currentPage.value--;
       }
     };
+    const onCleckValue = (childValue) => {
+      if (typeof childValue === 'string' && childValue.includes('http')) {
+        window.open(childValue)
+      }
+
+    };
 
     return {
       id,
@@ -129,6 +135,7 @@ export default {
       paginatedData,
       nextPage,
       prevPage,
+      onCleckValue,
     };
   },
 };
@@ -180,7 +187,13 @@ export default {
           </button>
         </div>
         <div v-for="child in paginatedData" :key="child.id">
-          <pre class="output"> {{ child }} </pre>
+          <!--          <pre class="output" @click="onCleckValue(child.value)"> {{ child }} </pre>-->
+          <div v-for="grandChild in child" :key="grandChild.id">
+            <pre v-if="child.id === grandChild" class="output"><a>{{ grandChild }}</a></pre>
+            <div v-else v-for="(value,key) in grandChild" :key="key.id">
+              <pre @click="onCleckValue(value)" class="output"><a>{{ key }}</a><br/>{{ value }}</pre>
+            </div>
+          </div>
         </div>
         <br/>
         <button class="button-primary" @click="deleteData">delete</button> &nbsp;
