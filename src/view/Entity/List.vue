@@ -1,8 +1,8 @@
 <script>
-import {getList, getById, deleteEntity} from "../services/dynamoService.js";
+import {getList, getById, deleteEntity} from "@/services/dynamoService.js";
 import {useRouter} from "vue-router";
 import {useDynamoStore} from "@/stores/dynamoStore.js"
-import {ref, computed, nextTick} from "vue";
+import {ref, computed} from "vue";
 
 export default {
   setup() {
@@ -114,7 +114,7 @@ export default {
         currentPage.value--;
       }
     };
-    const onCleckValue = (childValue) => {
+    const onClickValue = (childValue) => {
       if (typeof childValue === 'string' && childValue.includes('http')) {
         window.open(childValue)
       }
@@ -135,7 +135,7 @@ export default {
       paginatedData,
       nextPage,
       prevPage,
-      onCleckValue,
+      onClickValue,
     };
   },
 };
@@ -191,7 +191,7 @@ export default {
           <div v-for="grandChild in child" :key="grandChild.id">
             <pre v-if="child.id === grandChild" class="output"><a>{{ grandChild }}</a></pre>
             <div v-else v-for="(value,key) in grandChild" :key="key.id">
-              <pre @click="onCleckValue(value)" class="output"><a>{{ key }}</a><br/>{{ value }}</pre>
+              <pre @click="onClickValue(value)" class="output"><a>{{ key }}</a><br/>{{ value }}</pre>
             </div>
           </div>
         </div>

@@ -7,7 +7,7 @@ import {useRoute} from "vue-router";
 export default {
   name: 'KeyValueEditor',
   emits: ['update-json'], // 부모로 이벤트 전달
-  setup(props, {emit}) {
+  setup(_, {emit}) {
     const route = useRoute();
     const keyValuePairs = ref([{key: '', value: ''}]);
     const formattedJson = computed(() => {

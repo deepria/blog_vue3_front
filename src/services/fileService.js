@@ -32,7 +32,7 @@ export const downloadFile = async (authKey, downloadPath, fileName) => {
                 URL.revokeObjectURL(url);
             }
         } else {
-            throw new Error(`Download failed with status ${response.status}.`);
+            console.error(`Download failed with status ${response.status}.`);
         }
     } catch (error) {
         console.error("Error during file download:", error);
@@ -44,7 +44,7 @@ function downloadBlob(blob, fileName) {
     const reader = new FileReader();
     reader.onload = function () {
         const base64Data = reader.result.split(",")[1];
-        // Android Interface로 데이터 전달
+        // Android Interface 로 데이터 전달
         Android.downloadBlob(base64Data, fileName);
     };
     reader.readAsDataURL(blob);

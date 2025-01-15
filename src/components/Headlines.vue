@@ -29,7 +29,7 @@ export default {
                 split.push(words.slice(i, i + 4).join(" ")); // 4개씩 묶어서 하나의 문자열로 변환
               }
 
-              // 나눈 문장을 headlines에 추가
+              // 나눈 문장을 headlines 에 추가
               for (const part of split) {
                 headlines.value.push(part);
                 await delay(2000); // 3초 딜레이
@@ -75,12 +75,6 @@ export default {
 </template>
 
 <style scoped>
-.main {
-  .video {
-    width: 100%;
-  }
-}
-
 /* 컨테이너 스타일 */
 .container {
   position: relative;

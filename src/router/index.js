@@ -2,11 +2,11 @@ import {createRouter, createWebHistory} from "vue-router";
 
 // 뷰 컴포넌트 import
 import HomeView from "@/view/HomeView.vue";
-import Get from "@/view/Get.vue";
-import Put from "@/view/Put.vue";
-import List from "@/view/List.vue";
-import Save from "@/view/Save.vue";
-import Upload from "@/view/Upload.vue";
+import Get from "@/view/Attribute/Get.vue";
+import Put from "@/view/Attribute/Put.vue";
+import List from "@/view/Entity/List.vue";
+import Save from "@/view/Entity/Save.vue";
+import Upload from "@/view/Util/Upload.vue";
 // 라우트 정의
 const routes = [
     {

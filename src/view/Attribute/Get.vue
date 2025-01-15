@@ -1,6 +1,6 @@
 <script>
 import {ref} from "vue";
-import {getData} from "../services/dynamoService.js";
+import {getData} from "@/services/dynamoService.js";
 import {useRouter} from "vue-router";
 import {useDynamoStore} from "@/stores/dynamoStore.js"
 
@@ -73,7 +73,7 @@ export default {
 
       <button class="button-primary" @click="get">Get Data</button>
     </div>
-<br />
+    <br/>
     <!-- 결과 컨테이너 -->
     <div class="result-container">
       <h1 class="header">Result</h1>
@@ -91,6 +91,7 @@ export default {
       <button class="button-primary" @click="modify">Modify</button>
     </div>
   </div>
+  <button class="button" style="display: none"/>
 </template>
 
 <style scoped>

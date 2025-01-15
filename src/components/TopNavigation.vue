@@ -71,7 +71,7 @@ export default {
 <style scoped>
 /* 가로로 표시되는 메뉴 스타일 */
 .navi {
-  display: flex !important; /* Flexbox로 가로 정렬 */
+  display: flex !important; /* Flexbox 로 가로 정렬 */
   list-style: none;
   padding: 0;
   margin: 0;
@@ -127,7 +127,7 @@ export default {
   color: #42b983; /* Vue Green */
 }
 
-/* 드롭다운 애니메이션 */
+/* 드롭다운 애니메이션
 .dropdown-enter-active,
 .dropdown-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -138,4 +138,5 @@ export default {
   opacity: 0;
   transform: translateY(-10px);
 }
+*/
 </style>

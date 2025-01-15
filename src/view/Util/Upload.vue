@@ -1,8 +1,7 @@
 <script>
-import {onMounted, ref, watch} from "vue";
-import {getData, postData} from "../services/dynamoService.js";
+import {onMounted, ref} from "vue";
+import {getData, postData} from "@/services/dynamoService.js";
 import {uploadFile, downloadFile, loadFiles, deleteFile} from "@/services/fileService.js";
-import {useDynamoStore} from "@/stores/dynamoStore.js";
 
 export default {
   setup() {

@@ -1,6 +1,6 @@
 <script>
 import {onMounted, ref, watch} from "vue";
-import {postEntity} from "../services/dynamoService.js";
+import {postData} from "@/services/dynamoService.js";
 import JsonInput from "@/components/JsonInput.vue";
 import {useDynamoStore} from "@/stores/dynamoStore.js"
 
@@ -10,18 +10,21 @@ export default {
   },
   setup() {
 
-    const id = ref("");
+    const part = ref("");
+    const index = ref("");
+    const pk = ref("");
     const value = ref("");
-    const valueInputType = ref("string");
+    const res = ref(null);
     const error = ref(null);
-    const res = ref("");
+    const valueInputType = ref("string");
 
     onMounted(() => {
-      if (useDynamoStore().getEntity) {
-        const objFromGet = useDynamoStore().getEntity
-        console.log(JSON.stringify(objFromGet, null, 2))
-        id.value = objFromGet.id
-        value.value = objFromGet.value
+      if (useDynamoStore().getObj) {
+        const objFromGet = useDynamoStore().getObj
+        // console.log(JSON.stringify(objFromGet, null, 2))
+        part.value = objFromGet.part
+        index.value = objFromGet.index
+        value.value = objFromGet.data
       }
     })
 
@@ -36,12 +39,8 @@ export default {
     const put = async () => {
       try {
         error.value = null;
-        const entity = {
-          id: id.value,
-          value: value.value,
-        }
-        useDynamoStore().setEntity(entity);
-        res.value = await postEntity();
+        res.value = await postData(part.value, index.value, pk.value, value.value);
+        useDynamoStore().clearObj()
       } catch (err) {
         error.value = "Failed to upsert data";
       }
@@ -49,11 +48,13 @@ export default {
 
 
     return {
-      id,
+      part,
+      index,
+      pk,
       value,
+      res,
       error,
       valueInputType,
-      res,
       put,
       handleJsonUpdate,
     };
@@ -65,14 +66,36 @@ export default {
   <div class="main-container">
     <!-- 입력 및 서브밋 컨테이너 -->
     <div class="form-container">
-      <h1 class="header">Upsert Entity</h1>
+      <h1 class="header">Put Data</h1>
       <div class="form-group">
         <label for="part">Partition Key</label>
         <input
-            id="id"
+            id="part"
             type="text"
-            v-model="id"
+            v-model="part"
             placeholder="Enter partition key"
+            class="styled-input"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="index">Index Key</label>
+        <input
+            id="index"
+            type="text"
+            v-model="index"
+            placeholder="Enter index key"
+            class="styled-input"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="pk">Primary Key</label>
+        <input
+            id="pk"
+            type="text"
+            v-model="pk"
+            placeholder="Enter primary key"
             class="styled-input"
         />
       </div>
@@ -91,24 +114,25 @@ export default {
       </div>
 
       <div v-if="valueInputType ==='string'" class="form-group">
-        <label for="data">Data - String</label>
+        <label for="value">Value - String</label>
         <input
-            id="data"
+            id="value"
             type="text"
             v-model="value"
-            placeholder="Enter data"
+            placeholder="Enter value"
             class="styled-input"
         />
       </div>
 
       <div v-else-if="valueInputType ==='json'" class="form-group">
-        <h4>Data - Json</h4>
+        <h4>Value - Json</h4>
         <JsonInput @update-json="handleJsonUpdate"/>
       </div>
 
       <button class="button-primary" @click="put">Put Data</button>
     </div>
-    <br/>
+    <br />
+
     <div class="result-container">
       <h1 class="header">Result</h1>
       <div v-if="error" class="error-message">
@@ -118,21 +142,20 @@ export default {
         <p><strong>Result :</strong> {{ res }}</p>
       </div>
       <div v-else>
-        <p>No Data Yet</p>
+        <p>No Request Yet</p>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* 메인 컨테이너 */
 .main-container {
   gap: 20px;
   max-width: 900px;
   margin: 0 auto;
   padding: 20px;
+  background-color: #121212; /* 배경 검은색 */
   color: #ffffff; /* 기본 텍스트 흰색 */
-  background-color: #121212; /* 다크 모드 배경 */
 }
 
 /* 양쪽 컨테이너 공통 스타일 */
@@ -140,26 +163,23 @@ export default {
 .result-container {
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  min-height: 300px;
   background-color: #1e1e1e; /* 어두운 회색 배경 */
-  color: #e0e0e0; /* 약간 밝은 회색 텍스트 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 뚜렷한 그림자 */
+  min-height: 100px;
 }
 
 /* Header 스타일 */
 .header {
   font-size: 1.8rem;
   text-align: center;
-  margin-bottom: 20px;
   color: #42b983; /* Vue Green */
-  border-bottom: 2px solid #333333; /* 구분선 */
-  padding-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 /* 에러 메시지 */
 .error-message {
   margin-top: 15px;
-  color: #ff4d4d; /* 빨간색 에러 메시지 */
+  color: #ff4d4d; /* 에러 메시지 빨간색 */
   font-weight: bold;
   text-align: center;
 }
@@ -167,7 +187,7 @@ export default {
 /* 결과 텍스트 */
 .result-container p {
   font-size: 1.2rem;
-  color: #e0e0e0; /* 텍스트 밝은 회색 */
+  color: #ffffff; /* 텍스트 흰색 */
   text-align: center;
 }
 
@@ -190,11 +210,10 @@ export default {
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  border: 1px solid #555555; /* 어두운 회색 경계선 */
+  border: 1px solid #555555; /* 어두운 경계선 */
   border-radius: 4px;
   cursor: pointer;
-  color: #e0e0e0; /* 텍스트 밝은 회색 */
-  background-color: #1e1e1e; /* 어두운 회색 배경 */
+  color: #ffffff; /* 라벨 텍스트 흰색 */
   transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -202,12 +221,12 @@ export default {
 .radio-group input[type="radio"]:checked + label {
   background-color: #42b983; /* Vue Green */
   border-color: #42b983;
-  color: #ffffff; /* 선택된 상태 텍스트 흰색 */
+  color: #ffffff; /* 선택된 상태에서도 흰색 텍스트 유지 */
 }
 
 /* 라벨 호버 스타일 */
 .radio-group label:hover {
-  background-color: #333333; /* 밝은 회색 배경 */
+  background-color: #333333; /* 살짝 밝은 회색 */
 }
 
 /* 라디오 버튼 동그라미 스타일 */
