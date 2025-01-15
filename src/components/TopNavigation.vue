@@ -26,6 +26,7 @@ export default {
           isOpen: false, // 드롭다운 열림 상태 관리
           children: [
             {name: "Upload", path: "/upload"},
+            {name: "QR", path: "/qr"},
           ],
         },
       ],

@@ -7,6 +7,7 @@ import Put from "@/view/Attribute/Put.vue";
 import List from "@/view/Entity/List.vue";
 import Save from "@/view/Entity/Save.vue";
 import Upload from "@/view/Util/Upload.vue";
+import QR from "@/view/Util/QR.vue";
 // 라우트 정의
 const routes = [
     {
@@ -38,6 +39,11 @@ const routes = [
         path: "/upload",
         name: "Upload",
         component: Upload
+    },
+    {
+        path: "/qr",
+        name: "QR",
+        component: QR
     },
 ];
 
