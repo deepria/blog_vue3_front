@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, computed} from "vue";
+import {onMounted, ref} from "vue";
 import {getData, postData} from "@/services/dynamoService.js";
 import {uploadFile, downloadFile, loadFiles, deleteFile} from "@/services/fileService.js";
 
