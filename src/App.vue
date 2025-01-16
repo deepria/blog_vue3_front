@@ -4,12 +4,7 @@
     <router-view/>
   </div>
 </template>
-<script>
+<script setup>
 import TopNavigation from "@/components/TopNavigation.vue";
-
-export default {
-  name: "App",
-  components: {TopNavigation},
-}
 </script>
 

@@ -23,7 +23,6 @@ watch(valueInputType, () => {
   value.value = ""
 });
 
-
 const handleJsonUpdate = (updatedJson) => {
   value.value = JSON.stringify(updatedJson);
 };
@@ -87,20 +86,17 @@ const put = async () => {
         <h4>Data - Json</h4>
         <JsonInput @update-json="handleJsonUpdate"/>
       </div>
-
-      <button class="button-primary" @click="put">Put Data</button>
-    </div>
-    <br/>
-    <div class="result-container">
-      <h1 class="header">Result</h1>
-      <div v-if="error" class="error-message">
-        <p>Error: {{ error }}</p>
-      </div>
-      <div v-else-if="res">
-        <p><strong>Result :</strong> {{ res }}</p>
-      </div>
-      <div v-else>
-        <p>No Data Yet</p>
+      <div style="display: flex">
+        <button class="button-primary" @click="put">Put Data</button>
+        <div v-if="error" class="error-message">
+          <p>Error: {{ error }}</p>
+        </div>
+        <div v-else-if="res">
+          <p><strong>Result :</strong> {{ res }}</p>
+        </div>
+        <div v-else>
+          <p></p>
+        </div>
       </div>
     </div>
   </div>
@@ -140,10 +136,7 @@ const put = async () => {
 
 /* 에러 메시지 */
 .error-message {
-  margin-top: 15px;
   color: #ff4d4d; /* 빨간색 에러 메시지 */
-  font-weight: bold;
-  text-align: center;
 }
 
 /* 결과 텍스트 */
