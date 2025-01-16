@@ -1,45 +1,40 @@
-<script>
-export default {
-  name: "TopNavigation",
-  data() {
-    return {
-      menus: [
-        {name: "Home", path: "/"},
-        {
-          name: "Attribute",
-          isOpen: false, // 드롭다운 열림 상태 관리
-          children: [
-            {name: "Get", path: "/get"},
-            {name: "Put", path: "/put"},
-          ],
-        },
-        {
-          name: "Entity",
-          isOpen: false, // 드롭다운 열림 상태 관리
-          children: [
-            {name: "Get", path: "/list"},
-            {name: "Put", path: "/save"},
-          ],
-        },
-        {
-          name: "Util",
-          isOpen: false, // 드롭다운 열림 상태 관리
-          children: [
-            {name: "Upload", path: "/upload"},
-            {name: "QR", path: "/qr"},
-          ],
-        },
-      ],
-    };
+<script setup>
+import { ref } from "vue";
+
+const menus = ref([
+  { name: "Home", path: "/" },
+  {
+    name: "Attribute",
+    isOpen: false, // 드롭다운 열림 상태 관리
+    children: [
+      { name: "Get", path: "/get" },
+      { name: "Put", path: "/put" },
+    ],
   },
-  methods: {
-    showDropdown(menu) {
-      menu.isOpen = true;
-    },
-    hideDropdown(menu) {
-      menu.isOpen = false;
-    },
+  {
+    name: "Entity",
+    isOpen: false, // 드롭다운 열림 상태 관리
+    children: [
+      { name: "Get", path: "/list" },
+      { name: "Put", path: "/save" },
+    ],
   },
+  {
+    name: "Util",
+    isOpen: false, // 드롭다운 열림 상태 관리
+    children: [
+      { name: "Upload", path: "/upload" },
+      { name: "QR", path: "/qr" },
+    ],
+  },
+]);
+
+const showDropdown = (menu) => {
+  menu.isOpen = true;
+};
+
+const hideDropdown = (menu) => {
+  menu.isOpen = false;
 };
 </script>
 

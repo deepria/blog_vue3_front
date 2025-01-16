@@ -1,143 +1,121 @@
-<script>
+<script setup>
 import {getList, getById, deleteEntity} from "@/services/dynamoService.js";
 import {useRouter} from "vue-router";
 import {useDynamoStore} from "@/stores/dynamoStore.js"
 import {ref, computed} from "vue";
 
-export default {
-  setup() {
-    const router = useRouter();
-    const id = ref("");
-    const data = ref([]);
-    const error = ref(null);
+const router = useRouter();
+const id = ref("");
+const data = ref([]);
+const error = ref(null);
 
-    // 페이징 관련 상태
-    const currentPage = ref(1);
-    const itemsPerPage = ref(1); // 페이지당 항목 수
-    const totalItems = computed(() => data.value.length);
-    const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
+// 페이징 관련 상태
+const currentPage = ref(1);
+const itemsPerPage = ref(1); // 페이지당 항목 수
+const totalItems = computed(() => data.value.length);
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
 
-    // 현재 페이지 데이터
-    const paginatedData = computed(() => {
-      const start = (currentPage.value - 1) * itemsPerPage.value;
-      const end = start + itemsPerPage.value;
-      return data.value.slice(start, end);
-    });
+// 현재 페이지 데이터
+const paginatedData = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return data.value.slice(start, end);
+});
 
-    const get = async () => {
-      try {
-        error.value = null;
-        let res = id.value === '' ? await getList() : await getById(id.value);
+const get = async () => {
+  try {
+    error.value = null;
+    let res = id.value === '' ? await getList() : await getById(id.value);
 
-        const temp = [];
-        for (const [key, value] of Object.entries(res)) {
-          let tempKey = null;
-          let tempVal = null;
+    const temp = [];
+    for (const [_, value] of Object.entries(res)) {
+      let tempKey = null;
+      let tempVal = null;
 
-          for (const [innerKey, innerValue] of Object.entries(value)) {
-            if (innerKey === 'id') {
-              tempKey = innerValue;
-            } else {
-              tempVal = innerValue;
-            }
-          }
-
-          if (typeof tempVal === 'string' && tempVal.includes('{')) {
-            temp.push({id: tempKey, value: JSON.parse(tempVal)});
-          } else {
-            temp.push({id: tempKey, value: tempVal});
-          }
-        }
-        data.value = temp;
-      } catch (err) {
-        console.log(err);
-        error.value = `Failed to load data: ${err.message || err}`;
-      }
-    };
-
-    const modify = () => {
-      let tempId, tempVal
-      for (const item of paginatedData.value) {
-        if (item.id) {
-          tempId = item.id
-        }
-        if (item.value) {
-          tempVal = item.value
+      for (const [innerKey, innerValue] of Object.entries(value)) {
+        if (innerKey === 'id') {
+          tempKey = innerValue;
+        } else {
+          tempVal = innerValue;
         }
       }
-      const param = {
-        id: tempId,
-        value: tempVal
+
+      if (typeof tempVal === 'string' && tempVal.includes('{')) {
+        temp.push({id: tempKey, value: JSON.parse(tempVal)});
+      } else {
+        temp.push({id: tempKey, value: tempVal});
       }
-      useDynamoStore().setEntity(param)
-      router.push('/save')
-    };
+    }
+    data.value = temp;
+  } catch (err) {
+    console.log(err);
+    error.value = `Failed to load data: ${err.message || err}`;
+  }
+};
 
-    const deleteData = async () => {
-      try {
-        const deletePromises = [];
+const modify = () => {
+  let tempId, tempVal
+  for (const item of paginatedData.value) {
+    if (item.id) {
+      tempId = item.id
+    }
+    if (item.value) {
+      tempVal = item.value
+    }
+  }
+  const param = {
+    id: tempId,
+    value: tempVal
+  }
+  useDynamoStore().setEntity(param)
+  router.push('/save')
+};
 
-        for (const item of paginatedData.value) {
-          if (item.id) {
-            // 비동기 삭제 작업 추가
-            deletePromises.push(deleteEntity(item.id));
-          }
-        }
+const deleteData = async () => {
+  try {
+    const deletePromises = [];
 
-        // 모든 삭제 작업이 완료될 때까지 기다림
-        await Promise.all(deletePromises);
-
-        // 데이터 삭제 후 다시 가져옴
-        await get();
-
-        // 현재 페이지가 마지막 페이지를 초과하는 경우 조정
-        if (currentPage.value > totalPages.value) {
-          currentPage.value = totalPages.value || 1; // 최소 1로 유지
-        }
-      } catch (error) {
-        console.error("Error during deletion:", error);
+    for (const item of paginatedData.value) {
+      if (item.id) {
+        // 비동기 삭제 작업 추가
+        deletePromises.push(deleteEntity(item.id));
       }
-    };
+    }
 
-    const clear = () => {
-      id.value = "";
-    };
+    // 모든 삭제 작업이 완료될 때까지 기다림
+    await Promise.all(deletePromises);
 
-    const nextPage = () => {
-      if (currentPage.value < totalPages.value) {
-        currentPage.value++;
-      }
-    };
+    // 데이터 삭제 후 다시 가져옴
+    await get();
 
-    const prevPage = () => {
-      if (currentPage.value > 1) {
-        currentPage.value--;
-      }
-    };
-    const onClickValue = (childValue) => {
-      if (typeof childValue === 'string' && childValue.includes('http')) {
-        window.open(childValue)
-      }
+    // 현재 페이지가 마지막 페이지를 초과하는 경우 조정
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value || 1; // 최소 1로 유지
+    }
+  } catch (error) {
+    console.error("Error during deletion:", error);
+  }
+};
 
-    };
+const clear = () => {
+  id.value = "";
+};
 
-    return {
-      id,
-      data,
-      error,
-      get,
-      modify,
-      deleteData,
-      clear,
-      currentPage,
-      itemsPerPage,
-      totalPages,
-      paginatedData,
-      nextPage,
-      prevPage,
-      onClickValue,
-    };
-  },
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+const onClickValue = (childValue) => {
+  if (typeof childValue === 'string' && childValue.includes('http')) {
+    window.open(childValue)
+  }
 };
 </script>
 

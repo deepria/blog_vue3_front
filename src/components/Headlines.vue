@@ -1,63 +1,52 @@
-<script>
+<script setup>
 import {ref, onMounted} from "vue";
 
-export default {
-  name: "HomeView",
-  setup() {
+const headlines = ref([]); // 뉴스 헤드라인 데이터'
+// 딜레이 함수
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-    const headlines = ref([]); // 뉴스 헤드라인 데이터'
-    // 딜레이 함수
-    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-    // 뉴스 헤드라인 가져오기
-    const fetchHeadlines = async () => {
-      try {
-        const response = await fetch(
-            "https://newsapi.org/v2/top-headlines?country=us&apiKey=ecb792be20bb45988e999801f817f575"
-        );
-        const data = await response.json();
-
-        if (data.articles) {
-          for (const article of data.articles) {
-            if (article.title.length > 20) {
-              // 문자열을 단어 배열로 변환
-              const words = article.title.split(" "); // 공백을 기준으로 나눔
-
-              // 4개의 단어씩 묶기
-              const split = [];
-              for (let i = 0; i < words.length; i += 4) {
-                split.push(words.slice(i, i + 4).join(" ")); // 4개씩 묶어서 하나의 문자열로 변환
-              }
-
-              // 나눈 문장을 headlines 에 추가
-              for (const part of split) {
-                headlines.value.push(part);
-                await delay(2000); // 3초 딜레이
-              }
-
-            } else {
-              headlines.value.push(article.title); // 하나씩 추가
-              await delay(2000); // 1초 딜레이
-            }
-          }
-        }
-      } catch (error) {
-        console.error("뉴스 데이터를 가져오는 중 오류가 발생했습니다:", error);
-      }
-    };
-
-    // 초기 데이터 가져오기
-    onMounted(() => {
-          fetchHeadlines();
-        }
+// 뉴스 헤드라인 가져오기
+const fetchHeadlines = async () => {
+  try {
+    const response = await fetch(
+        "https://newsapi.org/v2/top-headlines?country=us&apiKey=ecb792be20bb45988e999801f817f575"
     );
+    const data = await response.json();
 
-    return {
-      headlines,
-    };
+    if (data.articles) {
+      for (const article of data.articles) {
+        if (article.title.length > 20) {
+          // 문자열을 단어 배열로 변환
+          const words = article.title.split(" "); // 공백을 기준으로 나눔
+
+          // 4개의 단어씩 묶기
+          const split = [];
+          for (let i = 0; i < words.length; i += 4) {
+            split.push(words.slice(i, i + 4).join(" ")); // 4개씩 묶어서 하나의 문자열로 변환
+          }
+
+          // 나눈 문장을 headlines 에 추가
+          for (const part of split) {
+            headlines.value.push(part);
+            await delay(2000); // 3초 딜레이
+          }
+
+        } else {
+          headlines.value.push(article.title); // 하나씩 추가
+          await delay(2000); // 1초 딜레이
+        }
+      }
+    }
+  } catch (error) {
+    console.error("뉴스 데이터를 가져오는 중 오류가 발생했습니다:", error);
   }
-}
-;
+};
+
+// 초기 데이터 가져오기
+onMounted(() => {
+      fetchHeadlines();
+    }
+);
 </script>
 
 <template>

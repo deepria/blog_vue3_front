@@ -1,62 +1,44 @@
-<script>
+<script setup>
 import {onMounted, ref, watch} from "vue";
 import {postEntity} from "@/services/dynamoService.js";
-import JsonInput from "@/components/JsonInput.vue";
 import {useDynamoStore} from "@/stores/dynamoStore.js"
+import JsonInput from "@/components/JsonInput.vue";
 
-export default {
-  components: {
-    JsonInput
-  },
-  setup() {
+const id = ref("");
+const value = ref("");
+const valueInputType = ref("string");
+const error = ref(null);
+const res = ref("");
 
-    const id = ref("");
-    const value = ref("");
-    const valueInputType = ref("string");
-    const error = ref(null);
-    const res = ref("");
+onMounted(() => {
+  if (useDynamoStore().getEntity) {
+    const objFromGet = useDynamoStore().getEntity
+    console.log(JSON.stringify(objFromGet, null, 2))
+    id.value = objFromGet.id
+    value.value = objFromGet.value
+  }
+})
 
-    onMounted(() => {
-      if (useDynamoStore().getEntity) {
-        const objFromGet = useDynamoStore().getEntity
-        console.log(JSON.stringify(objFromGet, null, 2))
-        id.value = objFromGet.id
-        value.value = objFromGet.value
-      }
-    })
-
-    watch(valueInputType, () => {
-      value.value = ""
-    });
-
-    const handleJsonUpdate = (updatedJson) => {
-      value.value = JSON.stringify(updatedJson);
-    };
-
-    const put = async () => {
-      try {
-        error.value = null;
-        const entity = {
-          id: id.value,
-          value: value.value,
-        }
-        useDynamoStore().setEntity(entity);
-        res.value = await postEntity();
-      } catch (err) {
-        error.value = "Failed to upsert data";
-      }
-    };
+watch(valueInputType, () => {
+  value.value = ""
+});
 
 
-    return {
-      id,
-      value,
-      error,
-      valueInputType,
-      res,
-      put,
-      handleJsonUpdate,
-    };
+const handleJsonUpdate = (updatedJson) => {
+  value.value = JSON.stringify(updatedJson);
+};
+
+const put = async () => {
+  try {
+    error.value = null;
+    const entity = {
+      id: id.value,
+      value: value.value,
+    }
+    useDynamoStore().setEntity(entity);
+    res.value = await postEntity();
+  } catch (err) {
+    error.value = "Failed to upsert data";
   }
 };
 </script>

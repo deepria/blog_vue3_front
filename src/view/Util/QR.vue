@@ -1,39 +1,26 @@
-<script>
+<script setup>
 import {ref, computed} from "vue";
 
-export default {
-  setup() {
-    const url = ref("");
-    const data = ref([]);
-    const error = ref(null);
+const url = ref("");
+const error = ref(null);
 
-    const src = computed(
-        () => `https://qrtag.net/api/qr_12.png?url=${encodeURIComponent(url.value)}`
-    );
+const src = computed(
+    () => `https://qrtag.net/api/qr_12.png?url=${encodeURIComponent(url.value)}`
+);
 
-    const clear = () => {
-      url.value = "";
-      error.value = null;
-    };
-
-    const generate = () => {
-      if (!url.value) {
-        error.value = "URL cannot be empty!";
-      } else {
-        error.value = null;
-      }
-    };
-
-    return {
-      url,
-      data,
-      error,
-      src,
-      clear,
-      generate,
-    };
-  },
+const clear = () => {
+  url.value = "";
+  error.value = null;
 };
+
+const generate = () => {
+  if (!url.value) {
+    error.value = "URL cannot be empty!";
+  } else {
+    error.value = null;
+  }
+};
+
 </script>
 
 <template>

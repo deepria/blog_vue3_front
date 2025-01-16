@@ -1,61 +1,56 @@
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue';
+import { useDynamoStore } from "@/stores/dynamoStore.js";
+import { useRoute } from "vue-router";
 
-<script>
-import {ref, computed, watch, onMounted} from 'vue';
-import {useDynamoStore} from "@/stores/dynamoStore.js"
-import {useRoute} from "vue-router";
+// emits 선언
+const emit = defineEmits(['update-json']);
 
-export default {
-  name: 'KeyValueEditor',
-  emits: ['update-json'], // 부모로 이벤트 전달
-  setup(_, {emit}) {
-    const route = useRoute();
-    const keyValuePairs = ref([{key: '', value: ''}]);
-    const formattedJson = computed(() => {
-      const result = {};
-      keyValuePairs.value.forEach((pair) => {
-        if (pair.key.trim()) {
-          result[pair.key] = pair.value;
-        }
-      });
-      return result;
-    });
+const route = useRoute();
+const keyValuePairs = ref([{ key: '', value: '' }]);
 
-    onMounted(() => {
-      const isEntity = route.name !== 'Put'
-      const storedData = isEntity ? useDynamoStore().getEntity?.value : useDynamoStore().getObj?.data;
-      if (storedData) {
-        try {
-          const valueFromGet = isEntity ? storedData : JSON.parse(storedData);
-          keyValuePairs.value.pop();
-          Object.entries(valueFromGet).forEach(([key, value]) => {
-            keyValuePairs.value.push({key: key, value: value});
-          });
-        } catch (error) {
-          console.error('Failed to parse JSON:', error);
-        }
-      }
-    });
-    watch(formattedJson, (newJson) => {
-      emit('update-json', newJson);
-    });
+const formattedJson = computed(() => {
+  const result = {};
+  keyValuePairs.value.forEach((pair) => {
+    if (pair.key.trim()) {
+      result[pair.key] = pair.value;
+    }
+  });
+  return result;
+});
 
-    const addRow = () => {
-      keyValuePairs.value.push({key: '', value: ''});
-    };
+// onMounted에서 DynamoDB 데이터 가져오기
+onMounted(() => {
+  const store = useDynamoStore();
+  const isEntity = route.name !== 'Put';
+  const storedData = isEntity ? store.getEntity?.value : store.getObj?.data;
 
-    const removeRow = (index) => {
-      if (keyValuePairs.value.length > 1) {
-        keyValuePairs.value.splice(index, 1);
-      }
-    };
+  if (storedData) {
+    try {
+      const valueFromGet = isEntity ? storedData : JSON.parse(storedData);
+      keyValuePairs.value = Object.entries(valueFromGet).map(([key, value]) => ({
+        key,
+        value
+      }));
+    } catch (error) {
+      console.error('Failed to parse JSON:', error);
+    }
+  }
+});
 
-    return {
-      keyValuePairs,
-      formattedJson,
-      addRow,
-      removeRow,
-    };
-  },
+// formattedJson이 변경될 때 부모 컴포넌트에 이벤트 전송
+watch(formattedJson, (newJson) => {
+  emit('update-json', newJson);
+});
+
+const addRow = () => {
+  keyValuePairs.value.push({ key: '', value: '' });
+};
+
+const removeRow = (index) => {
+  if (keyValuePairs.value.length > 1) {
+    keyValuePairs.value.splice(index, 1);
+  }
 };
 </script>
 

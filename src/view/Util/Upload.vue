@@ -1,112 +1,89 @@
-<script>
-import {onMounted, ref} from "vue";
+<script setup>
+import {onMounted, ref, computed} from "vue";
 import {getData, postData} from "@/services/dynamoService.js";
 import {uploadFile, downloadFile, loadFiles, deleteFile} from "@/services/fileService.js";
 
-export default {
-  setup() {
-    const selectedFile = ref(null); // 선택된 파일
-    const authKey = ref(""); // 인증 키
-    const downloadPath = ref(""); // 다운로드 경로
-    const directory = ref([]); // 디렉터리 가시화 데이터
+const selectedFile = ref(null); // 선택된 파일
+const authKey = ref(""); // 인증 키
+const directory = ref([]); // 디렉터리 가시화 데이터
 
-    // 파일 선택 핸들러
-    const handleFileChange = (event) => {
-      const files = event.target.files;
-      if (files.length > 0) {
-        selectedFile.value = files[0]; // 파일 설정
-      } else {
-        console.error("No file selected.");
-      }
-    };
-
-    // 파일 선택 핸들러
-    const fileOnClick = (file) => {
-      downloadPath.value = file.path;
-    };
-
-    // 파일 업로드
-    const upload = async () => {
-      try {
-        const response = await uploadFile(selectedFile.value);
-        if (response.status === 200) {
-          await postData('file', 'file:' + selectedFile.value.name, 'authKey', authKey.value);
-          selectedFile.value = null
-          authKey.value = ''
-          await loadDirectory();
-        } else {
-          alert("File upload failed.");
-        }
-      } catch (error) {
-        console.error("Upload error:", error);
-        alert("File upload failed.");
-      }
-    };
-
-    // 파일 다운로드
-    const download = async (file) => {
-      const key = await getData('file', 'file:' + file.name);
-      if (key === authKey.value) {
-        try {
-          await downloadFile(authKey.value, file.path, file.name);
-          authKey.value = '';
-        } catch (error) {
-          console.error("Download error:", error);
-          alert("File download failed.");
-        }
-      } else {
-        alert("Authentication failed");
-      }
-    };
-
-    // 디렉터리 데이터 로드
-    const loadDirectory = async () => {
-      try {
-        const response = await loadFiles();
-        directory.value = response.data; // 파일 목록 업데이트
-      } catch (error) {
-        console.error("Directory load error:", JSON.stringify(error,null,2));
-        alert("Failed to load directory.");
-      }
-    };
-
-    // 파일 삭제
-    const deleteFileHandler = async (file) => {
-      const key = await getData('file', 'file:' + file.name);
-      if (key === authKey.value) {
-        try {
-          await deleteFile(file.path);
-          authKey.value = ''
-          // 삭제 후 파일 목록 갱신
-          await loadDirectory();
-        } catch (error) {
-          console.error("Error deleting file:", error);
-        }
-      } else {
-        alert("Authentication failed");
-      }
-    };
-    const clear = () => {
-      authKey.value = '';
-    };
-
-    // 초기 디렉터리 로드
-    onMounted(loadDirectory);
-
-    return {
-      selectedFile,
-      authKey,
-      downloadPath,
-      directory,
-      handleFileChange,
-      fileOnClick,
-      upload,
-      download,
-      remove: deleteFileHandler,
-      clear
-    };
-  },
+// 파일 선택 핸들러
+const handleFileChange = (event) => {
+  const files = event.target.files;
+  if (files.length > 0) {
+    selectedFile.value = files[0]; // 파일 설정
+  } else {
+    console.error("No file selected.");
+  }
 };
+
+// 파일 업로드
+const upload = async () => {
+  try {
+    const response = await uploadFile(selectedFile.value);
+    if (response.status === 200) {
+      await postData('file', 'file:' + selectedFile.value.name, 'authKey', authKey.value);
+      selectedFile.value = null
+      authKey.value = ''
+      await loadDirectory();
+    } else {
+      alert("File upload failed.");
+    }
+  } catch (error) {
+    console.error("Upload error:", error);
+    alert("File upload failed.");
+  }
+};
+
+// 파일 다운로드
+const download = async (file) => {
+  const key = await getData('file', 'file:' + file.name);
+  if (key === authKey.value) {
+    try {
+      await downloadFile(authKey.value, file.path, file.name);
+      authKey.value = '';
+    } catch (error) {
+      console.error("Download error:", error);
+      alert("File download failed.");
+    }
+  } else {
+    alert("Authentication failed");
+  }
+};
+
+// 디렉터리 데이터 로드
+const loadDirectory = async () => {
+  try {
+    const response = await loadFiles();
+    directory.value = response.data; // 파일 목록 업데이트
+  } catch (error) {
+    console.error("Directory load error:", JSON.stringify(error, null, 2));
+    alert("Failed to load directory.");
+  }
+};
+
+// 파일 삭제
+const remove = async (file) => {
+  const key = await getData('file', 'file:' + file.name);
+  if (key === authKey.value) {
+    try {
+      await deleteFile(file.path);
+      authKey.value = ''
+      // 삭제 후 파일 목록 갱신
+      await loadDirectory();
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
+  } else {
+    alert("Authentication failed");
+  }
+};
+const clear = () => {
+  authKey.value = '';
+};
+
+// 초기 디렉터리 로드
+onMounted(loadDirectory);
 </script>
 
 <template>
