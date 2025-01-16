@@ -10,19 +10,6 @@ const valueInputType = ref("string");
 const error = ref(null);
 const res = ref("");
 
-onMounted(() => {
-  if (useDynamoStore().getEntity) {
-    const objFromGet = useDynamoStore().getEntity
-    console.log(JSON.stringify(objFromGet, null, 2))
-    id.value = objFromGet.id
-    value.value = objFromGet.value
-  }
-})
-
-watch(valueInputType, () => {
-  value.value = ""
-});
-
 const handleJsonUpdate = (updatedJson) => {
   value.value = JSON.stringify(updatedJson);
 };
@@ -40,6 +27,19 @@ const put = async () => {
     error.value = "Failed to upsert data";
   }
 };
+
+onMounted(() => {
+  if (useDynamoStore().getEntity) {
+    const objFromGet = useDynamoStore().getEntity
+    console.log(JSON.stringify(objFromGet, null, 2))
+    id.value = objFromGet.id
+    value.value = objFromGet.value
+  }
+})
+
+watch(valueInputType, () => {
+  value.value = ""
+});
 </script>
 
 <template>

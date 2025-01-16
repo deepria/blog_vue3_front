@@ -1,9 +1,10 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
-import { postData } from "@/services/dynamoService.js";
+import {onMounted, ref, watch} from "vue";
+import {postData} from "@/services/dynamoService.js";
 import JsonInput from "@/components/JsonInput.vue";
-import { useDynamoStore } from "@/stores/dynamoStore.js";
+import {useDynamoStore} from "@/stores/dynamoStore.js";
 
+const dynamoStore = useDynamoStore();
 const part = ref("");
 const index = ref("");
 const pk = ref("");
@@ -11,21 +12,6 @@ const value = ref("");
 const res = ref(null);
 const error = ref(null);
 const valueInputType = ref("string");
-
-const dynamoStore = useDynamoStore();
-
-onMounted(() => {
-  if (dynamoStore.getObj) {
-    const objFromGet = dynamoStore.getObj;
-    part.value = objFromGet.part;
-    index.value = objFromGet.index;
-    value.value = objFromGet.data;
-  }
-});
-
-watch(valueInputType, () => {
-  value.value = "";
-});
 
 const handleJsonUpdate = (updatedJson) => {
   value.value = JSON.stringify(updatedJson);
@@ -40,6 +26,19 @@ const put = async () => {
     error.value = "Failed to upsert data";
   }
 };
+onMounted(() => {
+  if (dynamoStore.getObj) {
+    const objFromGet = dynamoStore.getObj;
+    part.value = objFromGet.part;
+    index.value = objFromGet.index;
+    value.value = objFromGet.data;
+  }
+});
+
+watch(valueInputType, () => {
+  value.value = "";
+});
+
 </script>
 
 <template>

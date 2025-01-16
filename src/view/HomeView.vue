@@ -1,11 +1,11 @@
 <script setup>
 import {onMounted, ref, computed} from "vue";
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const articles = ref([]);
 const headlines = ref([]);
 const weather = ref({});
 const MAX_HEADLINES = 20;
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const fetchRSS = async () => {
   const response = await fetch(
