@@ -25,7 +25,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
     (response) => {
         message.destroy("loading");
-        message.success("Loading finished", 1.5).then();
+        message.success("Succeed", 1.5).then();
         return response;
     },
     (error) => {
