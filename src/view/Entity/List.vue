@@ -178,7 +178,7 @@ const onClickValue = (childValue) => {
         <button class="button-primary" @click="modify">modify</button>
       </div>
       <div v-else>
-        <p>No Data Yet</p>
+        <p>No result</p>
       </div>
     </div>
   </div>

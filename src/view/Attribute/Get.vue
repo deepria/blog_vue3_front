@@ -9,7 +9,6 @@ const router = useRouter();
 const part = ref("");
 const index = ref("");
 const data = ref(null);
-const error = ref(null);
 
 const get = async () => {
   if (!part.value || !index.value) {

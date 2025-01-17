@@ -88,15 +88,6 @@ watch(valueInputType, () => {
       </div>
       <div style="display: flex">
         <button class="button-primary" @click="put">Put Data</button>
-        <div v-if="error" class="error-message">
-          <p>Error: {{ error }}</p>
-        </div>
-        <div v-else-if="res">
-          <p><strong>Result :</strong> {{ res }}</p>
-        </div>
-        <div v-else>
-          <p></p>
-        </div>
       </div>
     </div>
   </div>
