@@ -12,7 +12,7 @@ const app = createApp(App);
 const pinia = createPinia();
 
 message.config({
-    top: "unset",
+    top: '80vh',
     duration: 1.5,
     maxCount: 1,
 });
