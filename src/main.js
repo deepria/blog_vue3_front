@@ -13,9 +13,8 @@ const pinia = createPinia();
 
 message.config({
     top: "unset",
-    bottom: "50px",
     duration: 1.5,
-    maxCount: 3,
+    maxCount: 1,
 });
 
 app.use(router);

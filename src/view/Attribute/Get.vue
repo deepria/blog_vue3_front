@@ -3,6 +3,7 @@ import {ref} from "vue";
 import {getData} from "@/services/dynamoService.js";
 import {useRouter} from "vue-router";
 import {useDynamoStore} from "@/stores/dynamoStore.js"
+import {message} from "ant-design-vue";
 
 const router = useRouter();
 const part = ref("");
@@ -11,11 +12,11 @@ const data = ref(null);
 const error = ref(null);
 
 const get = async () => {
-  try {
-    error.value = null;
+  if (!part.value || !index.value) {
+    const emptyVal = !part.value ? 'Partition Key' : 'Index Key'
+    message.warn(`${emptyVal} is empty!`).then(); // 통신 실패 메시지 표시
+  } else {
     data.value = JSON.stringify(await getData(part.value, index.value), null, 2);
-  } catch (err) {
-    error.value = "Failed to load data.";
   }
 };
 
@@ -33,7 +34,6 @@ const modify = () => {
 
 <template>
   <div class="main-container">
-    <!-- 입력 및 서브밋 컨테이너 -->
     <div class="form-container">
       <h1 class="header">Get Data</h1>
       <div class="form-group">
@@ -64,18 +64,14 @@ const modify = () => {
     <!-- 결과 컨테이너 -->
     <div class="result-container">
       <h1 class="header">Result</h1>
-      <div v-if="error" class="error-message">
-        <p>Error: {{ error }}</p>
-      </div>
-      <div v-else-if="data">
+      <div v-if="data">
         <pre class="output">{{ data }}</pre>
+        <br/>
+        <button class="button-primary" @click="modify">Modify</button>
       </div>
       <div v-else>
-        <p>No Data Yet</p>
+        <p></p>
       </div>
-
-      <br/>
-      <button class="button-primary" @click="modify">Modify</button>
     </div>
   </div>
   <button class="button" style="display: none"/>
@@ -110,14 +106,6 @@ const modify = () => {
   margin-bottom: 20px;
   border-bottom: 2px solid #333333; /* 헤더 아래 구분선 */
   padding-bottom: 10px;
-}
-
-/* 에러 메시지 */
-.error-message {
-  margin-top: 15px;
-  color: #ff4d4d; /* 에러 메시지 강조를 위한 빨간색 */
-  font-weight: bold;
-  text-align: center;
 }
 
 /* 결과 텍스트 */

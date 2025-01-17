@@ -122,7 +122,7 @@ button {
   border: none;
   border-radius: 4px;
   background-color: #42b983; /* Vue Green */
-  color: #ffffff; /* 버튼 텍스트 흰색 */
+  color: #000000; /* 버튼 텍스트 흰색 */
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.1s;
 }

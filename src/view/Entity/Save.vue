@@ -175,7 +175,6 @@ watch(valueInputType, () => {
 
 /* 선택된 상태 스타일 */
 .radio-group input[type="radio"]:checked + label {
-  background-color: #42b983; /* Vue Green */
   border-color: #42b983;
   color: #ffffff; /* 선택된 상태 텍스트 흰색 */
 }
@@ -203,8 +202,8 @@ watch(valueInputType, () => {
   background-color: #42b983; /* Vue Green */
   border-radius: 50%;
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 45%;
+  left: 45%;
   transform: translate(-50%, -50%);
   opacity: 0;
   transition: opacity 0.2s;

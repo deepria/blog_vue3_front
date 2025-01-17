@@ -134,8 +134,7 @@ watch(valueInputType, () => {
 }
 
 /* 양쪽 컨테이너 공통 스타일 */
-.form-container,
-.result-container {
+.form-container {
   border-radius: 10px;
   padding: 20px;
   background-color: #1e1e1e; /* 어두운 회색 배경 */
@@ -191,7 +190,6 @@ watch(valueInputType, () => {
 
 /* 선택된 상태 스타일 */
 .radio-group input[type="radio"]:checked + label {
-  background-color: #42b983; /* Vue Green */
   border-color: #42b983;
   color: #ffffff; /* 선택된 상태에서도 흰색 텍스트 유지 */
 }
@@ -219,8 +217,8 @@ watch(valueInputType, () => {
   background-color: #42b983; /* Vue Green */
   border-radius: 50%;
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 40%;
+  left: 45%;
   transform: translate(-50%, -50%);
   opacity: 0;
   transition: opacity 0.2s;

@@ -94,15 +94,15 @@ onMounted(loadDirectory);
 
       <!-- 파일 업로드 -->
       <div class="form-group">
-        <label for="fileUpload">Select File</label>
+
+        <label for="fileUpload" class="custom-file-upload">Select File</label>
         <input
             type="file"
             id="fileUpload"
             @change="handleFileChange"
-            class="styled-input"
         />
         <p v-if="selectedFile" class="file-info">
-          Selected File: {{ selectedFile.name }} ({{ selectedFile.size }} bytes)
+           {{ selectedFile.name }} ({{ selectedFile.size }} bytes)
         </p>
       </div>
 
@@ -198,26 +198,24 @@ onMounted(loadDirectory);
   box-shadow: 0 0 5px rgba(66, 185, 131, 0.3);
 }
 
-/* 버튼 스타일 (Vue Green) */
-.button-primary {
+input[type="file"] {
+  display: none;
+}
+.custom-file-upload {
   display: inline-block;
-  padding: 12px 20px;
-  font-size: 14px;
-  background-color: #42b983; /* Vue Green */
-  color: #ffffff; /* 버튼 텍스트 흰색 */
-  border: none;
-  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  border: 1px solid #42b983;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s;
+  text-align: center;
+}
+.custom-file-upload:hover {
+  background-color: #0056b3;
 }
 
-.button-primary:hover {
-  background-color: #3a9d74; /* 약간 더 어두운 Vue Green */
-}
-
-.button-primary:active {
-  transform: scale(0.98); /* 클릭 시 약간 축소 */
-}
 
 /* 디렉터리 리스트 */
 .directory-list {
