@@ -1,11 +1,13 @@
 <script setup>
 import {onMounted, ref} from "vue";
 import {getData, postData} from "@/services/dynamoService.js";
-import {uploadFile, downloadFile, loadFiles, deleteFile} from "@/services/fileService.js";
+import {uploadFile, previewFile, downloadFile, loadFiles, deleteFile} from "@/services/fileService.js";
 
 const selectedFile = ref(null); // 선택된 파일
 const authKey = ref(""); // 인증 키
 const directory = ref([]); // 디렉터리 가시화 데이터
+const visible = ref(false);
+const src = ref("");
 
 // 파일 선택 핸들러
 const handleFileChange = (event) => {
@@ -82,9 +84,29 @@ const clear = () => {
   authKey.value = '';
 };
 
+const preview = async (value, file) => {
+  setVisible(value);
+  try {
+    const imageUrl = await previewFile(file.name); // Blob URL 받아오기
+    if (imageUrl) {
+      src.value = imageUrl; // 미리보기 URL 설정
+    } else {
+      alert("Failed to load preview.");
+    }
+  } catch (error) {
+    console.error("Error loading preview:", error);
+  }
+};
+
+const setVisible = value => {
+  visible.value = value;
+};
+
 // 초기 디렉터리 로드
 onMounted(loadDirectory);
+
 </script>
+
 
 <template>
   <div class="main-container">
@@ -102,7 +124,7 @@ onMounted(loadDirectory);
             @change="handleFileChange"
         />
         <p v-if="selectedFile" class="file-info">
-           {{ selectedFile.name }} ({{ selectedFile.size }} bytes)
+          {{ selectedFile.name }} ({{ selectedFile.size }} bytes)
         </p>
       </div>
 
@@ -118,7 +140,6 @@ onMounted(loadDirectory);
         />
       </div>
       <button class="button-primary" @click="clear">Clear</button>
-      &nbsp;
       <button class="button-primary" @click="upload">Upload</button>
     </div>
 
@@ -127,12 +148,22 @@ onMounted(loadDirectory);
       <h1 class="header">Directory Viewer</h1>
       <ul class="directory-list">
         <li v-for="(file, index) in directory" :key="index">
-          <span @click="download(file)">{{ file.name.length > 15 ? file.name.slice(0, 15) + '...' : file.name }}</span>
-          <button @click="remove(file)">X</button>
+          <span @click="() => preview(true,file)">{{
+              file.name.length > 15 ? file.name.slice(0, 15) + '...' : file.name
+            }}</span>
+          <div class="button-group">
+            <button @click="download(file)" class="button-primary"><i class="fa-solid fa-download"></i></button>
+            <button @click="remove(file)" class="button-primary"><i class="fa-solid fa-ban"></i></button>
+          </div>
         </li>
       </ul>
     </div>
   </div>
+  <a-image
+      :width="200"
+      :style="{ display: 'none' }"
+      :preview="{  visible,  onVisibleChange: setVisible,}"
+      :src="src"/>
 </template>
 
 <style scoped>
@@ -201,6 +232,7 @@ onMounted(loadDirectory);
 input[type="file"] {
   display: none;
 }
+
 .custom-file-upload {
   display: inline-block;
   padding: 10px 20px;
@@ -212,8 +244,9 @@ input[type="file"] {
   cursor: pointer;
   text-align: center;
 }
+
 .custom-file-upload:hover {
-  background-color: #0056b3;
+  background-color: #42b983;
 }
 
 
@@ -226,8 +259,8 @@ input[type="file"] {
 
 .directory-list li {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   padding: 10px 12px;
   border: 1px solid #555555; /* 어두운 회색 경계선 */
   border-radius: 6px;
@@ -252,29 +285,14 @@ input[type="file"] {
   color: #42b983; /* Vue Green */
 }
 
-/* 삭제 버튼 (빨간색) */
-.directory-list li button {
+.button-group {
+  display: flex;
+  gap: 2px;
+}
+
+.button-group button {
   padding: 6px 12px;
   font-size: 12px;
-  background-color: #ff4d4d; /* 삭제 버튼 빨간색 */
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s;
-}
-
-.directory-list li button:hover {
-  background-color: #cc0000; /* 더 어두운 빨간색 */
-}
-
-.directory-list li button:active {
-  transform: scale(0.95); /* 클릭 시 축소 효과 */
-}
-
-.directory-list li button:focus {
-  outline: 2px solid #ff4d4d; /* 빨간색 외곽선 */
-  outline-offset: 2px;
 }
 
 /* 모바일 최적화 */
@@ -285,4 +303,5 @@ input[type="file"] {
     padding: 10px 20px; /* 좁은 화면에서 여백 추가 */
   }
 }
+
 </style>

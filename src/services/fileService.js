@@ -40,6 +40,19 @@ export const downloadFile = async (authKey, downloadPath, fileName) => {
     }
 };
 
+export const previewFile = async (fileName) => {
+    try {
+        const response = await apiClient.get(`/api/${encodeURIComponent(fileName)}`, {
+            responseType: 'blob' // 이미지 데이터 반환
+        });
+
+        return URL.createObjectURL(response.data); // Blob URL 생성
+    } catch (error) {
+        console.error("Preview error:", error);
+        return null; // 실패 시 null 반환
+    }
+};
+
 function downloadBlob(blob, fileName) {
     const reader = new FileReader();
     reader.onload = function () {
