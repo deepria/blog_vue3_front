@@ -2,6 +2,7 @@
 import {onMounted, ref} from "vue";
 import {getData, postData} from "@/services/dynamoService.js";
 import {uploadFile, previewFile, downloadFile, loadFiles, deleteFile} from "@/services/fileService.js";
+import {v4 as uuidv4} from "uuid";
 
 const selectedFile = ref(null); // 선택된 파일
 const authKey = ref(""); // 인증 키
@@ -22,9 +23,20 @@ const handleFileChange = (event) => {
 // 파일 업로드
 const upload = async () => {
   try {
-    const response = await uploadFile(selectedFile.value);
+    const baseName = selectedFile.value.name.replace(/\s+/g, "_") // 공백을 `_`로 변환
+        .replace(/[^a-zA-Z0-9_.-]/g, "_") // 특수문자 제거
+        .replace(/_+/g, "_") // 연속된 `_`를 하나로 변환
+        .replace(/^_|_$/g, ""); // 앞뒤 `_` 제거
+    const uuid = `${uuidv4()}_${baseName}`; // UUID + 안전한 파일명
+    // 새로운 File 객체 생성
+    const newFile = new File([selectedFile.value], uuid, {
+      type: selectedFile.value.type, // 원본 파일 타입 유지
+      lastModified: selectedFile.value.lastModified // 원본 수정 시간 유지
+    });
+
+    const response = await uploadFile(newFile);
     if (response.status === 200) {
-      await postData('file', 'file:' + selectedFile.value.name, 'authKey', authKey.value);
+      await postData('file', 'file:' + uuid, 'authKey', authKey.value);
       selectedFile.value = null
       authKey.value = ''
       await loadDirectory();
@@ -149,7 +161,7 @@ onMounted(loadDirectory);
       <ul class="directory-list">
         <li v-for="(file, index) in directory" :key="index">
           <span @click="() => preview(true,file)">{{
-              file.name.length > 15 ? file.name.slice(0, 15) + '...' : file.name
+              file.name.length > 15 ? file.name.replace(/^[a-f0-9-]{36}_/, "").slice(-15) : file.name.replace(/^[a-f0-9-]{36}_/, "")
             }}</span>
           <div class="button-group">
             <button @click="download(file)" class="button-primary"><i class="fa-solid fa-download"></i></button>
