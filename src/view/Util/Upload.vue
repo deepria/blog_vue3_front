@@ -3,7 +3,9 @@ import {onMounted, ref} from "vue";
 import {getData, postData} from "@/services/dynamoService.js";
 import {uploadFile, previewFile, downloadFile, loadFiles, deleteFile} from "@/services/fileService.js";
 import {v4 as uuidv4} from "uuid";
+import {message} from "ant-design-vue";
 
+const fileInput = ref(null);
 const selectedFile = ref(null); // 선택된 파일
 const authKey = ref(""); // 인증 키
 const directory = ref([]); // 디렉터리 가시화 데이터
@@ -12,10 +14,13 @@ const src = ref("");
 
 // 파일 선택 핸들러
 const handleFileChange = (event) => {
-  const files = event.target.files;
-  if (files.length > 0) {
-    selectedFile.value = files[0]; // 파일 설정
+  if (event.target !== null) {
+    const files = event.target.files;
+    if (files.length > 0) {
+      selectedFile.value = files[0]; // 파일 설정
+    }
   } else {
+    // selectedFile.value = null;
     console.error("No file selected.");
   }
 };
@@ -37,15 +42,17 @@ const upload = async () => {
     const response = await uploadFile(newFile);
     if (response.status === 200) {
       await postData('file', 'file:' + uuid, 'authKey', authKey.value);
-      selectedFile.value = null
-      authKey.value = ''
       await loadDirectory();
     } else {
-      alert("File upload failed.");
+      message.warn("File upload failed.").then();
     }
   } catch (error) {
+    message.warn("File upload failed.").then();
     console.error("Upload error:", error);
-    alert("File upload failed.");
+  } finally {
+    authKey.value = ''
+    clearFileInput();
+    // handleFileChange(new Event("change"));
   }
 };
 
@@ -58,10 +65,10 @@ const download = async (file) => {
       authKey.value = '';
     } catch (error) {
       console.error("Download error:", error);
-      alert("File download failed.");
+      message.warn("File download failed.").then();
     }
   } else {
-    alert("Authentication failed");
+    message.warn("File download failed.").then();
   }
 };
 
@@ -72,7 +79,7 @@ const loadDirectory = async () => {
     directory.value = response.data; // 파일 목록 업데이트
   } catch (error) {
     console.error("Directory load error:", JSON.stringify(error, null, 2));
-    alert("Failed to load directory.");
+    message.warn("Failed to load directory.").then();
   }
 };
 
@@ -86,34 +93,47 @@ const remove = async (file) => {
       // 삭제 후 파일 목록 갱신
       await loadDirectory();
     } catch (error) {
-      console.error("Error deleting file:", error);
+      message.warn("Failed to delete file.").then();
     }
   } else {
-    alert("Authentication failed");
+    message.warn("Authentication failed").then();
   }
 };
 const clear = () => {
   authKey.value = '';
+  clearFileInput();
+  // handleFileChange(new Event("change"));
 };
 
 const preview = async (value, file) => {
-  setVisible(value);
-  try {
-    const imageUrl = await previewFile(file.name); // Blob URL 받아오기
-    if (imageUrl) {
-      src.value = imageUrl; // 미리보기 URL 설정
-    } else {
-      alert("Failed to load preview.");
+  const key = await getData('file', 'file:' + file.name);
+  if (key === authKey.value) {
+    setVisible(value);
+    try {
+      const imageUrl = await previewFile(file.name); // Blob URL 받아오기
+      if (imageUrl) {
+        src.value = imageUrl; // 미리보기 URL 설정
+      } else {
+        message.warn("Failed to load preview.").then();
+      }
+    } catch (error) {
+      message.warn("Failed to load preview.").then();
+      console.error("Error loading preview:", error);
     }
-  } catch (error) {
-    console.error("Error loading preview:", error);
+  } else {
+    message.warn("Authentication failed").then();
   }
 };
 
 const setVisible = value => {
   visible.value = value;
 };
-
+const clearFileInput = () => {
+  if (fileInput.value) {
+    fileInput.value.value = ""; // 파일 입력 필드 초기화
+    selectedFile.value = null;
+  }
+};
 // 초기 디렉터리 로드
 onMounted(loadDirectory);
 
@@ -128,16 +148,17 @@ onMounted(loadDirectory);
 
       <!-- 파일 업로드 -->
       <div class="form-group">
-
         <label for="fileUpload" class="custom-file-upload">Select File</label>
         <input
             type="file"
+            ref="fileInput"
             id="fileUpload"
             @change="handleFileChange"
         />
         <p v-if="selectedFile" class="file-info">
           {{ selectedFile.name }} ({{ selectedFile.size }} bytes)
         </p>
+        <p v-else class="file-info">No selected file</p>
       </div>
 
       <!-- 다운로드 설정 -->
@@ -314,6 +335,10 @@ input[type="file"] {
     gap: 20px;
     padding: 10px 20px; /* 좁은 화면에서 여백 추가 */
   }
+}
+
+.file-info {
+  align-content: center
 }
 
 </style>
