@@ -4,6 +4,7 @@ import { ref, onMounted } from 'vue';
 const bgColor = ref('#000000');
 const invertedColor = ref('');
 const showColor = ref(false);
+let lastTouchTime = 0; // 더블터치 감지를 위한 변수
 
 // RGB 값을 Hex로 변환하는 함수
 const rgbToHex = (r, g, b) => {
@@ -18,40 +19,45 @@ const invertHex = (hex) => {
   return rgbToHex(r, g, b);
 };
 
-// 마우스 이동에 따라 배경색 변경
+// 터치 드래그 시 배경색 변경
 const updateColor = (event) => {
-  const x = event.clientX / window.innerWidth;
-  const y = event.clientY / window.innerHeight;
+  event.preventDefault();
+  const touch = event.touches[0];
+  const x = touch.clientX / window.innerWidth;
+  const y = touch.clientY / window.innerHeight;
   const r = Math.floor(x * 255);
   const g = Math.floor(y * 255);
   const b = Math.floor((1 - x) * 255);
   bgColor.value = rgbToHex(r, g, b);
+  // 더블 터치 감지 (300ms 이내의 연속 터치)
   invertedColor.value = invertHex(bgColor.value);
   showColor.value = true;
 };
 
-// 클릭 시 반전된 색상 표시 및 클립보드 복사
-const setInvertedColor = async () => {
-
-  try {
-    await navigator.clipboard.writeText(invertedColor.value);
-  } catch (err) {
-    console.error('Failed to copy:', err);
+// 더블 터치 감지 및 반전 색상 표시 + 클립보드 복사
+const handleTouchEnd = async () => {
+  const now = Date.now();
+  if (now - lastTouchTime < 300) {
+    try {
+      await navigator.clipboard.writeText(invertedColor.value);
+      console.log('Copied to clipboard:', invertedColor.value);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
   }
+  lastTouchTime = now;
 };
 
 onMounted(() => {
-  window.addEventListener('mousemove', updateColor);
+  window.addEventListener('touchmove', updateColor, {passive: false});
+  window.addEventListener('touchend', handleTouchEnd);
 });
 </script>
 
 <template>
-  <div
-      class="container"
-      :style="{ backgroundColor: bgColor }"
-      @click="setInvertedColor"
-  >
+  <div class="container" :style="{ backgroundColor: bgColor }">
     <div v-if="showColor" class="color-display" :style="{ color: invertedColor }">
+      double tap for copy
       {{ invertedColor }}
     </div>
   </div>
@@ -66,11 +72,12 @@ onMounted(() => {
   align-items: center;
   position: relative;
   cursor: pointer;
+  touch-action: none; /* 모바일 터치 이벤트 방지 */
 }
+
 .color-display {
   font-size: 3rem;
   font-weight: bold;
-  color: white;
   padding: 20px;
   border-radius: 10px;
 }
