@@ -12,10 +12,6 @@ export const loadFiles = async () => {
 // 파일 다운로드
 export const downloadFile = async (authKey, downloadPath, fileName) => {
     try {
-        // if (!authKey || !downloadPath) {
-        //     throw new Error("Authentication key and download path are required.");
-        // }
-
         const response = await apiClient.get(`/api/download?path=${encodeURIComponent(downloadPath)}&key=${encodeURIComponent(authKey)}`, {
             responseType: "blob", // 응답 형식 설정
         });

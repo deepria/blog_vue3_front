@@ -8,6 +8,7 @@ import List from "@/view/Entity/List.vue";
 import Save from "@/view/Entity/Save.vue";
 import Upload from "@/view/Util/Upload.vue";
 import QR from "@/view/Util/QR.vue";
+import ColorPicker from "@/view/Util/ColorPicker.vue";
 // 라우트 정의
 const routes = [
     {
@@ -44,6 +45,11 @@ const routes = [
         path: "/qr",
         name: "QR",
         component: QR
+    },
+    {
+        path: "/colorPicker",
+        name: "ColorPicker",
+        component: ColorPicker
     },
 ];
 

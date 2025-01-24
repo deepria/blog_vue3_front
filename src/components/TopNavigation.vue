@@ -25,6 +25,7 @@ const menus = ref([
     children: [
       { name: "Upload", path: "/upload" },
       { name: "QR", path: "/qr" },
+      { name: "ColorPicker", path: "/colorPicker" },
     ],
   },
 ]);
