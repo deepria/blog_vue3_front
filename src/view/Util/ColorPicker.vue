@@ -57,7 +57,6 @@ onMounted(() => {
 <template>
   <div class="container" :style="{ backgroundColor: bgColor }">
     <div v-if="showColor" class="color-display" :style="{ color: invertedColor }">
-      double tap for copy
       {{ invertedColor }}
     </div>
   </div>
