@@ -1,139 +1,230 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const menus = ref([
-  { name: "Home", path: "/" },
   {
-    name: "Attribute",
-    isOpen: false, // 드롭다운 열림 상태 관리
+    name: "Legacy",
     children: [
-      { name: "Get", path: "/get" },
-      { name: "Put", path: "/put" },
-    ],
-  },
-  {
-    name: "Entity",
-    isOpen: false, // 드롭다운 열림 상태 관리
-    children: [
-      { name: "Get", path: "/list" },
-      { name: "Put", path: "/save" },
+      { name: "Get-private", path: "/get" },
+      { name: "Put-private", path: "/put" },
+      { name: "Get-public", path: "/list" },
+      { name: "Put-public", path: "/save" },
     ],
   },
   {
     name: "Util",
-    isOpen: false, // 드롭다운 열림 상태 관리
     children: [
       { name: "Upload", path: "/upload" },
       { name: "QR", path: "/qr" },
       { name: "ColorPicker", path: "/colorPicker" },
     ],
   },
+  // ,
+  // {
+  //   name: "Todo",
+  //   children: [{ name: "Custom", path: "/custom" }],
+  // },
 ]);
 
-const showDropdown = (menu) => {
-  menu.isOpen = true;
+const activeMenu = ref(null);
+const touchPosition = ref({ x: 0, y: 0 });
+const selectedIndex = ref(null);
+const isMenuVisible = ref(false);
+let holdTimeout = null;
+
+const startHold = (menu, event) => {
+  selectedIndex.value = null;
+  activeMenu.value = menu;
+
+  const rect = event.target.getBoundingClientRect();
+  touchPosition.value = {
+    x: Math.max(
+      80,
+      Math.min(window.innerWidth - 80, rect.left + rect.width / 2),
+    ),
+    y: rect.top,
+  };
+
+  holdTimeout = setTimeout(() => {
+    isMenuVisible.value = true;
+  }, 100);
 };
 
-const hideDropdown = (menu) => {
-  menu.isOpen = false;
+const moveSelection = (event) => {
+  if (!isMenuVisible.value || !activeMenu.value) return;
+
+  const touchY = event.touches ? event.touches[0].clientY : event.clientY;
+  const startY = touchPosition.value.y;
+  const moveDistance = startY - touchY;
+
+  const totalItems = activeMenu.value.children.length;
+  const spreadFactor = 80; // 펼쳐지는 거리 조정
+  const index = Math.min(
+    totalItems - 1,
+    Math.max(0, Math.floor(moveDistance / spreadFactor)),
+  );
+
+  selectedIndex.value = index;
 };
+
+const selectMenu = () => {
+  if (selectedIndex.value !== null && activeMenu.value) {
+    const selectedPath = activeMenu.value.children[selectedIndex.value].path;
+    router.push(selectedPath);
+  }
+
+  resetMenu();
+};
+
+const resetMenu = () => {
+  activeMenu.value = null;
+  selectedIndex.value = null;
+  isMenuVisible.value = false;
+  clearTimeout(holdTimeout);
+};
+
+// 스크롤 방지
+const preventScroll = (e) => e.preventDefault();
+onMounted(() =>
+  document.addEventListener("touchmove", preventScroll, { passive: false }),
+);
+onUnmounted(() => document.removeEventListener("touchmove", preventScroll));
 </script>
 
 <template>
-  <nav>
-    <ul class="navi">
-      <li v-for="menu in menus" :key="menu.name" class="menu-item">
-        <div
-            v-if="menu.children"
-            @mouseover="showDropdown(menu)"
-            @mouseleave="hideDropdown(menu)"
-            class="dropdown-container"
-        >
-          {{ menu.name }}
-          <transition name="dropdown">
-            <ul v-show="menu.isOpen" class="dropdown">
-              <li v-for="child in menu.children" :key="child.name">
-                <router-link :to="child.path">{{ child.name }}</router-link>
-              </li>
-            </ul>
-          </transition>
-        </div>
-        <router-link v-else :to="menu.path">{{ menu.name }}</router-link>
-      </li>
-    </ul>
+  <nav class="bottom-nav">
+    <div
+      v-for="menu in menus"
+      :key="menu.name"
+      class="nav-item"
+      @touchstart="startHold(menu, $event)"
+      @mousedown="startHold(menu, $event)"
+      @touchmove="moveSelection"
+      @mousemove="moveSelection"
+      @touchend="selectMenu"
+      @mouseup="selectMenu"
+      @mouseleave="resetMenu"
+    >
+      {{ menu.name }}
+    </div>
+
+    <!-- 홈 버튼 (텍스트만 표시) -->
+    <router-link to="/" class="home-button">Home</router-link>
   </nav>
+
+  <!-- 트리 구조로 위로 펼쳐지는 메뉴 -->
+  <transition name="menu-fade">
+    <div
+      v-if="isMenuVisible"
+      class="tree-menu"
+      :style="{
+        left: `${touchPosition.x}px`,
+        top: `${touchPosition.y - 60}px`,
+      }"
+    >
+      <div
+        v-for="(child, index) in activeMenu.children"
+        :key="child.name"
+        class="tree-item"
+        :class="{ selected: index === selectedIndex }"
+        :style="{ transform: `translateY(-${index * 80}px) scale(1.1)` }"
+      >
+        {{ child.name }}
+      </div>
+    </div>
+  </transition>
 </template>
 
-
 <style scoped>
-/* 가로로 표시되는 메뉴 스타일 */
-.navi {
-  display: flex !important; /* Flexbox 로 가로 정렬 */
-  list-style: none;
-  padding: 0;
+/* 스크롤 방지 */
+html,
+body {
+  overflow: hidden;
   margin: 0;
-  gap: 20px; /* 메뉴 항목 간 간격 */
-  align-items: center; /* 수직 정렬 */
-  color: #ffffff; /* 메뉴 텍스트 흰색 */
+  padding: 0;
 }
 
-.menu-item {
-  position: relative; /* 드롭다운의 기준 위치 */
+/* 하단 네비게이션 */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  background: #1e1e1e;
+  padding: 10px 0;
+  color: #ffffff;
   font-size: 18px;
   font-weight: bold;
+  align-items: center;
+}
+
+/* 네비게이션 아이템 */
+.nav-item {
   cursor: pointer;
+  padding: 10px 20px;
 }
 
-.menu-item:hover {
-  color: #42b983; /* 메뉴 항목 호버 시 Vue Green */
+.nav-item:hover {
+  color: #42b983;
 }
 
-/* 드롭다운 스타일 */
-.dropdown-container {
-  cursor: pointer;
-}
-
-.dropdown {
-  list-style-type: none;
-  position: absolute; /* 부모 요소와 독립적인 위치 */
-  top: 100%; /* 부모 요소 바로 아래에 배치 */
-  left: 0;
-  background-color: #1e1e1e; /* 드롭다운 배경 어두운 회색 */
-  border: 1px solid #333333; /* 어두운 회색 경계선 */
-  padding: 10px;
-  margin: 0;
-  width: 150px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* 뚜렷한 그림자 */
-  border-radius: 4px;
-  z-index: 1000; /* 다른 요소 위에 표시 */
-}
-
-/* 드롭다운 항목 스타일 */
-.dropdown li {
-  margin: 5px 0;
-  font-size: 16px;
-}
-
-.dropdown li a {
+/* 홈 버튼 (배경색 없이 텍스트만) */
+.home-button {
+  font-size: 18px;
+  font-weight: bold;
   text-decoration: none;
-  color: #e0e0e0; /* 드롭다운 항목 텍스트 밝은 회색 */
+  color: white;
+  padding: 10px;
   transition: color 0.3s ease;
 }
 
-.dropdown li a:hover {
-  color: #42b983; /* Vue Green */
+.home-button:hover {
+  color: #42b983;
 }
 
-/* 드롭다운 애니메이션
-.dropdown-enter-active,
-.dropdown-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+/* 트리 메뉴 */
+.tree-menu {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px;
+  z-index: 1000;
 }
 
-.dropdown-enter-from,
-.dropdown-leave-to {
+/* 트리 아이템 */
+.tree-item {
+  font-size: 20px;
+  color: white;
+  text-align: center;
+  margin: 10px 0;
+  transition:
+    font-weight 0.1s ease,
+    transform 0.3s ease;
+}
+
+/* 선택 강조 (볼드 효과) */
+.tree-item.selected {
+  font-weight: bold;
+}
+
+/* 애니메이션 (메뉴 등장) */
+.menu-fade-enter-active,
+.menu-fade-leave-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.menu-fade-enter-from,
+.menu-fade-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(20px) scale(0.9);
 }
-*/
 </style>
