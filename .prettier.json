@@ -1,0 +1,15 @@
+{
+  "trailingComma": "es5",
+  "singleQuote": true,
+  "singleAttributePerLine": true,
+  "semi": true,
+  "quoteProps": "as-needed",
+  "proseWrap": "preserve",
+  "printWidth": 80,
+  "bracketSpacing": true,
+  "arrowParens": "always",
+  "useTabs": false,
+  "htmlWhitespaceSensitivity": "css",
+  "endOfLine": "lf",
+  "embeddedLanguageFormatting": "auto"
+}
