@@ -68,9 +68,9 @@ const menus = ref([
   {
     name: "Util",
     children: [
-      { name: "Upload", path: "/upload" },
       { name: "QR", path: "/qr" },
       { name: "ColorPicker", path: "/colorPicker" },
+      { name: "Upload", path: "/upload" },
     ],
   },
 ]);
@@ -140,16 +140,17 @@ const resetMenu = () => {
 .app {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
 /* 라우터 페이지 컨텐츠 */
 .content {
   flex: 1;
-  height: calc(100vh - 60px); /* 네비게이션을 제외한 높이 */
+  height: 100%;
+  overflow: hidden; /* 네비게이션을 제외한 높이 */
   overflow-y: auto;
-  padding-bottom: 60px; /* 네비게이션 가리지 않도록 */
+  padding-bottom: 6vh; /* 네비게이션 가리지 않도록 */
 }
 
 /* 하단 네비게이션 */
@@ -158,7 +159,7 @@ const resetMenu = () => {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 60px;
+  height: 6vh;
   display: flex;
   justify-content: space-around;
   background: #1e1e1e;
