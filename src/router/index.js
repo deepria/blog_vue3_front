@@ -9,7 +9,6 @@ import Save from "@/view/Entity/Save.vue";
 import Upload from "@/view/Util/Upload.vue";
 import QR from "@/view/Legacy/QR.vue";
 import ColorPicker from "@/view/Legacy/ColorPicker.vue";
-import Custom from "@/view/Todo/Custom.vue";
 import Todo from "@/view/Todo/Todo.vue";
 // 라우트 정의
 const routes = [
