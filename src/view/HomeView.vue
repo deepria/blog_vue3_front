@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, computed} from "vue";
+import { onMounted, ref, computed } from "vue";
 
 const articles = ref([]);
 const headlines = ref([]);
@@ -9,7 +9,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const fetchRSS = async () => {
   const response = await fetch(
-      "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
+    "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
   );
   const data = await response.text();
 
@@ -20,8 +20,9 @@ const fetchRSS = async () => {
   articles.value = Array.from(items).map((item) => {
     const namespace = "http://search.yahoo.com/mrss/";
     const image =
-        item.getElementsByTagNameNS(namespace, "content")[0]?.getAttribute("url") ||
-        '';
+      item
+        .getElementsByTagNameNS(namespace, "content")[0]
+        ?.getAttribute("url") || "";
 
     return {
       title: item.querySelector("title")?.textContent || "",
@@ -80,17 +81,19 @@ const latLonToGrid = (lat, lon) => {
   const olon = OLON * DEGRAD;
   const olat = OLAT * DEGRAD;
 
-  let sn = Math.tan(Math.PI * 0.25 + slat2 * 0.5) / Math.tan(Math.PI * 0.25 + slat1 * 0.5);
+  let sn =
+    Math.tan(Math.PI * 0.25 + slat2 * 0.5) /
+    Math.tan(Math.PI * 0.25 + slat1 * 0.5);
   sn = Math.log(Math.cos(slat1) / Math.cos(slat2)) / Math.log(sn);
 
   let sf = Math.tan(Math.PI * 0.25 + slat1 * 0.5);
-  sf = Math.pow(sf, sn) * Math.cos(slat1) / sn;
+  sf = (Math.pow(sf, sn) * Math.cos(slat1)) / sn;
 
   let ro = Math.tan(Math.PI * 0.25 + olat * 0.5);
-  ro = re * sf / Math.pow(ro, sn);
+  ro = (re * sf) / Math.pow(ro, sn);
 
   let ra = Math.tan(Math.PI * 0.25 + lat * DEGRAD * 0.5);
-  ra = re * sf / Math.pow(ra, sn);
+  ra = (re * sf) / Math.pow(ra, sn);
 
   let theta = lon * DEGRAD - olon;
   if (theta > Math.PI) theta -= 2.0 * Math.PI;
@@ -100,7 +103,7 @@ const latLonToGrid = (lat, lon) => {
   const x = Math.floor(ra * Math.sin(theta) + XO + 0.5);
   const y = Math.floor(ro - ra * Math.cos(theta) + YO + 0.5);
 
-  return {nx: x, ny: y};
+  return { nx: x, ny: y };
 };
 
 const fetchWeather = async () => {
@@ -118,18 +121,21 @@ const fetchWeather = async () => {
     const minutes = date.getMinutes();
     // 30분 이전이면 한 시간 전으로 설정
     return minutes < 30
-        ? `${String(hours - 1).padStart(2, "0")}00`
-        : `${hours}00`;
+      ? `${String(hours - 1).padStart(2, "0")}00`
+      : `${hours}00`;
   };
 
   try {
     const gridData = await requestGPSData(); // GPS 데이터 요청 및 격자 좌표 변환
-    const url = new URL('https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst');
+    const url = new URL(
+      "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst",
+    );
     const params = {
-      serviceKey: 'w5c0HrdcfeykNvDjMhIQzq/5MpELUA0eBU/u1TpRBNG293IqdrinnVGeaHuFLyFdOODRDbD0EkJSiZ2fTGjvcw==',
-      pageNo: '1',
-      numOfRows: '1000',
-      dataType: 'JSON',
+      serviceKey:
+        "w5c0HrdcfeykNvDjMhIQzq/5MpELUA0eBU/u1TpRBNG293IqdrinnVGeaHuFLyFdOODRDbD0EkJSiZ2fTGjvcw==",
+      pageNo: "1",
+      numOfRows: "1000",
+      dataType: "JSON",
       base_date: getYYYYMMDD(now),
       base_time: getHHMM(now),
       nx: gridData.nx,
@@ -138,7 +144,7 @@ const fetchWeather = async () => {
 
     // URL에 파라미터 추가
     Object.keys(params).forEach((key) =>
-        url.searchParams.append(key, params[key])
+      url.searchParams.append(key, params[key]),
     );
 
     const response = await fetch(url);
@@ -151,45 +157,52 @@ const fetchWeather = async () => {
     // 날씨 데이터 매핑
     const items = data.response?.body?.items?.item || [];
     weather.value = {
-      precipitationType: items.find((item) => item.category === 'PTY')?.obsrValue || '0',
-      humidity: items.find((item) => item.category === 'REH')?.obsrValue || '0',
-      rainPerHour: items.find((item) => item.category === 'RN1')?.obsrValue || '0',
-      temperature: items.find((item) => item.category === 'T1H')?.obsrValue || '0',
-      windSpeedEastWest: items.find((item) => item.category === 'UUU')?.obsrValue || '0',
-      windSpeedNorthSouth: items.find((item) => item.category === 'VVV')?.obsrValue || '0',
-      windDirection: items.find((item) => item.category === 'VEC')?.obsrValue || '0',
-      windSpeed: items.find((item) => item.category === 'WSD')?.obsrValue || '0',
+      precipitationType:
+        items.find((item) => item.category === "PTY")?.obsrValue || "0",
+      humidity: items.find((item) => item.category === "REH")?.obsrValue || "0",
+      rainPerHour:
+        items.find((item) => item.category === "RN1")?.obsrValue || "0",
+      temperature:
+        items.find((item) => item.category === "T1H")?.obsrValue || "0",
+      windSpeedEastWest:
+        items.find((item) => item.category === "UUU")?.obsrValue || "0",
+      windSpeedNorthSouth:
+        items.find((item) => item.category === "VVV")?.obsrValue || "0",
+      windDirection:
+        items.find((item) => item.category === "VEC")?.obsrValue || "0",
+      windSpeed:
+        items.find((item) => item.category === "WSD")?.obsrValue || "0",
     };
 
-    console.log('날씨 데이터:', weather.value);
+    console.log("날씨 데이터:", weather.value);
   } catch (error) {
-    console.error('날씨 데이터를 가져오는 중 오류 발생:', error);
+    console.error("날씨 데이터를 가져오는 중 오류 발생:", error);
   }
 };
 
 // 강수 형태 해석
 const precipitationMap = {
-  "0": "없음",
-  "1": "비",
-  "2": "비/눈",
-  "3": "눈",
-  "4": "소나기",
+  0: "없음",
+  1: "비",
+  2: "비/눈",
+  3: "눈",
+  4: "소나기",
 };
 const precipitationText = computed(
-    () => precipitationMap[weather.value.precipitationType] || "정보 없음"
+  () => precipitationMap[weather.value.precipitationType] || "정보 없음",
 );
 
 // 강수 형태 아이콘 맵
 const iconMap = {
-  "0": "fa-solid fa-sun",
-  "1": "fa-solid fa-cloud-showers-heavy",
-  "2": "fa-solid fa-cloud-rain",
-  "3": "fa-solid fa-snowflake",
-  "4": "fa-solid fa-cloud-bolt",
+  0: "fa-solid fa-sun",
+  1: "fa-solid fa-cloud-showers-heavy",
+  2: "fa-solid fa-cloud-rain",
+  3: "fa-solid fa-snowflake",
+  4: "fa-solid fa-cloud-bolt",
 };
 
 const iconClass = computed(
-    () => iconMap[weather.value.precipitationType] || "fa-solid fa-question"
+  () => iconMap[weather.value.precipitationType] || "fa-solid fa-question",
 );
 
 // 풍향 해석
@@ -198,15 +211,13 @@ const getWindDirection = (angle) => {
   return directions[Math.round(angle / 45) % 8];
 };
 const windDirectionText = computed(() =>
-    getWindDirection(Number(weather.value.windDirection))
+  getWindDirection(Number(weather.value.windDirection)),
 );
 
 onMounted(() => {
-      fetchRSS();
-      fetchWeather();
-    }
-);
-
+  fetchRSS();
+  fetchWeather();
+});
 </script>
 
 <template>
@@ -234,10 +245,21 @@ onMounted(() => {
 
   <div class="container">
     <ul>
-      <li v-for="(article, index) in headlines" :key="index" class="falling-text">
+      <li
+        v-for="(article, index) in headlines"
+        :key="index"
+        class="falling-text"
+      >
         <div class="content">
-          <img :src="article.image" alt="Article Image" v-if="article.image" loading="lazy"/>
-          <h3><a :href="article.link" target="_blank">{{ article.title }}</a></h3>
+          <img
+            :src="article.image"
+            alt="Article Image"
+            v-if="article.image"
+            loading="lazy"
+          />
+          <h3>
+            <a :href="article.link" target="_blank">{{ article.title }}</a>
+          </h3>
           <p>{{ article.description }}</p>
           <small>{{ article.pubDate }}</small>
         </div>

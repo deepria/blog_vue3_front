@@ -35,13 +35,13 @@ html, body {
     margin: 0;
     padding: 0;
     width: 100vw; /* 뷰포트 너비에 맞춤 */
-    height: 100vh; /* 뷰포트 높이에 맞춤 */
+    height: 100dvh; /* 뷰포트 높이에 맞춤 */
     font-family: 'Inter', sans-serif;
     line-height: 1.6;
     background: var(--color-background);
     color: var(--color-text);
     transition: background 0.3s, color 0.3s;
-    overflow-x: hidden; /* Prevent horizontal scroll in webviews */
+    overflow: hidden; /* Prevent horizontal scroll in webviews */
     -webkit-font-smoothing: antialiased; /* Smooth font rendering for webviews */
 }
 

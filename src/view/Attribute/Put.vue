@@ -1,8 +1,8 @@
 <script setup>
-import {onMounted, ref, watch} from "vue";
-import {postData} from "@/services/dynamoService.js";
+import { onMounted, ref, watch } from "vue";
 import JsonInput from "@/components/JsonInput.vue";
-import {useDynamoStore} from "@/stores/dynamoStore.js";
+import { useDynamoStore } from "@/stores/dynamoStore.js";
+import { postData } from "@/services/dynamoService.js";
 
 const dynamoStore = useDynamoStore();
 const part = ref("");
@@ -38,7 +38,6 @@ onMounted(() => {
 watch(valueInputType, () => {
   value.value = "";
 });
-
 </script>
 
 <template>
@@ -49,63 +48,68 @@ watch(valueInputType, () => {
       <div class="form-group">
         <label for="part">Partition Key</label>
         <input
-            id="part"
-            type="text"
-            v-model="part"
-            placeholder="Enter partition key"
-            class="styled-input"
+          id="part"
+          type="text"
+          v-model="part"
+          placeholder="Enter partition key"
+          class="styled-input"
         />
       </div>
 
       <div class="form-group">
         <label for="index">Index Key</label>
         <input
-            id="index"
-            type="text"
-            v-model="index"
-            placeholder="Enter index key"
-            class="styled-input"
+          id="index"
+          type="text"
+          v-model="index"
+          placeholder="Enter index key"
+          class="styled-input"
         />
       </div>
 
       <div class="form-group">
         <label for="pk">Primary Key</label>
         <input
-            id="pk"
-            type="text"
-            v-model="pk"
-            placeholder="Enter primary key"
-            class="styled-input"
+          id="pk"
+          type="text"
+          v-model="pk"
+          placeholder="Enter primary key"
+          class="styled-input"
         />
       </div>
 
       <div class="radio-group">
-        <input type="radio" id="string" value="string" v-model="valueInputType"/>
+        <input
+          type="radio"
+          id="string"
+          value="string"
+          v-model="valueInputType"
+        />
         <label for="string">
           <span class="radio-circle"></span>
           String
         </label>
-        <input type="radio" id="json" value="json" v-model="valueInputType"/>
+        <input type="radio" id="json" value="json" v-model="valueInputType" />
         <label for="json">
           <span class="radio-circle"></span>
           JSON
         </label>
       </div>
 
-      <div v-if="valueInputType ==='string'" class="form-group">
+      <div v-if="valueInputType === 'string'" class="form-group">
         <label for="value">Value - String</label>
         <input
-            id="value"
-            type="text"
-            v-model="value"
-            placeholder="Enter value"
-            class="styled-input"
+          id="value"
+          type="text"
+          v-model="value"
+          placeholder="Enter value"
+          class="styled-input"
         />
       </div>
 
-      <div v-else-if="valueInputType ==='json'" class="form-group">
+      <div v-else-if="valueInputType === 'json'" class="form-group">
         <h4>Value - Json</h4>
-        <JsonInput @update-json="handleJsonUpdate"/>
+        <JsonInput @update-json="handleJsonUpdate" />
       </div>
       <button class="button-primary" @click="put">Put Data</button>
     </div>
@@ -174,7 +178,9 @@ watch(valueInputType, () => {
   border-radius: 4px;
   cursor: pointer;
   color: #ffffff; /* 라벨 텍스트 흰색 */
-  transition: background-color 0.3s, border-color 0.3s;
+  transition:
+    background-color 0.3s,
+    border-color 0.3s;
 }
 
 /* 선택된 상태 스타일 */
@@ -200,7 +206,7 @@ watch(valueInputType, () => {
 
 /* 선택된 상태에서 동그라미 내부 표시 */
 .radio-circle::after {
-  content: '';
+  content: "";
   width: 8px;
   height: 8px;
   background-color: #42b983; /* Vue Green */

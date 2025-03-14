@@ -59,17 +59,18 @@ const menus = ref([
   {
     name: "Legacy",
     children: [
-      { name: "Get-private", path: "/get" },
+      { name: "QR", path: "/qr" },
+      { name: "ColorPicker", path: "/colorPicker" },
       { name: "Put-private", path: "/put" },
-      { name: "Get-public", path: "/list" },
+      { name: "Get-private", path: "/get" },
       { name: "Put-public", path: "/save" },
+      { name: "Get-public", path: "/list" },
     ],
   },
   {
     name: "Util",
     children: [
-      { name: "QR", path: "/qr" },
-      { name: "ColorPicker", path: "/colorPicker" },
+      { name: "Todo", path: "/todo" },
       { name: "Upload", path: "/upload" },
     ],
   },
