@@ -112,13 +112,13 @@ const dragStartY = ref(0);
 const dragOffset = ref(0);
 const isDragging = ref(false);
 
-watch(
-  items,
-  (newItems) => {
-    console.log("리스트 업데이트됨:", JSON.stringify(newItems, null, 2));
-  },
-  { deep: true },
-);
+// watch(
+//   items,
+//   (newItems) => {
+//     console.log("리스트 업데이트됨:", JSON.stringify(newItems, null, 2));
+//   },
+//   { deep: true },
+// );
 
 watch(showPopup, async (newVal) => {
   if (newVal) {
@@ -240,13 +240,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-html,
-body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden; /* 가로 스크롤 방지 */
-}
-
 .container {
   height: 85vh;
   position: relative;
@@ -391,7 +384,6 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  overflow: hidden; /* 스크롤 제거 */
   position: relative;
   cursor: grab;
 }
