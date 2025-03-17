@@ -101,7 +101,9 @@ const truncateFileName = (name) => {
 
 const previewFileClick = async (file) => {
   try {
-    const fileUrl = await previewFile(file.name);
+    const encodedFileName = encodeURIComponent(file.name);
+    const fileUrl = await previewFile(encodedFileName);
+
     if (fileUrl) {
       src.value = fileUrl; // Blob URL 할당
       visible.value = true; // 미리보기 활성화
