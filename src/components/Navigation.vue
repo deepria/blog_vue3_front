@@ -13,8 +13,8 @@
         class="nav-item"
         @touchstart="startHold(menu, $event)"
         @mousedown="startHold(menu, $event)"
-        @touchmove="moveSelection"
-        @mousemove="moveSelection"
+        @touchmove="optimizedTouchMove"
+        @mousemove="optimizedTouchMove"
         @touchend="selectMenu"
         @mouseup="selectMenu"
         @mouseleave="resetMenu"
@@ -40,7 +40,7 @@
           :key="child.name"
           class="tree-item"
           :class="{ selected: index === selectedIndex }"
-          :style="{ transform: `translateY(-${index * 80}px) scale(1.1)` }"
+          :style="{ transform: `translateY(-${index * 120}px) scale(1.1)` }"
         >
           {{ child.name }}
         </div>
@@ -106,7 +106,10 @@ const moveSelection = (event) => {
 
   const touchY = event.touches ? event.touches[0].clientY : event.clientY;
   const startY = touchPosition.value.y;
-  const moveDistance = startY - touchY;
+  const moveDistance = startY - touchY; // Y축 기준으로 변경
+
+  const threshold = 20; // 터치 감도 조정
+  if (Math.abs(moveDistance) < threshold) return;
 
   const totalItems = activeMenu.value.children.length;
   const spreadFactor = 80;
@@ -116,6 +119,12 @@ const moveSelection = (event) => {
   );
 
   selectedIndex.value = index;
+};
+
+// 터치 이벤트 최적화 (Y축 전용)
+const optimizedTouchMove = (event) => {
+  event.preventDefault();
+  moveSelection(event);
 };
 
 const selectMenu = () => {
@@ -171,12 +180,14 @@ const resetMenu = () => {
   align-items: center;
 }
 
-/* 네비게이션 아이템 */
+/* 네비게이션 아이템 크기 확대 */
 .nav-item {
   cursor: pointer;
-  padding: 10px 20px;
+  padding: 10px 20px; /* 기존보다 크기를 키움 */
+  font-size: 20px; /* 글자 크기도 증가 */
 }
 
+/* 네비게이션 아이템 hover 효과 */
 .nav-item:hover {
   color: #42b983;
 }
@@ -207,15 +218,15 @@ const resetMenu = () => {
   pointer-events: none;
 }
 
-/* 트리 아이템 */
+/* 트리 아이템 크기 확대 */
 .tree-item {
-  font-size: 20px;
+  font-size: 30px; /* 글자 크기 증가 */
   color: white;
   text-align: center;
-  margin: 10px 0;
+  margin: 8px 0;
   transition:
     font-weight 0.1s ease,
-    transform 0.3s ease;
+    transform 0.3s ease-out; /* 부드러운 애니메이션 */
   pointer-events: auto;
 }
 
