@@ -1,344 +1,399 @@
 <script setup>
-import {onMounted, ref} from "vue";
-import {getData, postData} from "@/services/dynamoService.js";
-import {uploadFile, previewFile, downloadFile, loadFiles, deleteFile} from "@/services/fileService.js";
-import {v4 as uuidv4} from "uuid";
-import {message} from "ant-design-vue";
+import { onMounted, ref } from "vue";
+import { getData, postData } from "@/services/dynamoService.js";
+import {
+  uploadFile,
+  previewFile,
+  downloadFile,
+  loadFiles,
+  deleteFile,
+} from "@/services/fileService.js";
+import { v4 as uuidv4 } from "uuid";
+import { message } from "ant-design-vue";
 
 const fileInput = ref(null);
-const selectedFile = ref(null); // 선택된 파일
-const authKey = ref(""); // 인증 키
-const directory = ref([]); // 디렉터리 가시화 데이터
+const selectedFile = ref(null);
+const authKey = ref("");
+const customFileName = ref("");
+const directory = ref([]);
 const visible = ref(false);
+const setVisible = (value) => {
+  visible.value = value;
+};
 const src = ref("");
+const showPopup = ref(false);
+const dragStartY = ref(0);
+const dragOffset = ref(0);
+const isDragging = ref(false);
 
-// 파일 선택 핸들러
 const handleFileChange = (event) => {
-  if (event.target !== null) {
-    const files = event.target.files;
-    if (files.length > 0) {
-      selectedFile.value = files[0]; // 파일 설정
-    }
-  } else {
-    // selectedFile.value = null;
-    console.error("No file selected.");
+  if (event.target.files.length > 0) {
+    selectedFile.value = event.target.files[0];
   }
 };
 
-// 파일 업로드
 const upload = async () => {
   try {
-    const baseName = selectedFile.value.name.replace(/\s+/g, "_") // 공백을 `_`로 변환
-        .replace(/[^a-zA-Z0-9_.-]/g, "_") // 특수문자 제거
-        .replace(/_+/g, "_") // 연속된 `_`를 하나로 변환
-        .replace(/^_|_$/g, ""); // 앞뒤 `_` 제거
-    const uuid = `${uuidv4()}_${baseName}`; // UUID + 안전한 파일명
-    // 새로운 File 객체 생성
-    const newFile = new File([selectedFile.value], uuid, {
-      type: selectedFile.value.type, // 원본 파일 타입 유지
-      lastModified: selectedFile.value.lastModified // 원본 수정 시간 유지
+    const originalName = selectedFile.value.name;
+    const baseName = customFileName.value.trim()
+      ? customFileName.value.trim() +
+        originalName.substring(originalName.lastIndexOf("."))
+      : originalName
+          .replace(/\s+/g, "_")
+          .replace(/[^a-zA-Z0-9_.-]/g, "_")
+          .replace(/_+/g, "_")
+          .replace(/^_|_$/g, "");
+    const uuid = uuidv4();
+    const newFileName = `${uuid}_${baseName}`;
+    const newFile = new File([selectedFile.value], newFileName, {
+      type: selectedFile.value.type,
+      lastModified: selectedFile.value.lastModified,
     });
 
     const response = await uploadFile(newFile);
     if (response.status === 200) {
-      await postData('file', 'file:' + uuid, 'authKey', authKey.value);
+      await postData("file", "file:" + newFileName, "authKey", authKey.value);
       await loadDirectory();
+      showPopup.value = false;
+
+      // ✅ 업로드 후 파일 정보 초기화
+      selectedFile.value = null;
+      authKey.value = "";
+      customFileName.value = "";
     } else {
       message.warn("File upload failed.").then();
     }
   } catch (error) {
     message.warn("File upload failed.").then();
     console.error("Upload error:", error);
-  } finally {
-    authKey.value = ''
-    clearFileInput();
-    // handleFileChange(new Event("change"));
   }
 };
 
-// 파일 다운로드
-const download = async (file) => {
-  const key = await getData('file', 'file:' + file.name);
-  if (key === authKey.value) {
-    try {
-      await downloadFile(authKey.value, file.path, file.name);
-      authKey.value = '';
-    } catch (error) {
-      console.error("Download error:", error);
-      message.warn("File download failed.").then();
-    }
-  } else {
-    message.warn("File download failed.").then();
-  }
-};
-
-// 디렉터리 데이터 로드
 const loadDirectory = async () => {
   try {
     const response = await loadFiles();
-    directory.value = response.data; // 파일 목록 업데이트
+    directory.value = response.data;
   } catch (error) {
-    console.error("Directory load error:", JSON.stringify(error, null, 2));
+    console.error("Directory load error:", error);
     message.warn("Failed to load directory.").then();
   }
 };
 
-// 파일 삭제
+const startDrag = (e) => {
+  isDragging.value = true;
+  dragStartY.value = e.touches ? e.touches[0].clientY : e.clientY;
+};
+
+const onDrag = (e) => {
+  if (!isDragging.value) return;
+  const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+  dragOffset.value += currentY - dragStartY.value;
+  dragStartY.value = currentY;
+};
+
+const endDrag = () => {
+  isDragging.value = false;
+};
+
+const truncateFileName = (name) => {
+  return name.replace(/^[a-f0-9-]{36}_/, "");
+};
+
+const previewFileClick = async (file) => {
+  try {
+    const fileUrl = await previewFile(file.name);
+    if (fileUrl) {
+      src.value = fileUrl; // Blob URL 할당
+      visible.value = true; // 미리보기 활성화
+    } else {
+      message.warn("미리보기를 불러올 수 없습니다.").then();
+    }
+  } catch (error) {
+    console.error("Preview error:", error);
+    message.warn("미리보기를 불러올 수 없습니다.").then();
+  }
+};
+
+const download = (file) => {
+  try {
+    downloadFile(
+      authKey.value,
+      file.name,
+      file.name.replace(/^[a-f0-9-]{36}_/, ""),
+    );
+  } catch (error) {
+    message.warn("파일 다운로드에 실패했습니다.").then();
+  }
+};
+
 const remove = async (file) => {
-  const key = await getData('file', 'file:' + file.name);
-  if (key === authKey.value) {
-    try {
-      await deleteFile(file.path);
-      authKey.value = ''
-      // 삭제 후 파일 목록 갱신
-      await loadDirectory();
-    } catch (error) {
-      message.warn("Failed to delete file.").then();
-    }
-  } else {
-    message.warn("Authentication failed").then();
-  }
-};
-const clear = () => {
-  authKey.value = '';
-  clearFileInput();
-  // handleFileChange(new Event("change"));
-};
-
-const preview = async (value, file) => {
-  const key = await getData('file', 'file:' + file.name);
-  if (key === authKey.value) {
-    setVisible(value);
-    try {
-      const imageUrl = await previewFile(file.name); // Blob URL 받아오기
-      if (imageUrl) {
-        src.value = imageUrl; // 미리보기 URL 설정
-      } else {
-        message.warn("Failed to load preview.").then();
-      }
-    } catch (error) {
-      message.warn("Failed to load preview.").then();
-      console.error("Error loading preview:", error);
-    }
-  } else {
-    message.warn("Authentication failed").then();
+  try {
+    await deleteFile(file.name);
+    await loadDirectory(); // 파일 삭제 후 리스트 새로고침
+  } catch (error) {
+    message.warn("파일 삭제에 실패했습니다.").then();
   }
 };
 
-const setVisible = value => {
-  visible.value = value;
+const formatFileSize = (size) => {
+  return (size / (1024 * 1024)).toFixed(2) + " MB"; // 메가바이트 변환
 };
-const clearFileInput = () => {
-  if (fileInput.value) {
-    fileInput.value.value = ""; // 파일 입력 필드 초기화
-    selectedFile.value = null;
-  }
+
+const cancelUpload = () => {
+  selectedFile.value = null; // 선택한 파일 초기화
+  authKey.value = ""; // 입력된 비밀번호 초기화
+  showPopup.value = false; // 팝업 닫기
 };
-// 초기 디렉터리 로드
+
 onMounted(loadDirectory);
-
 </script>
-
 
 <template>
   <div class="main-container">
-    <!-- 왼쪽: 파일 업로드 및 다운로드 설정 -->
-    <div class="upload-container">
-      <h1 class="header">File Upload & Download</h1>
-
-      <!-- 파일 업로드 -->
-      <div class="form-group">
-        <label for="fileUpload" class="custom-file-upload">Select File</label>
-        <input
-            type="file"
-            ref="fileInput"
-            id="fileUpload"
-            @change="handleFileChange"
-        />
-        <p v-if="selectedFile" class="file-info">
-          {{ selectedFile.name }} ({{ selectedFile.size }} bytes)
-        </p>
-        <p v-else class="file-info">No selected file</p>
+    <div class="file-grid">
+      <div v-for="(file, index) in directory" :key="index" class="file-item">
+        <span class="file-name" @click="previewFileClick(file)">
+          {{ truncateFileName(file.name) }}
+        </span>
+        <div class="button-group">
+          <button @click="download(file)" class="button-primary">
+            <i class="fa-solid fa-download"></i>
+          </button>
+          <button @click="remove(file)" class="button-primary">
+            <i class="fa-solid fa-ban"></i>
+          </button>
+        </div>
       </div>
-
-      <!-- 다운로드 설정 -->
-      <div class="form-group">
-        <label for="authKey">Authentication Key</label>
-        <input
-            type="text"
-            id="authKey"
-            v-model="authKey"
-            placeholder="Enter password for permission"
-            class="styled-input"
-        />
-      </div>
-      <button class="button-primary" @click="clear">Clear</button>
-      <button class="button-primary" @click="upload">Upload</button>
     </div>
 
-    <!-- 오른쪽: 디렉터리 가시화 -->
-    <div class="directory-container">
-      <h1 class="header">Directory Viewer</h1>
-      <ul class="directory-list">
-        <li v-for="(file, index) in directory" :key="index">
-          <span @click="() => preview(true,file)">{{
-              file.name.length > 15 ? file.name.replace(/^[a-f0-9-]{36}_/, "").slice(-15) : file.name.replace(/^[a-f0-9-]{36}_/, "")
-            }}</span>
-          <div class="button-group">
-            <button @click="download(file)" class="button-primary"><i class="fa-solid fa-download"></i></button>
-            <button @click="remove(file)" class="button-primary"><i class="fa-solid fa-ban"></i></button>
-          </div>
-        </li>
-      </ul>
+    <button class="add-button" @click="showPopup = true">
+      <i class="fas fa-plus"></i>
+    </button>
+
+    <div v-if="showPopup" class="popup">
+      <div class="popup-content">
+        <div class="file-upload-area">
+          <span v-if="selectedFile" class="file-info">
+            {{ selectedFile.name }} ({{ formatFileSize(selectedFile.size) }})
+          </span>
+          <label class="custom-file-upload">
+            파일 선택
+            <input
+              type="file"
+              ref="fileInput"
+              @change="handleFileChange"
+              hidden
+            />
+          </label>
+        </div>
+
+        <!-- 파일명 입력 필드 -->
+        <input
+          type="text"
+          v-model="customFileName"
+          placeholder="업로드할 파일명 입력"
+          class="styled-input"
+          v-if="selectedFile"
+        />
+
+        <input
+          type="text"
+          v-model="authKey"
+          placeholder="비밀번호 (선택사항)"
+          class="styled-input"
+        />
+
+        <div class="popup-buttons">
+          <button class="button-secondary" @click="cancelUpload">취소</button>
+          <button class="button-primary" @click="upload">업로드</button>
+        </div>
+      </div>
     </div>
-  </div>
-  <a-image
+
+    <a-image
       :width="200"
-      :style="{ display: 'none' }"
-      :preview="{  visible,  onVisibleChange: setVisible,}"
-      :src="src"/>
+      :preview="{ visible, onVisibleChange: setVisible }"
+      :src="src"
+      style="display: none"
+    />
+  </div>
 </template>
 
 <style scoped>
-/* 전체 컨테이너 */
 .main-container {
+  position: relative;
+  width: 100%;
+  height: 85vh;
   display: flex;
   flex-wrap: wrap;
-  gap: 30px;
-  max-width: 1000px;
-  margin: 40px auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
-  color: #ffffff; /* 모든 텍스트 색상 흰색 */
-  background-color: #121212; /* 기본 배경 검은색 */
+  justify-content: center;
+  align-items: center;
 }
 
-/* 업로드 및 디렉터리 컨테이너 */
-.upload-container,
-.directory-container {
-  flex: 1;
-  border: 2px solid #333333; /* 어두운 회색 경계선 */
-  border-radius: 12px;
-  padding: 20px;
-  background: #1e1e1e; /* 어두운 회색 배경 */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* 뚜렷한 그림자 */
+:deep(.ant-image-preview-img) {
+  max-width: 90vw; /* 화면 너비 90% 이내로 조정 */
+  max-height: 90vh; /* 화면 높이 90% 이내로 조정 */
+  object-fit: contain; /* 비율 유지하면서 조정 */
 }
 
-/* 헤더 스타일 */
-.header {
-  font-size: 1.8rem;
+.file-grid {
+  display: flex;
+  flex-direction: column; /* 세로 정렬 */
+  overflow-y: auto; /* 세로 스크롤 가능 */
+  overflow-x: hidden; /* 가로 스크롤 제거 */
+  gap: 10px;
+  padding: 10px;
+  width: 100%; /* 전체 너비 차지 */
+  height: calc(100vh - 120px); /* 하단 네비게이션 및 추가 버튼 제외 */
+}
+
+.file-item {
+  width: 100%; /* 가로 폭을 부모 크기에 맞춤 */
+  padding: 10px;
+  background: #1e1e1e;
+  border-radius: 6px;
+  color: white;
   text-align: center;
-  margin-bottom: 20px;
-  color: #42b983; /* Vue Green */
-  border-bottom: 2px solid #333333; /* 구분선 */
-  padding-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* 폼 그룹 */
-.form-group {
-  margin-bottom: 20px;
+.file-name {
+  max-width: calc(100% - 130px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  white-space: nowrap;
+}
+
+.add-button {
+  position: fixed;
+  right: 15px;
+  bottom: 60px;
+  width: 45px;
+  height: 45px;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background-color: #42b983;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-upload-area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px; /* 기존보다 살짝 줄인 패딩 */
+  border: 2px solid #42b983; /* 테두리 유지 */
+  border-radius: 6px;
+  background: #1e1e1e;
+  min-height: 40px; /* 일정한 높이 유지 */
+  margin-bottom: 12px; /* 파일 선택 영역과 비밀번호 인풋 사이 간격 조정 */
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #1e1e1e;
+  border-radius: 6px;
+}
+
+.file-info {
+  flex-grow: 1; /* 파일명과 용량이 자동 확장 */
+  text-align: left;
+  font-size: 14px;
+  color: white;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-left: 8px;
+}
+
+.custom-file-upload {
+  background-color: #42b983;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  flex-shrink: 0; /* 버튼 크기 고정 */
+  margin-left: auto; /* 우측 정렬 */
+}
+
+.custom-file-upload:hover {
+  background-color: #369d75;
+}
+
+.popup-content {
+  background: #222;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 400px; /* 팝업 창 가로 길이 고정 */
+  max-width: 90vw; /* 화면 크기에 맞춰 조정 */
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.button-primary {
+  background-color: #42b983;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button-primary:hover {
+  background-color: #369d75;
+}
+
+.button-secondary {
+  background-color: #666;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button-secondary:hover {
+  background-color: #555;
 }
 
 .styled-input {
   width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-  border: 1px solid #555555; /* 어두운 회색 경계선 */
-  border-radius: 6px;
-  font-size: 14px;
-  background-color: #121212; /* 입력 필드 배경 검은색 */
-  color: #ffffff; /* 텍스트 색상 흰색 */
-  box-sizing: border-box;
-}
-
-.styled-input::placeholder {
-  color: #aaaaaa; /* Placeholder 색상 */
-}
-
-.styled-input:focus {
-  border-color: #42b983; /* Vue Green */
-  background-color: #1a1a1a; /* 포커스 시 약간 밝은 배경 */
-  outline: none;
-  box-shadow: 0 0 5px rgba(66, 185, 131, 0.3);
-}
-
-input[type="file"] {
-  display: none;
-}
-
-.custom-file-upload {
-  display: inline-block;
-  padding: 10px 20px;
-  font-size: 16px;
-  font-weight: bold;
+  padding: 8px;
+  border-radius: 4px;
+  background: #121212;
   color: white;
-  border: 1px solid #42b983;
-  border-radius: 5px;
-  cursor: pointer;
-  text-align: center;
+  margin-bottom: 10px; /* 입력 필드 하단 간격 추가 */
 }
-
-.custom-file-upload:hover {
-  background-color: #42b983;
-}
-
-
-/* 디렉터리 리스트 */
-.directory-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.directory-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
-  border: 1px solid #555555; /* 어두운 회색 경계선 */
-  border-radius: 6px;
-  margin-bottom: 10px;
-  background-color: #1e1e1e; /* 어두운 배경 */
-  color: #e0e0e0; /* 텍스트 약간 밝은 회색 */
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.directory-list li:hover {
-  background-color: #333333; /* 밝은 회색 배경 */
-  transform: scale(1.02); /* 약간 확대 효과 */
-}
-
-.directory-list li span {
-  font-size: 14px;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.directory-list li span:hover {
-  color: #42b983; /* Vue Green */
-}
-
-.button-group {
-  display: flex;
-  gap: 2px;
-}
-
-.button-group button {
-  padding: 6px 12px;
-  font-size: 12px;
-}
-
-/* 모바일 최적화 */
-@media (max-width: 768px) {
-  .main-container {
-    flex-direction: column;
-    gap: 20px;
-    padding: 10px 20px; /* 좁은 화면에서 여백 추가 */
-  }
-}
-
-.file-info {
-  align-content: center
-}
-
 </style>
