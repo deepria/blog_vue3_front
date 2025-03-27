@@ -1,0 +1,23 @@
+.weather-info {
+  text-align: left;
+  animation: fadeIn var(--animation-speed-normal) ease-in-out;
+}
+
+.weather-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-large);
+  padding: var(--spacing-medium);
+}
+
+.weather-icon {
+  font-size: var(--font-size-xlarge);
+  color: var(--primary-color);
+  animation: spin var(--animation-speed-slow) linear infinite;
+}
+
+.weather-info li {
+  font-size: var(--font-size-medium);
+  margin: var(--spacing-small) 0;
+} 

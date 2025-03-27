@@ -1,0 +1,217 @@
+/* CSS 변수 정의 */
+:root {
+  /* 색상 변수 */
+  --primary-color: #42b983;
+  --background-dark: #141414;
+  --text-color: rgba(255, 255, 255, 0.85);
+  --text-light: #fefefe;
+  --text-dark: #213547;
+  --link-color: #646cff;
+  --link-hover-color: #535bf2;
+  --border-color: #303030;
+  
+  /* 폰트 크기 - 모바일 최적화 */
+  --font-size-small: 0.875rem;    /* 14px */
+  --font-size-medium: 1rem;       /* 16px */
+  --font-size-large: 1.125rem;    /* 18px */
+  --font-size-xlarge: 1.25rem;    /* 20px */
+  
+  /* 간격 - 모바일 터치 영역 최적화 */
+  --spacing-small: 0.5rem;      /* 8px */
+  --spacing-medium: 0.75rem;    /* 12px */
+  --spacing-large: 1rem;        /* 16px */
+  --spacing-xlarge: 1.5rem;     /* 24px */
+  
+  /* 네비게이션 높이 - 모바일 최적화 */
+  --bottom-nav-height: 3.5rem;  /* 56px */
+  --content-height: calc(100vh - var(--bottom-nav-height));
+  
+  /* 터치 타겟 크기 */
+  --touch-target-size: 2.75rem; /* 44px - Apple 권장 최소 터치 영역 */
+
+  /* 반응형 디자인 */
+  --max-width: 1280px;
+  --mobile-width: 420px;
+}
+
+/* 기본 스타일 리셋 및 웹뷰 최적화 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--background-dark);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+.app {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  height: var(--content-height);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--spacing-medium);
+  flex: 1;
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+/* 버튼 및 클릭 가능한 요소 기본 스타일 */
+button, 
+[role="button"],
+.clickable {
+  min-height: var(--touch-target-size);
+  min-width: var(--touch-target-size);
+  padding: var(--spacing-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* 모바일 터치 피드백 */
+@media (hover: none) {
+  .clickable:active {
+    opacity: 0.7;
+  }
+}
+
+/* 사파리 노치 영역 대응 */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .content {
+    padding-top: calc(env(safe-area-inset-top) + var(--spacing-medium));
+    padding-bottom: calc(env(safe-area-inset-bottom) + var(--spacing-medium));
+  }
+}
+
+/* 링크 스타일 */
+a {
+  text-decoration: none;
+  color: var(--link-color);
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--link-hover-color);
+}
+
+/* 기본 레이아웃 */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--spacing-medium);
+}
+
+/* 공통 애니메이션 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 반응형 디자인 */
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0 2rem;
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-light: #ffffff;
+    --background-dark: #242424;
+  }
+}
+
+/* 유틸리티 클래스 */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+
+.mt-1 { margin-top: var(--spacing-small); }
+.mt-2 { margin-top: var(--spacing-medium); }
+.mt-3 { margin-top: var(--spacing-large); }
+.mt-4 { margin-top: var(--spacing-xlarge); }
+
+.mb-1 { margin-bottom: var(--spacing-small); }
+.mb-2 { margin-bottom: var(--spacing-medium); }
+.mb-3 { margin-bottom: var(--spacing-large); }
+.mb-4 { margin-bottom: var(--spacing-xlarge); }
+
+/* 접근성 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 포커스 표시 */
+:focus-visible {
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
+} 

@@ -1,9 +1,9 @@
 <script setup>
-import {ref} from "vue";
-import {getData} from "@/services/dynamoService.js";
-import {useRouter} from "vue-router";
-import {useDynamoStore} from "@/stores/dynamoStore.js"
-import {message} from "ant-design-vue";
+import { ref } from "vue";
+import { getData } from "@/services/dynamoService.js";
+import { useRouter } from "vue-router";
+import { useDynamoStore } from "@/stores/dynamoStore.js";
+import { message } from "ant-design-vue";
 
 const router = useRouter();
 const part = ref("");
@@ -12,10 +12,14 @@ const data = ref(null);
 
 const get = async () => {
   if (!part.value || !index.value) {
-    const emptyVal = !part.value ? 'Partition Key' : 'Index Key'
+    const emptyVal = !part.value ? "Partition Key" : "Index Key";
     message.warn(`${emptyVal} is empty!`).then(); // 통신 실패 메시지 표시
   } else {
-    data.value = JSON.stringify(await getData(part.value, index.value), null, 2);
+    data.value = JSON.stringify(
+      await getData(part.value, index.value),
+      null,
+      2,
+    );
   }
 };
 
@@ -23,49 +27,47 @@ const modify = () => {
   const obj = {
     part: part.value,
     index: index.value,
-    data: data.value
-  }
-  useDynamoStore().setObj(obj)
-  router.push('/put')
+    data: data.value,
+  };
+  useDynamoStore().setObj(obj);
+  router.push("/put");
 };
-
 </script>
 
 <template>
   <div class="main-container">
     <div class="form-container">
-      <h1 class="header">Get Data</h1>
       <div class="form-group">
         <label for="part">Partition Key</label>
         <input
-            id="part"
-            type="text"
-            v-model="part"
-            placeholder="Enter partition key"
-            class="styled-input"
+          id="part"
+          type="text"
+          v-model="part"
+          placeholder="Enter partition key"
+          class="styled-input"
         />
       </div>
 
       <div class="form-group">
         <label for="index">Index Key</label>
         <input
-            id="index"
-            type="text"
-            v-model="index"
-            placeholder="Enter index key"
-            class="styled-input"
+          id="index"
+          type="text"
+          v-model="index"
+          placeholder="Enter index key"
+          class="styled-input"
         />
       </div>
 
       <button class="button-primary" @click="get">Get Data</button>
     </div>
-    <br/>
+    <br />
     <!-- 결과 컨테이너 -->
     <div class="result-container">
       <h1 class="header">Result</h1>
       <div v-if="data">
         <pre class="output">{{ data }}</pre>
-        <br/>
+        <br />
         <button class="button-primary" @click="modify">Modify</button>
       </div>
       <div v-else>
@@ -73,7 +75,7 @@ const modify = () => {
       </div>
     </div>
   </div>
-  <button class="button" style="display: none"/>
+  <button class="button" style="display: none" />
 </template>
 
 <style scoped>
@@ -135,7 +137,9 @@ const modify = () => {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s;
+  transition:
+    background-color 0.3s ease,
+    transform 0.1s;
 }
 
 .button:hover {

@@ -14,15 +14,20 @@
         @touchstart="startHold(menu, $event)"
         @mousedown="startHold(menu, $event)"
         @touchmove="optimizedTouchMove"
-        @mousemove="optimizedTouchMove"
+        @mousemove="moveSelection"
         @touchend="selectMenu"
         @mouseup="selectMenu"
         @mouseleave="resetMenu"
       >
         {{ menu.name }}
       </div>
-
-      <router-link to="/" class="home-button">Home</router-link>
+      <router-link to="/" class="home-button" active-class="active">
+        <span class="sr-only">홈</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+      </router-link>
     </nav>
 
     <!-- 트리 메뉴 (고정된 위치) -->
@@ -32,15 +37,15 @@
         class="tree-menu"
         :style="{
           left: `${touchPosition.x}px`,
-          top: `${touchPosition.y - 60}px`,
+          bottom: `calc(var(--bottom-nav-height) + env(safe-area-inset-bottom))`,
         }"
       >
         <div
-          v-for="(child, index) in activeMenu.children"
+          v-for="(child, index) in activeMenu?.children"
           :key="child.name"
           class="tree-item"
           :class="{ selected: index === selectedIndex }"
-          :style="{ transform: `translateY(-${index * 120}px) scale(1.1)` }"
+          :style="{ transform: `translateY(-${index * 48}px)` }"
         >
           {{ child.name }}
         </div>
@@ -50,8 +55,10 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
+import '@/assets/styles/navigation.css';
+import '@/assets/styles/layout.css';
 
 const router = useRouter();
 
@@ -83,6 +90,7 @@ const isMenuVisible = ref(false);
 let holdTimeout = null;
 
 const startHold = (menu, event) => {
+  event.preventDefault();
   selectedIndex.value = null;
   activeMenu.value = menu;
 
@@ -97,7 +105,6 @@ const startHold = (menu, event) => {
 
   holdTimeout = setTimeout(() => {
     isMenuVisible.value = true;
-    document.querySelector(".content").style.overflow = "hidden"; // 스크롤 방지
   }, 100);
 };
 
@@ -106,9 +113,9 @@ const moveSelection = (event) => {
 
   const touchY = event.touches ? event.touches[0].clientY : event.clientY;
   const startY = touchPosition.value.y;
-  const moveDistance = startY - touchY; // Y축 기준으로 변경
+  const moveDistance = startY - touchY;
 
-  const threshold = 20; // 터치 감도 조정
+  const threshold = 20;
   if (Math.abs(moveDistance) < threshold) return;
 
   const totalItems = activeMenu.value.children.length;
@@ -121,7 +128,6 @@ const moveSelection = (event) => {
   selectedIndex.value = index;
 };
 
-// 터치 이벤트 최적화 (Y축 전용)
 const optimizedTouchMove = (event) => {
   event.preventDefault();
   moveSelection(event);
@@ -132,7 +138,6 @@ const selectMenu = () => {
     const selectedPath = activeMenu.value.children[selectedIndex.value].path;
     router.push(selectedPath);
   }
-
   resetMenu();
 };
 
@@ -140,112 +145,6 @@ const resetMenu = () => {
   activeMenu.value = null;
   selectedIndex.value = null;
   isMenuVisible.value = false;
-  document.querySelector(".content").style.overflow = "auto"; // 스크롤 복구
   clearTimeout(holdTimeout);
 };
 </script>
-
-<style scoped>
-/* 전체 레이아웃 */
-.app {
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  overflow: hidden;
-}
-
-/* 라우터 페이지 컨텐츠 */
-.content {
-  flex: 1;
-  height: 100%;
-  overflow: hidden; /* 네비게이션을 제외한 높이 */
-  overflow-y: auto;
-  padding-bottom: 6vh; /* 네비게이션 가리지 않도록 */
-}
-
-/* 하단 네비게이션 */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 6vh;
-  display: flex;
-  justify-content: space-around;
-  background: #1e1e1e;
-  padding: 10px 0;
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: bold;
-  align-items: center;
-}
-
-/* 네비게이션 아이템 크기 확대 */
-.nav-item {
-  cursor: pointer;
-  padding: 10px 20px; /* 기존보다 크기를 키움 */
-  font-size: 20px; /* 글자 크기도 증가 */
-}
-
-/* 네비게이션 아이템 hover 효과 */
-.nav-item:hover {
-  color: #42b983;
-}
-
-/* 홈 버튼 */
-.home-button {
-  font-size: 18px;
-  font-weight: bold;
-  text-decoration: none;
-  color: white;
-  padding: 10px;
-  transition: color 0.3s ease;
-}
-
-.home-button:hover {
-  color: #42b983;
-}
-
-/* 트리 메뉴 */
-.tree-menu {
-  position: fixed; /* 화면 크기에 관계없이 떠 있도록 설정 */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 10px;
-  z-index: 1000;
-  pointer-events: none;
-}
-
-/* 트리 아이템 크기 확대 */
-.tree-item {
-  font-size: 30px; /* 글자 크기 증가 */
-  color: white;
-  text-align: center;
-  margin: 8px 0;
-  transition:
-    font-weight 0.1s ease,
-    transform 0.3s ease-out; /* 부드러운 애니메이션 */
-  pointer-events: auto;
-}
-
-/* 선택 강조 (볼드 효과) */
-.tree-item.selected {
-  font-weight: bold;
-}
-
-/* 애니메이션 (메뉴 등장) */
-.menu-fade-enter-active,
-.menu-fade-leave-active {
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
-}
-
-.menu-fade-enter-from,
-.menu-fade-leave-to {
-  opacity: 0;
-  transform: translateY(20px) scale(0.9);
-}
-</style>

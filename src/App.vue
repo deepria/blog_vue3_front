@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app">
     <a-config-provider :theme="{ algorithm: theme.darkAlgorithm }">
       <navigation />
     </a-config-provider>
@@ -9,4 +9,5 @@
 <script setup>
 import Navigation from "@/components/Navigation.vue";
 import { theme } from "ant-design-vue";
+import '@/assets/styles/global.css';
 </script>

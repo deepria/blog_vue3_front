@@ -1,7 +1,61 @@
+<template>
+  <div class="main-container">
+    <!-- 입력 및 서브밋 컨테이너 -->
+    <div class="form-container">
+      <div class="form-group">
+        <label for="part">Partition Key</label>
+        <input
+          id="id"
+          type="text"
+          v-model="id"
+          placeholder="Enter partition key"
+          class="styled-input"
+        />
+      </div>
+
+      <div class="radio-group">
+        <input
+          type="radio"
+          id="string"
+          value="string"
+          v-model="valueInputType"
+        />
+        <label for="string">
+          <span class="radio-circle"></span>
+          String
+        </label>
+        <input type="radio" id="json" value="json" v-model="valueInputType" />
+        <label for="json">
+          <span class="radio-circle"></span>
+          JSON
+        </label>
+      </div>
+
+      <div v-if="valueInputType === 'string'" class="form-group">
+        <label for="data">Data - String</label>
+        <input
+          id="data"
+          type="text"
+          v-model="value"
+          placeholder="Enter data"
+          class="styled-input"
+        />
+      </div>
+
+      <div v-else-if="valueInputType === 'json'" class="form-group">
+        <h4>Data - Json</h4>
+        <JsonInput @update-json="handleJsonUpdate" />
+      </div>
+      <div style="display: flex">
+        <button class="button-primary" @click="put">Put Data</button>
+      </div>
+    </div>
+  </div>
+</template>
 <script setup>
-import {onMounted, ref, watch} from "vue";
-import {postEntity} from "@/services/dynamoService.js";
-import {useDynamoStore} from "@/stores/dynamoStore.js"
+import { onMounted, ref, watch } from "vue";
+import { postEntity } from "@/services/dynamoService.js";
+import { useDynamoStore } from "@/stores/dynamoStore.js";
 import JsonInput from "@/components/JsonInput.vue";
 
 const id = ref("");
@@ -20,7 +74,7 @@ const put = async () => {
     const entity = {
       id: id.value,
       value: value.value,
-    }
+    };
     useDynamoStore().setEntity(entity);
     res.value = await postEntity();
   } catch (err) {
@@ -30,69 +84,17 @@ const put = async () => {
 
 onMounted(() => {
   if (useDynamoStore().getEntity) {
-    const objFromGet = useDynamoStore().getEntity
-    console.log(JSON.stringify(objFromGet, null, 2))
-    id.value = objFromGet.id
-    value.value = objFromGet.value
+    const objFromGet = useDynamoStore().getEntity;
+    console.log(JSON.stringify(objFromGet, null, 2));
+    id.value = objFromGet.id;
+    value.value = objFromGet.value;
   }
-})
+});
 
 watch(valueInputType, () => {
-  value.value = ""
+  value.value = "";
 });
 </script>
-
-<template>
-  <div class="main-container">
-    <!-- 입력 및 서브밋 컨테이너 -->
-    <div class="form-container">
-      <h1 class="header">Upsert Entity</h1>
-      <div class="form-group">
-        <label for="part">Partition Key</label>
-        <input
-            id="id"
-            type="text"
-            v-model="id"
-            placeholder="Enter partition key"
-            class="styled-input"
-        />
-      </div>
-
-      <div class="radio-group">
-        <input type="radio" id="string" value="string" v-model="valueInputType"/>
-        <label for="string">
-          <span class="radio-circle"></span>
-          String
-        </label>
-        <input type="radio" id="json" value="json" v-model="valueInputType"/>
-        <label for="json">
-          <span class="radio-circle"></span>
-          JSON
-        </label>
-      </div>
-
-      <div v-if="valueInputType ==='string'" class="form-group">
-        <label for="data">Data - String</label>
-        <input
-            id="data"
-            type="text"
-            v-model="value"
-            placeholder="Enter data"
-            class="styled-input"
-        />
-      </div>
-
-      <div v-else-if="valueInputType ==='json'" class="form-group">
-        <h4>Data - Json</h4>
-        <JsonInput @update-json="handleJsonUpdate"/>
-      </div>
-      <div style="display: flex">
-        <button class="button-primary" @click="put">Put Data</button>
-      </div>
-    </div>
-  </div>
-</template>
-
 <style scoped>
 /* 메인 컨테이너 */
 .main-container {
@@ -161,7 +163,9 @@ watch(valueInputType, () => {
   cursor: pointer;
   color: #e0e0e0; /* 텍스트 밝은 회색 */
   background-color: #1e1e1e; /* 어두운 회색 배경 */
-  transition: background-color 0.3s, border-color 0.3s;
+  transition:
+    background-color 0.3s,
+    border-color 0.3s;
 }
 
 /* 선택된 상태 스타일 */
@@ -187,7 +191,7 @@ watch(valueInputType, () => {
 
 /* 선택된 상태에서 동그라미 내부 표시 */
 .radio-circle::after {
-  content: '';
+  content: "";
   width: 8px;
   height: 8px;
   background-color: #42b983; /* Vue Green */

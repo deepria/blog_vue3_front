@@ -1,0 +1,277 @@
+/* Todo 컨테이너 */
+.todo-container {
+  width: 100%;
+  height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-medium);
+  position: relative;
+}
+
+/* 아이템 컨테이너 */
+.item-container {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding-bottom: 140px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 리스트 아이템 */
+.list-item {
+  width: 100%;
+  padding: var(--spacing-large);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: var(--text-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  margin-bottom: var(--spacing-medium);
+}
+
+.list-item:active {
+  transform: scale(0.98);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* 아이템 컨텐츠 */
+.item-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-medium);
+  flex: 1;
+  margin-right: var(--spacing-medium);
+}
+
+.priority-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 아이템 텍스트 */
+.item-text {
+  flex: 1;
+  font-size: var(--font-size-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 완료된 아이템 */
+.completed {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* 버튼 컨테이너 */
+.button-container {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  z-index: 100;
+}
+
+.button-container button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background-color: #000000;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.button-container button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.button-container button:active {
+  transform: scale(0.95);
+}
+
+/* 팝업 입력 영역 */
+.popup-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: var(--spacing-medium);
+}
+
+.popup-input-wrapper .popup-input {
+  flex: 1;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-color);
+  font-size: var(--font-size-medium);
+}
+
+ 
+.popup-input-wrapper .button-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.popup-input-wrapper .button-primary:active {
+  transform: scale(0.95);
+}
+
+/* 설정 팝업 */
+.settings-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.settings-content {
+  background: var(--background-dark);
+  padding: var(--spacing-large);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* 설정 버튼 */
+.settings-button {
+  width: var(--touch-target-size);
+  height: var(--touch-target-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-button svg {
+  width: 24px;
+  height: 24px;
+  stroke: #FFFFFF;
+  stroke-width: 2.5;
+}
+
+.settings-button:active {
+  opacity: 0.8;
+}
+
+/* 우선순위 선택 */
+.priority-select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-color);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: var(--spacing-medium);
+  position: relative;
+  z-index: 1;
+}
+
+.priority-select option {
+  background: var(--background-dark);
+  color: var(--text-color);
+  padding: 12px;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+/* 색상 선택 옵션 */
+.color-options {
+  display: grid;
+  grid-template-columns: repeat(8, 16px);
+  gap: 28px;
+  margin: 4px 0;
+  width: 100%;
+  padding: 0;
+}
+
+.color-label {
+  position: relative;
+  cursor: pointer;
+}
+
+.color-label input {
+  position: absolute;
+  opacity: 0;
+}
+
+.color-icon {
+  display: block;
+  width: 32px;
+  height: 32px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.color-label input:checked + .color-icon {
+  border-color: var(--primary-color);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* 우선순위 아이콘 색상 */
+.text-red { color: #ff4d4f; }
+.text-yellow { color: #faad14; }
+.text-green { color: var(--primary-color); }
+
+/* 체크박스 */
+.task-checkbox {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  margin-left: auto;
+  cursor: pointer;
+  appearance: checkbox;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.task-checkbox:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+

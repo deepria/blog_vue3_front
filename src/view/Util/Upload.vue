@@ -10,6 +10,8 @@ import {
 } from "@/services/fileService.js";
 import { v4 as uuidv4 } from "uuid";
 import { message } from "ant-design-vue";
+import "@/assets/styles/layout.css";
+import "@/assets/styles/upload.css";
 
 const fileInput = ref(null);
 const selectedFile = ref(null);
@@ -159,18 +161,60 @@ onMounted(loadDirectory);
         </span>
         <div class="button-group">
           <button @click="download(file)" class="button-primary">
-            <i class="fa-solid fa-download"></i>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
           </button>
           <button @click="remove(file)" class="button-primary">
-            <i class="fa-solid fa-ban"></i>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
           </button>
         </div>
       </div>
     </div>
-
-    <button class="add-button" @click="showPopup = true">
-      <i class="fas fa-plus"></i>
-    </button>
+    <div class="button-container">
+      <button class="add-button" @click="showPopup = true">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+    </div>
 
     <div v-if="showPopup" class="popup">
       <div class="popup-content">
@@ -178,7 +222,7 @@ onMounted(loadDirectory);
           <span v-if="selectedFile" class="file-info">
             {{ selectedFile.name }} ({{ formatFileSize(selectedFile.size) }})
           </span>
-          <label class="custom-file-upload">
+          <label class="file-select-button">
             파일 선택
             <input
               type="file"
@@ -189,13 +233,11 @@ onMounted(loadDirectory);
           </label>
         </div>
 
-        <!-- 파일명 입력 필드 -->
         <input
           type="text"
           v-model="customFileName"
           placeholder="업로드할 파일명 입력"
           class="styled-input"
-          v-if="selectedFile"
         />
 
         <input
@@ -220,182 +262,3 @@ onMounted(loadDirectory);
     />
   </div>
 </template>
-
-<style scoped>
-.main-container {
-  position: relative;
-  width: 100%;
-  height: 85vh;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-}
-
-:deep(.ant-image-preview-img) {
-  max-width: 90vw; /* 화면 너비 90% 이내로 조정 */
-  max-height: 90vh; /* 화면 높이 90% 이내로 조정 */
-  object-fit: contain; /* 비율 유지하면서 조정 */
-}
-
-.file-grid {
-  display: flex;
-  flex-direction: column; /* 세로 정렬 */
-  overflow-y: auto; /* 세로 스크롤 가능 */
-  overflow-x: hidden; /* 가로 스크롤 제거 */
-  gap: 10px;
-  padding: 10px;
-  width: 100%; /* 전체 너비 차지 */
-  height: calc(100vh - 120px); /* 하단 네비게이션 및 추가 버튼 제외 */
-}
-
-.file-item {
-  width: 100%; /* 가로 폭을 부모 크기에 맞춤 */
-  padding: 10px;
-  background: #1e1e1e;
-  border-radius: 6px;
-  color: white;
-  text-align: center;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.file-name {
-  max-width: calc(100% - 130px);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-  white-space: nowrap;
-}
-
-.add-button {
-  position: fixed;
-  right: 15px;
-  bottom: 60px;
-  width: 45px;
-  height: 45px;
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  background-color: #42b983;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.file-upload-area {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px; /* 기존보다 살짝 줄인 패딩 */
-  border: 2px solid #42b983; /* 테두리 유지 */
-  border-radius: 6px;
-  background: #1e1e1e;
-  min-height: 40px; /* 일정한 높이 유지 */
-  margin-bottom: 12px; /* 파일 선택 영역과 비밀번호 인풋 사이 간격 조정 */
-}
-
-.popup-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  padding: 10px;
-  background: #1e1e1e;
-  border-radius: 6px;
-}
-
-.file-info {
-  flex-grow: 1; /* 파일명과 용량이 자동 확장 */
-  text-align: left;
-  font-size: 14px;
-  color: white;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding-left: 8px;
-}
-
-.custom-file-upload {
-  background-color: #42b983;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: bold;
-  text-align: center;
-  flex-shrink: 0; /* 버튼 크기 고정 */
-  margin-left: auto; /* 우측 정렬 */
-}
-
-.custom-file-upload:hover {
-  background-color: #369d75;
-}
-
-.popup-content {
-  background: #222;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-  width: 400px; /* 팝업 창 가로 길이 고정 */
-  max-width: 90vw; /* 화면 크기에 맞춰 조정 */
-}
-
-.popup-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.button-primary {
-  background-color: #42b983;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.button-primary:hover {
-  background-color: #369d75;
-}
-
-.button-secondary {
-  background-color: #666;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.button-secondary:hover {
-  background-color: #555;
-}
-
-.styled-input {
-  width: 100%;
-  padding: 8px;
-  border-radius: 4px;
-  background: #121212;
-  color: white;
-  margin-bottom: 10px; /* 입력 필드 하단 간격 추가 */
-}
-</style>

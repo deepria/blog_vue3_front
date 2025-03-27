@@ -1,8 +1,78 @@
+<template>
+  <div class="main-container">
+    <!-- 입력 및 서브밋 컨테이너 -->
+    <div class="form-container">
+      <div class="form-group">
+        <label for="id"></label>
+        <input
+          id="id"
+          type="text"
+          v-model="id"
+          placeholder="Enter ID"
+          class="styled-input"
+        />
+      </div>
+      <button class="button-primary" @click="clear">Clear</button>
+      &nbsp;
+      <button class="button-primary" @click="get">Get</button>
+    </div>
+    <br />
+    <!-- 결과 컨테이너 -->
+    <div class="result-container">
+      <div v-if="error" class="error-message">
+        <p>Error: {{ error }}</p>
+      </div>
+      <div v-else-if="paginatedData.length">
+        <!-- 페이징 버튼 -->
+        <div class="pagination">
+          <button
+            class="button-primary"
+            @click="prevPage"
+            :disabled="currentPage === 1"
+          >
+            Previous
+          </button>
+          <span>Page {{ currentPage }} of {{ totalPages }}</span>
+          <button
+            class="button-primary"
+            @click="nextPage"
+            :disabled="currentPage === totalPages"
+          >
+            Next
+          </button>
+        </div>
+        <div v-for="child in paginatedData" :key="child.id">
+          <!--          <pre class="output" @click="onCleckValue(child.value)"> {{ child }} </pre>-->
+          <div v-for="grandChild in child" :key="grandChild.id">
+            <pre
+              v-if="child.id === grandChild"
+              class="output"
+            ><a>{{ grandChild }}</a></pre>
+            <div v-else v-for="(value, key) in grandChild" :key="key.id">
+              <pre
+                @click="onClickValue(value)"
+                class="output"
+              ><a>{{ key }}</a><br/>{{ value }}</pre>
+            </div>
+          </div>
+        </div>
+        <br />
+        <button class="button-primary" @click="deleteData">delete</button>
+        &nbsp;
+        <button class="button-primary" @click="modify">modify</button>
+      </div>
+      <div v-else>
+        <p>No result</p>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup>
-import {getList, getById, deleteEntity} from "@/services/dynamoService.js";
-import {useRouter} from "vue-router";
-import {useDynamoStore} from "@/stores/dynamoStore.js"
-import {ref, computed} from "vue";
+import { getList, getById, deleteEntity } from "@/services/dynamoService.js";
+import { useRouter } from "vue-router";
+import { useDynamoStore } from "@/stores/dynamoStore.js";
+import { ref, computed } from "vue";
 
 const router = useRouter();
 const id = ref("");
@@ -13,7 +83,9 @@ const error = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = ref(1); // 페이지당 항목 수
 const totalItems = computed(() => data.value.length);
-const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
+const totalPages = computed(() =>
+  Math.ceil(totalItems.value / itemsPerPage.value),
+);
 
 // 현재 페이지 데이터
 const paginatedData = computed(() => {
@@ -25,7 +97,7 @@ const paginatedData = computed(() => {
 const get = async () => {
   try {
     error.value = null;
-    let res = id.value === '' ? await getList() : await getById(id.value);
+    let res = id.value === "" ? await getList() : await getById(id.value);
 
     const temp = [];
     for (const [_, value] of Object.entries(res)) {
@@ -33,17 +105,17 @@ const get = async () => {
       let tempVal = null;
 
       for (const [innerKey, innerValue] of Object.entries(value)) {
-        if (innerKey === 'id') {
+        if (innerKey === "id") {
           tempKey = innerValue;
         } else {
           tempVal = innerValue;
         }
       }
 
-      if (typeof tempVal === 'string' && tempVal.includes('{')) {
-        temp.push({id: tempKey, value: JSON.parse(tempVal)});
+      if (typeof tempVal === "string" && tempVal.includes("{")) {
+        temp.push({ id: tempKey, value: JSON.parse(tempVal) });
       } else {
-        temp.push({id: tempKey, value: tempVal});
+        temp.push({ id: tempKey, value: tempVal });
       }
     }
     data.value = temp;
@@ -54,21 +126,21 @@ const get = async () => {
 };
 
 const modify = () => {
-  let tempId, tempVal
+  let tempId, tempVal;
   for (const item of paginatedData.value) {
     if (item.id) {
-      tempId = item.id
+      tempId = item.id;
     }
     if (item.value) {
-      tempVal = item.value
+      tempVal = item.value;
     }
   }
   const param = {
     id: tempId,
-    value: tempVal
-  }
-  useDynamoStore().setEntity(param)
-  router.push('/save')
+    value: tempVal,
+  };
+  useDynamoStore().setEntity(param);
+  router.push("/save");
 };
 
 const deleteData = async () => {
@@ -113,77 +185,11 @@ const prevPage = () => {
   }
 };
 const onClickValue = (childValue) => {
-  if (typeof childValue === 'string' && childValue.includes('http')) {
-    window.open(childValue)
+  if (typeof childValue === "string" && childValue.includes("http")) {
+    window.open(childValue);
   }
 };
 </script>
-
-<template>
-  <div class="main-container">
-    <!-- 입력 및 서브밋 컨테이너 -->
-    <div class="form-container">
-      <h1 class="header">Get Entity</h1>
-      <div class="form-group">
-        <label for="id">ID</label>
-        <input
-            id="id"
-            type="text"
-            v-model="id"
-            placeholder="Enter ID"
-            class="styled-input"
-        />
-      </div>
-      <button class="button-primary" @click="clear">Clear</button>
-      &nbsp;
-      <button class="button-primary" @click="get">Get</button>
-    </div>
-    <br/>
-    <!-- 결과 컨테이너 -->
-    <div class="result-container">
-      <h1 class="header">Result</h1>
-      <div v-if="error" class="error-message">
-        <p>Error: {{ error }}</p>
-      </div>
-      <div v-else-if="paginatedData.length">
-        <!-- 페이징 버튼 -->
-        <div class="pagination">
-          <button
-              class="button-primary"
-              @click="prevPage"
-              :disabled="currentPage === 1"
-          >
-            Previous
-          </button>
-          <span>Page {{ currentPage }} of {{ totalPages }}</span>
-          <button
-              class="button-primary"
-              @click="nextPage"
-              :disabled="currentPage === totalPages"
-          >
-            Next
-          </button>
-        </div>
-        <div v-for="child in paginatedData" :key="child.id">
-          <!--          <pre class="output" @click="onCleckValue(child.value)"> {{ child }} </pre>-->
-          <div v-for="grandChild in child" :key="grandChild.id">
-            <pre v-if="child.id === grandChild" class="output"><a>{{ grandChild }}</a></pre>
-            <div v-else v-for="(value,key) in grandChild" :key="key.id">
-              <pre @click="onClickValue(value)" class="output"><a>{{ key }}</a><br/>{{ value }}</pre>
-            </div>
-          </div>
-        </div>
-        <br/>
-        <button class="button-primary" @click="deleteData">delete</button> &nbsp;
-        <button class="button-primary" @click="modify">modify</button>
-      </div>
-      <div v-else>
-        <p>No result</p>
-      </div>
-    </div>
-  </div>
-</template>
-
 <style scoped>
 .main-container {
   gap: 20px;
@@ -202,7 +208,7 @@ const onClickValue = (childValue) => {
   padding: 20px;
   background: #1e1e1e; /* 어두운 회색 배경 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 뚜렷한 그림자 */
-  min-height: 200px;
+  min-height: 130px;
 }
 
 /* Header 스타일 */
@@ -244,7 +250,6 @@ const onClickValue = (childValue) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
   gap: 10px;
 }
 
@@ -256,7 +261,9 @@ const onClickValue = (childValue) => {
   background-color: #42b983; /* Vue Green */
   color: #ffffff; /* 버튼 텍스트 흰색 */
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s;
+  transition:
+    background-color 0.3s ease,
+    transform 0.1s;
 }
 
 .pagination button:hover {

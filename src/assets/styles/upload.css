@@ -1,0 +1,150 @@
+/* 메인 컨테이너 */
+.main-container {
+  position: relative;
+  width: 100%;
+  height: var(--content-height);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 파일 그리드 */
+.file-grid {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  gap: var(--spacing-medium);
+  padding: var(--spacing-medium);
+  width: 100%;
+  height: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 파일 아이템 */
+.file-item {
+  width: 100%;
+  padding: var(--spacing-large);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: var(--text-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.file-item:active {
+  transform: scale(0.98);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.file-name {
+  max-width: calc(100% - 130px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  white-space: nowrap;
+  font-size: var(--font-size-medium);
+  padding: var(--spacing-small);
+}
+
+/* 버튼 컨테이너 */
+.button-container {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  z-index: 100;
+}
+
+.button-container button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background-color: #000000;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.button-container button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.button-container button:active {
+  transform: scale(0.95);
+}
+
+.add-button {
+  background-color: #000000;
+}
+
+/* 파일 업로드 영역 */
+.file-upload-area {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-medium);
+  padding: var(--spacing-medium);
+  border: 2px var(--primary-color);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: var(--spacing-large);
+}
+
+.file-info {
+  flex: 1;
+  font-size: var(--font-size-medium);
+  color: var(--text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 이미지 미리보기 스타일 */
+:deep(.ant-image-preview-img) {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+}
+
+/* 파일 선택 버튼 */
+.file-select-button {
+  width: auto;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-color);
+  font-size: var(--font-size-medium);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: auto;
+}
+
+.file-select-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.file-select-button svg {
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+} 
