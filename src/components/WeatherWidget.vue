@@ -11,17 +11,17 @@
         <li>기온 : {{ weather.temperature }}℃</li>
         <li>강수 형태: {{ precipitationText }}</li>
         <li>습도: {{ weather.humidity }}%</li>
-        <li>1시간 강수량: {{ weather.rainPerHour }}mm</li>
-        <li>풍속: {{ weather.windSpeed }}m/s</li>
-        <li>풍향: {{ windDirectionText }}</li>
+        <li>1시간 강수량: {{ weather.rainPerHour || 0 }} mm</li>
+        <!--        <li>풍속: {{ weather.windSpeed }}m/s</li>-->
+        <!--        <li>풍향: {{ windDirectionText }}</li>-->
       </ul>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import '@/assets/styles/weather-widget.css';
+import { ref, computed, onMounted } from "vue";
+import "@/assets/styles/weather-widget.css";
 
 const weather = ref({});
 
@@ -194,4 +194,4 @@ const fetchWeather = async () => {
 onMounted(() => {
   fetchWeather();
 });
-</script> 
+</script>
