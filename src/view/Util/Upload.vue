@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from "vue";
-import { getData, postData } from "@/services/dynamoService.js";
+import { getData, postData, deleteData } from "@/services/dynamoService.js";
 import {
   uploadFile,
   previewFile,
@@ -8,7 +8,7 @@ import {
   loadFiles,
   deleteFile,
 } from "@/services/fileService.js";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuid_v4 } from "uuid";
 import { message } from "ant-design-vue";
 import "@/assets/styles/layout.css";
 import "@/assets/styles/upload.css";
@@ -16,6 +16,7 @@ import "@/assets/styles/upload.css";
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const authKey = ref("");
+const authKeyInput = ref("");
 const customFileName = ref("");
 const directory = ref([]);
 const visible = ref(false);
@@ -24,13 +25,16 @@ const setVisible = (value) => {
 };
 const src = ref("");
 const showPopup = ref(false);
-const dragStartY = ref(0);
-const dragOffset = ref(0);
-const isDragging = ref(false);
+const showAuthPopup = ref(false);
+let resolveAuthPromise = null;
 
-const handleFileChange = (event) => {
-  if (event.target.files.length > 0) {
-    selectedFile.value = event.target.files[0];
+const loadDirectory = async () => {
+  try {
+    const response = await loadFiles();
+    directory.value = response.data;
+  } catch (error) {
+    console.error("Directory load error:", error);
+    message.warn("Failed to load directory.").then();
   }
 };
 
@@ -45,7 +49,7 @@ const upload = async () => {
           .replace(/[^a-zA-Z0-9_.-]/g, "_")
           .replace(/_+/g, "_")
           .replace(/^_|_$/g, "");
-    const uuid = uuidv4();
+    const uuid = uuid_v4();
     const newFileName = `${uuid}_${baseName}`;
     const newFile = new File([selectedFile.value], newFileName, {
       type: selectedFile.value.type,
@@ -71,36 +75,6 @@ const upload = async () => {
   }
 };
 
-const loadDirectory = async () => {
-  try {
-    const response = await loadFiles();
-    directory.value = response.data;
-  } catch (error) {
-    console.error("Directory load error:", error);
-    message.warn("Failed to load directory.").then();
-  }
-};
-
-const startDrag = (e) => {
-  isDragging.value = true;
-  dragStartY.value = e.touches ? e.touches[0].clientY : e.clientY;
-};
-
-const onDrag = (e) => {
-  if (!isDragging.value) return;
-  const currentY = e.touches ? e.touches[0].clientY : e.clientY;
-  dragOffset.value += currentY - dragStartY.value;
-  dragStartY.value = currentY;
-};
-
-const endDrag = () => {
-  isDragging.value = false;
-};
-
-const truncateFileName = (name) => {
-  return name.replace(/^[a-f0-9-]{36}_/, "");
-};
-
 const previewFileClick = async (file) => {
   try {
     const encodedFileName = encodeURIComponent(file.name);
@@ -117,7 +91,6 @@ const previewFileClick = async (file) => {
     message.warn("미리보기를 불러올 수 없습니다.").then();
   }
 };
-
 const download = (file) => {
   try {
     downloadFile(
@@ -126,27 +99,81 @@ const download = (file) => {
       file.name.replace(/^[a-f0-9-]{36}_/, ""),
     );
   } catch (error) {
-    message.warn("파일 다운로드에 실패했습니다.").then();
+    message.warn("파일 다운로드 실패").then();
   }
 };
 
 const remove = async (file) => {
   try {
     await deleteFile(file.name);
+    await deleteData("file", "file:" + file.name);
     await loadDirectory(); // 파일 삭제 후 리스트 새로고침
   } catch (error) {
-    message.warn("파일 삭제에 실패했습니다.").then();
+    message.warn("파일 삭제 실패").then();
   }
-};
-
-const formatFileSize = (size) => {
-  return (size / (1024 * 1024)).toFixed(2) + " MB"; // 메가바이트 변환
 };
 
 const cancelUpload = () => {
   selectedFile.value = null; // 선택한 파일 초기화
-  authKey.value = ""; // 입력된 비밀번호 초기화
+  authKey.value = ""; // 입력된 비밀 번호 초기화
   showPopup.value = false; // 팝업 닫기
+};
+const formatFileSize = (size) => {
+  return (size / (1024 * 1024)).toFixed(2) + " MB"; // 메가 바이트 변환
+};
+
+const handleFileChange = (event) => {
+  if (event.target.files.length > 0) {
+    selectedFile.value = event.target.files[0];
+  }
+};
+const truncateFileName = (name) => {
+  return name.replace(/^[a-f0-9-]{36}_/, "");
+};
+
+const getAuthKey = async (file) => {
+  const key = await getData("file", "file:" + file.name);
+  return key || false;
+};
+
+const handleAuth = async (file, action) => {
+  const storedKey = await getAuthKey(file);
+  if (storedKey) {
+    const inputKey = await waitForAuthConfirmation(); // 사용자 입력 기다림
+    if (inputKey !== storedKey) {
+      message.error("비밀번호가 일치하지 않습니다.").then();
+      return;
+    }
+  }
+  switch (action) {
+    case "preview":
+      await previewFileClick(file);
+      break;
+    case "download":
+      download(file);
+      break;
+    case "remove":
+      await remove(file);
+      break;
+  }
+};
+const waitForAuthConfirmation = () => {
+  return new Promise((resolve) => {
+    resolveAuthPromise = resolve;
+    showAuthPopup.value = true;
+  });
+};
+
+const confirmAuth = () => {
+  showAuthPopup.value = false;
+  if (resolveAuthPromise) {
+    resolveAuthPromise(authKeyInput.value);
+    authKeyInput.value = ""; // 입력된 비밀 번호 초기화
+    resolveAuthPromise = null;
+  }
+};
+const closeAuthPopup = () => {
+  showAuthPopup.value = false;
 };
 
 onMounted(loadDirectory);
@@ -156,11 +183,11 @@ onMounted(loadDirectory);
   <div class="main-container">
     <div class="file-grid">
       <div v-for="(file, index) in directory" :key="index" class="file-item">
-        <span class="file-name" @click="previewFileClick(file)">
+        <span class="file-name" @click="handleAuth(file, 'preview')">
           {{ truncateFileName(file.name) }}
         </span>
         <div class="button-group">
-          <button @click="download(file)" class="button-primary">
+          <button @click="handleAuth(file, 'download')" class="button-primary">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -177,7 +204,7 @@ onMounted(loadDirectory);
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
           </button>
-          <button @click="remove(file)" class="button-primary">
+          <button @click="handleAuth(file, 'remove')" class="button-primary">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -250,6 +277,21 @@ onMounted(loadDirectory);
         <div class="popup-buttons">
           <button class="button-secondary" @click="cancelUpload">취소</button>
           <button class="button-primary" @click="upload">업로드</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showAuthPopup" class="popup">
+      <div class="popup-content">
+        <input
+          type="text"
+          v-model="authKeyInput"
+          placeholder="비밀번호"
+          class="styled-input"
+        />
+        <div class="popup-buttons">
+          <button class="button-secondary" @click="closeAuthPopup">취소</button>
+          <button class="button-primary" @click="confirmAuth">확인</button>
         </div>
       </div>
     </div>
