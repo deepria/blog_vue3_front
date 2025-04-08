@@ -31,22 +31,22 @@
   padding: 1vw;
   border-radius: 8px;
   color: var(--text-light);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-medium);
 }
 
 .news-content img {
   max-width: 80%;
-  margin-bottom: var(--spacing-base);
+  margin-bottom: var(--spacing-medium);
   border-radius: 5px;
 }
 
 .news-content h3 {
-  margin: var(--spacing-base) 0;
+  margin: var(--spacing-medium) 0;
   font-size: var(--font-size-large);
 }
 
 .news-content p {
-  margin: var(--spacing-base) 0;
+  margin: var(--spacing-medium) 0;
 }
 
 .news-content small {
