@@ -1,8 +1,8 @@
 <template>
-  <div class="main-container">
+  <div class="content">
     <!-- 입력 및 서브밋 컨테이너 -->
-    <div class="form-container">
-      <div class="form-group">
+    <div class="container">
+      <div>
         <label for="id"></label>
         <input
           id="id"
@@ -12,13 +12,14 @@
           class="styled-input"
         />
       </div>
-      <button class="button-primary" @click="clear">Clear</button>
-      &nbsp;
-      <button class="button-primary" @click="get">Get</button>
+      <div class="button-group">
+        <button class="button-primary" @click="clear">Clear</button>
+        <button class="button-primary" @click="get">Get</button>
+      </div>
     </div>
     <br />
     <!-- 결과 컨테이너 -->
-    <div class="result-container">
+    <div class="content">
       <div v-if="error" class="error-message">
         <p>Error: {{ error }}</p>
       </div>
@@ -42,7 +43,6 @@
           </button>
         </div>
         <div v-for="child in paginatedData" :key="child.id">
-          <!--          <pre class="output" @click="onCleckValue(child.value)"> {{ child }} </pre>-->
           <div v-for="grandChild in child" :key="grandChild.id">
             <pre
               v-if="child.id === grandChild"
@@ -57,9 +57,10 @@
           </div>
         </div>
         <br />
-        <button class="button-primary" @click="deleteData">delete</button>
-        &nbsp;
-        <button class="button-primary" @click="modify">modify</button>
+        <div class="button-group">
+          <button class="button-primary" @click="deleteData">delete</button>
+          <button class="button-primary" @click="modify">modify</button>
+        </div>
       </div>
       <div v-else>
         <p>No result</p>

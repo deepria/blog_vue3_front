@@ -1,8 +1,8 @@
 <template>
-  <div class="main-container">
+  <div class="content">
     <!-- 입력 및 서브밋 컨테이너 -->
-    <div class="form-container">
-      <div class="form-group">
+    <div class="container">
+      <div>
         <label for="part">Partition Key</label>
         <input
           id="id"
@@ -31,7 +31,7 @@
         </label>
       </div>
 
-      <div v-if="valueInputType === 'string'" class="form-group">
+      <div v-if="valueInputType === 'string'">
         <label for="data">Data - String</label>
         <input
           id="data"
@@ -42,7 +42,7 @@
         />
       </div>
 
-      <div v-else-if="valueInputType === 'json'" class="form-group">
+      <div v-else-if="valueInputType === 'json'">
         <h4>Data - Json</h4>
         <JsonInput @update-json="handleJsonUpdate" />
       </div>
@@ -96,49 +96,6 @@ watch(valueInputType, () => {
 });
 </script>
 <style scoped>
-/* 메인 컨테이너 */
-.main-container {
-  gap: 20px;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
-  color: #ffffff; /* 기본 텍스트 흰색 */
-  background-color: #121212; /* 다크 모드 배경 */
-}
-
-/* 양쪽 컨테이너 공통 스타일 */
-.form-container,
-.result-container {
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  min-height: 300px;
-  background-color: #1e1e1e; /* 어두운 회색 배경 */
-  color: #e0e0e0; /* 약간 밝은 회색 텍스트 */
-}
-
-/* Header 스타일 */
-.header {
-  font-size: 1.8rem;
-  text-align: center;
-  margin-bottom: 20px;
-  color: #42b983; /* Vue Green */
-  border-bottom: 2px solid #333333; /* 구분선 */
-  padding-bottom: 10px;
-}
-
-/* 에러 메시지 */
-.error-message {
-  color: #ff4d4d; /* 빨간색 에러 메시지 */
-}
-
-/* 결과 텍스트 */
-.result-container p {
-  font-size: 1.2rem;
-  color: #e0e0e0; /* 텍스트 밝은 회색 */
-  text-align: center;
-}
-
 /* 라디오 버튼 컨테이너 */
 .radio-group {
   display: flex;

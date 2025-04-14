@@ -1,13 +1,13 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from "vue";
 import { useDynamoStore } from "@/stores/dynamoStore.js";
 import { useRoute } from "vue-router";
 
 // emits 선언
-const emit = defineEmits(['update-json']);
+const emit = defineEmits(["update-json"]);
 
 const route = useRoute();
-const keyValuePairs = ref([{ key: '', value: '' }]);
+const keyValuePairs = ref([{ key: "", value: "" }]);
 
 const formattedJson = computed(() => {
   const result = {};
@@ -22,29 +22,31 @@ const formattedJson = computed(() => {
 // onMounted에서 DynamoDB 데이터 가져오기
 onMounted(() => {
   const store = useDynamoStore();
-  const isEntity = route.name !== 'Put';
+  const isEntity = route.name !== "Put";
   const storedData = isEntity ? store.getEntity?.value : store.getObj?.data;
 
   if (storedData) {
     try {
       const valueFromGet = isEntity ? storedData : JSON.parse(storedData);
-      keyValuePairs.value = Object.entries(valueFromGet).map(([key, value]) => ({
-        key,
-        value
-      }));
+      keyValuePairs.value = Object.entries(valueFromGet).map(
+        ([key, value]) => ({
+          key,
+          value,
+        }),
+      );
     } catch (error) {
-      console.error('Failed to parse JSON:', error);
+      console.error("Failed to parse JSON:", error);
     }
   }
 });
 
 // formattedJson이 변경될 때 부모 컴포넌트에 이벤트 전송
 watch(formattedJson, (newJson) => {
-  emit('update-json', newJson);
+  emit("update-json", newJson);
 });
 
 const addRow = () => {
-  keyValuePairs.value.push({ key: '', value: '' });
+  keyValuePairs.value.push({ key: "", value: "" });
 };
 
 const removeRow = (index) => {
@@ -56,55 +58,50 @@ const removeRow = (index) => {
 
 <template>
   <div class="key-value-editor">
-    <div v-for="(pair, index) in keyValuePairs" :key="index" class="key-value-row">
+    <div
+      v-for="(pair, index) in keyValuePairs"
+      :key="index"
+      class="key-value-row"
+    >
+      <input v-model="pair.key" placeholder="Enter key" class="styled-input" />
       <input
-          v-model="pair.key"
-          placeholder="Enter key"
-          class="input"
+        v-model="pair.value"
+        placeholder="Enter value"
+        class="styled-input"
       />
-      <input
-          v-model="pair.value"
-          placeholder="Enter value"
-          class="input"
-      />
-      <button @click="removeRow(index)">Delete</button>
+      <button class="button-primary" @click="removeRow(index)">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </button>
     </div>
-    <button @click="addRow">Add Row</button>
+    <button class="button-primary" @click="addRow">Add Row</button>
     <pre class="output">{{ formattedJson }}</pre>
   </div>
 </template>
 
 <style scoped>
 .key-value-editor {
-  max-width: 900px;
   margin: 0 auto;
   color: #ffffff; /* 기본 텍스트 흰색 */
-  background-color: #1e1e1e; /* 배경 검은색 */
 }
 
 .key-value-row {
   display: flex;
   gap: 8px;
   margin-bottom: 8px;
-}
-
-.input {
-  flex: 1;
-  padding: 4px;
-  border: 1px solid #555555; /* 어두운 회색 경계선 */
-  border-radius: 4px;
-  background-color: #1e1e1e; /* 어두운 회색 배경 */
-  color: #ffffff; /* 텍스트 흰색 */
-}
-
-.input::placeholder {
-  color: #aaaaaa; /* Placeholder 색상 */
-}
-
-.input:focus {
-  border-color: #42b983; /* Vue Green */
-  outline: none;
-  box-shadow: 0 0 5px rgba(66, 185, 131, 0.3); /* 포커스 시 시각적 피드백 */
 }
 
 .output {
@@ -115,23 +112,5 @@ const removeRow = (index) => {
   background-color: #000000; /* 배경 검은색 */
   color: #ffffff; /* 텍스트 흰색 */
   white-space: pre-wrap; /* 텍스트 줄바꿈 유지 */
-}
-
-button {
-  padding: 4px 8px;
-  border: none;
-  border-radius: 4px;
-  background-color: #42b983; /* Vue Green */
-  color: #000000; /* 버튼 텍스트 흰색 */
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s;
-}
-
-button:hover {
-  background-color: #3a9d74; /* 약간 더 어두운 Vue Green */
-}
-
-button:active {
-  transform: scale(0.98); /* 클릭 시 약간 축소 효과 */
 }
 </style>

@@ -47,7 +47,6 @@ export const deleteData = async (part, index) => {
 export const getList = async () => {
   try {
     const response = await apiClient.get("/dynamodb/list");
-    console.log(response);
     return response.data; // API 응답 데이터 반환
   } catch (error) {
     console.error("Error fetching get list:", error);
@@ -58,7 +57,6 @@ export const getList = async () => {
 export const getById = async (id) => {
   try {
     const response = await apiClient.get(`/dynamodb/${id}`);
-    console.log(response);
     return response.data; // API 응답 데이터 반환
   } catch (error) {
     console.error("Error fetching get list:", error);

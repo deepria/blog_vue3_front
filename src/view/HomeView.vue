@@ -1,10 +1,8 @@
 <template>
-  <div class="home-container flex flex-col gap-lg p-2">
-    <weather-widget class="weather-section" />
-
+  <div class="flex flex-col gap-lg p-2">
+    <weather-widget />
     <div class="construction-banner">🚧 공사중 - 너무 힘들어요 🚜</div>
-
-    <news-widget class="news-section" />
+    <news-widget />
   </div>
 </template>
 

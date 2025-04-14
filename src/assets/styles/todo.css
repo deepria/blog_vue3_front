@@ -261,10 +261,9 @@
 .task-checkbox {
   width: 24px;
   height: 24px;
-  margin: 0;
-  margin-left: auto;
+  margin: 0 0 0 auto;
   cursor: pointer;
-  appearance: checkbox;
+  appearance: inherit;
   border: 2px solid #fff;
   border-radius: 4px;
   background-color: transparent;

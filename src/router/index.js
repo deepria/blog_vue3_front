@@ -2,14 +2,14 @@ import { createRouter, createWebHistory } from "vue-router";
 
 // 뷰 컴포넌트 import
 import HomeView from "@/view/HomeView.vue";
-import Get from "@/view/Attribute/Get.vue";
-import Put from "@/view/Attribute/Put.vue";
-import List from "@/view/Entity/List.vue";
-import Save from "@/view/Entity/Save.vue";
+import Get from "@/view/Legacy/Get.vue";
+import Put from "@/view/Legacy/Put.vue";
+import List from "@/view/Legacy/List.vue";
+import Save from "@/view/Legacy/Save.vue";
 import Upload from "@/view/Util/Upload.vue";
 import QR from "@/view/Legacy/QR.vue";
 import ColorPicker from "@/view/Legacy/ColorPicker.vue";
-import Todo from "@/view/Todo/Todo.vue";
+import Todo from "@/view/Util/Todo.vue";
 // 라우트 정의
 const routes = [
   {

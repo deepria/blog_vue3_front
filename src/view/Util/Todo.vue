@@ -264,16 +264,6 @@ const openSettings = (item) => {
   showSettingsPopup.value = true;
 };
 
-const getPriorityIcon = (priority) => {
-  return (
-    {
-      low: "text-green",
-      medium: "text-yellow",
-      high: "text-red",
-    }[priority] || "text-green"
-  );
-};
-
 const startDrag = (e) => {
   isDragging.value = true;
   dragStartY.value = e.touches ? e.touches[0].clientY : e.clientY;

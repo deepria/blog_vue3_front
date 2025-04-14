@@ -1,184 +1,300 @@
-/* 레이아웃 관련 공통 스타일 */
+/* 기본 스타일 리셋 및 웹뷰 최적화 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--background-dark);
+    color: var(--text-color);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 링크 스타일 */
+a {
+    text-decoration: none;
+    color: var(--link-color);
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--link-hover-color);
+}
+
+
+#app {
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+
 .app {
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
 }
 
 .content {
-  flex: 1;
-  height: 100%;
-  overflow: hidden;
-  overflow-y: auto;
-  padding-bottom: 6vh;
+    height: var(--content-height);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: var(--spacing-medium);
+    flex: 1;
 }
 
 .container {
-  width: 100%;
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: var(--spacing-base);
+    width: 100%;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--spacing-base);
 }
 
-/* 반응형 레이아웃 */
-@media (min-width: 1024px) {
-  .container {
-    padding: var(--spacing-large);
-  }
 
-  .grid-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-large);
-  }
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
 }
 
-/* 플렉스 유틸리티 */
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-center { justify-content: center; }
-.gap-sm { gap: var(--spacing-small); }
-.gap-md { gap: var(--spacing-medium); }
-.gap-lg { gap: var(--spacing-large); }
+/* 포커스 표시 */
+:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+}
 
-/* 여백 유틸리티 */
-.m-1 { margin: var(--spacing-small); }
-.m-2 { margin: var(--spacing-base); }
-.m-3 { margin: var(--spacing-medium); }
-.m-4 { margin: var(--spacing-large); }
 
-.p-1 { padding: var(--spacing-small); }
-.p-2 { padding: var(--spacing-base); }
-.p-3 { padding: var(--spacing-medium); }
-.p-4 { padding: var(--spacing-large); }
-
-/* 공통 스타일 */
-:root {
-  --primary-color: #000000;
-  --text-color: #FFFFFF;
-  --background-dark: #1a1a1a;
-  --border-color: rgba(255, 255, 255, 0.1);
-  --spacing-small: 8px;
-  --spacing-medium: 16px;
-  --spacing-large: 24px;
-  --font-size-small: 14px;
-  --font-size-medium: 16px;
-  --font-size-large: 18px;
-  --touch-target-size: 48px;
-  --bottom-nav-height: 60px;
-  --content-height: calc(100vh - var(--bottom-nav-height));
+/* 버튼 및 클릭 가능한 요소 기본 스타일 */
+button,
+[role="button"],
+.clickable {
+    min-height: var(--touch-target-size);
+    min-width: var(--touch-target-size);
+    padding: var(--spacing-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
 
 /* 공통 버튼 스타일 */
 .button-primary {
-  background-color: #000000;
-  color: #FFFFFF;
-  border: none;
-  padding: var(--spacing-small);
-  border-radius: 8px;
-  height: var(--touch-target-size);
-  min-width: var(--touch-target-size);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.2s ease;
+    background-color: #000000;
+    color: #FFFFFF;
+    border: none;
+    padding: var(--spacing-small);
+    border-radius: 8px;
+    height: var(--touch-target-size);
+    min-width: var(--touch-target-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.2s ease;
 }
 
 .button-primary svg {
-  width: 24px;
-  height: 24px;
-  stroke: #FFFFFF;
-  stroke-width: 2.5;
+    width: 24px;
+    height: 24px;
+    stroke: #FFFFFF;
+    stroke-width: 2.5;
 }
 
 .button-primary:active {
-  opacity: 0.8;
+    opacity: 0.8;
 }
 
 .button-secondary {
-  background-color: #666;
-  color: var(--text-color);
-  border: none;
-  padding: var(--spacing-small);
-  border-radius: 4px;
-  height: var(--touch-target-size);
-  min-width: var(--touch-target-size);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  -webkit-tap-highlight-color: transparent;
+    background-color: #666;
+    color: var(--text-color);
+    border: none;
+    padding: var(--spacing-small);
+    border-radius: 4px;
+    height: var(--touch-target-size);
+    min-width: var(--touch-target-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .button-secondary:active {
-  opacity: 0.8;
-}
-
-/* 공통 팝업 스타일 */
-.popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  overflow: hidden;
-}
-
-.popup-content {
-  background: var(--background-dark);
-  padding: var(--spacing-large);
-  border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-/* 공통 입력 필드 스타일 */
-.styled-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-color);
-  margin-bottom: var(--spacing-medium);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 0.8;
 }
 
 /* 공통 버튼 그룹 스타일 */
 .button-group {
-  display: flex;
-  gap: var(--spacing-small);
+    display: flex;
+    gap: var(--spacing-small);
 }
+
+/* 공통 팝업 스타일 */
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.popup-content {
+    background: var(--background-dark);
+    padding: var(--spacing-large);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* 공통 입력 필드 스타일 */
+.styled-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-color);
+    margin-bottom: var(--spacing-medium);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 
 /* 공통 팝업 버튼 스타일 */
 .popup-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
 }
 
 .popup-buttons button {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: var(--font-size-medium);
-  font-weight: 500;
-  min-width: 80px;
-  transition: opacity 0.2s ease;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: var(--font-size-medium);
+    font-weight: 500;
+    min-width: 80px;
+    transition: opacity 0.2s ease;
 }
 
 .popup-buttons button:active {
-  opacity: 0.8;
-} 
+    opacity: 0.8;
+}
+
+/* 접근성 */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+
+/* 반응형 레이아웃 */
+@media (min-width: 1024px) {
+    .container {
+        padding: var(--spacing-large);
+    }
+
+    .grid-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-large);
+    }
+}
+
+
+/* 모바일 터치 피드백 */
+@media (hover: none) {
+    .clickable:active {
+        opacity: 0.7;
+    }
+}
+
+/* 사파리 노치 영역 대응 */
+@supports (padding-top: env(safe-area-inset-top)) {
+    .content {
+        padding-top: calc(env(safe-area-inset-top) + var(--spacing-medium));
+        padding-bottom: calc(env(safe-area-inset-bottom) + var(--spacing-medium));
+    }
+}
+
+
+/* 공통 애니메이션 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 반응형 디자인 */
+@media (hover: hover) {
+    a:hover {
+        background-color: hsla(160, 100%, 37%, 0.2);
+    }
+}
+
+@media (min-width: 1024px) {
+    body {
+        display: flex;
+        place-items: center;
+    }
+
+    #app {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding: 0 2rem;
+    }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text-light: #ffffff;
+        --background-dark: #242424;
+    }
+}
