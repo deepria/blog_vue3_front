@@ -74,6 +74,7 @@ import { getList, getById, deleteEntity } from "@/services/dynamoService.js";
 import { useRouter } from "vue-router";
 import { useDynamoStore } from "@/stores/dynamoStore.js";
 import { ref, computed } from "vue";
+import { message } from "ant-design-vue";
 
 const router = useRouter();
 const id = ref("");
@@ -188,50 +189,18 @@ const prevPage = () => {
 const onClickValue = (childValue) => {
   if (typeof childValue === "string" && childValue.includes("http")) {
     window.open(childValue);
+  } else {
+    navigator.clipboard.writeText(childValue);
+    message.success("copied to clipboard", 1.5).then();
   }
 };
 </script>
 <style scoped>
-.main-container {
-  gap: 20px;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
-  color: #ffffff; /* 기본 텍스트 흰색 */
-  background-color: #121212; /* 배경 검은색 */
-}
-
-/* 양쪽 컨테이너 공통 스타일 */
-.form-container,
-.result-container {
-  border: 1px solid #333333; /* 어두운 회색 경계선 */
-  border-radius: 10px;
-  padding: 20px;
-  background: #1e1e1e; /* 어두운 회색 배경 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 뚜렷한 그림자 */
-  min-height: 130px;
-}
-
-/* Header 스타일 */
-.header {
-  font-size: 1.8rem;
-  text-align: center;
-  color: #42b983; /* Vue Green */
-  margin-bottom: 20px;
-}
-
 /* 에러 메시지 */
 .error-message {
   margin-top: 15px;
   color: #ff4d4d; /* 에러 메시지 강조 빨간색 */
   font-weight: bold;
-  text-align: center;
-}
-
-/* 결과 텍스트 */
-.result-container p {
-  font-size: 1.2rem;
-  color: #ffffff; /* 텍스트 흰색 */
   text-align: center;
 }
 
@@ -244,6 +213,7 @@ const onClickValue = (childValue) => {
   background-color: #121212; /* 배경 검은색 */
   color: #ffffff; /* 텍스트 흰색 */
   white-space: pre-wrap;
+  overflow-x: auto;
 }
 
 /* 페이지네이션 */
@@ -252,32 +222,5 @@ const onClickValue = (childValue) => {
   justify-content: center;
   align-items: center;
   gap: 10px;
-}
-
-/* 페이지네이션 버튼 */
-.pagination button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  background-color: #42b983; /* Vue Green */
-  color: #ffffff; /* 버튼 텍스트 흰색 */
-  cursor: pointer;
-  transition:
-    background-color 0.3s ease,
-    transform 0.1s;
-}
-
-.pagination button:hover {
-  background-color: #3a9d74; /* 약간 더 어두운 Vue Green */
-}
-
-.pagination button:active {
-  transform: scale(0.98); /* 클릭 시 약간 축소 효과 */
-}
-
-.pagination button[disabled] {
-  background-color: #555555; /* 비활성화 버튼 회색 */
-  cursor: not-allowed;
-  color: #aaaaaa; /* 비활성화 텍스트 흐린 회색 */
 }
 </style>

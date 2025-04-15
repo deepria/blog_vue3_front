@@ -23,7 +23,17 @@
       </div>
       <router-link to="/" class="home-button" active-class="active">
         <span class="sr-only">홈</span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
           <polyline points="9 22 9 12 15 12 15 22"></polyline>
         </svg>
@@ -55,10 +65,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
-import '@/assets/styles/navigation.css';
-import '@/assets/styles/layout.css';
+import { ref, onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
+import "@/assets/styles/navigation.css";
+import "@/assets/styles/layout.css";
 
 const router = useRouter();
 
@@ -66,8 +76,8 @@ const menus = ref([
   {
     name: "Legacy",
     children: [
-      { name: "QR", path: "/qr" },
-      { name: "ColorPicker", path: "/colorPicker" },
+      // { name: "QR", path: "/qr" },
+      // { name: "ColorPicker", path: "/colorPicker" },
       { name: "Put-private", path: "/put" },
       { name: "Get-private", path: "/get" },
       { name: "Put-public", path: "/save" },
