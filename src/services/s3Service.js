@@ -49,12 +49,28 @@ export const downloadFromS3 = async (filename) => {
     params: { filename },
   });
 
-  const link = document.createElement("a");
-  link.href = downloadUrl;
-  link.download = filename; // 원하는 파일명
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  if (navigator.userAgent.includes("Android")) {
+    // 1. presigned URL로 파일(blob) 다운로드
+    const response = await axios.get(downloadUrl, {
+      responseType: "blob",
+    });
+    // 2. 다운로드 트리거
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", filename); // 저장할 파일 이름
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } else {
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = filename; // 원하는 파일명
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 };
 
 export const previewFromS3 = async (filename) => {
