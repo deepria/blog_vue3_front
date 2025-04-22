@@ -51,28 +51,18 @@ export const downloadFromS3 = async (filename) => {
 
   if (navigator.userAgent.includes("Android")) {
     // 1. presigned URL로 파일(blob) 다운로드
-    const response = await axios.get(downloadUrl, {
+    const response = await apiClient.get(downloadUrl, {
       responseType: "blob",
     });
 
     const blob = new Blob([response.data]);
     const reader = new FileReader();
-
-    reader.onloadend = function () {
-      if (typeof reader.result === "string") {
-        const base64data = reader.result;
-        const link = document.createElement("a");
-        link.href = base64data;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        console.error("파일 변환 실패: 예상과 다른 결과 타입", reader.result);
-      }
+    reader.onload = function () {
+      const base64Data = reader.result.split(",")[1];
+      // Android Interface 로 데이터 전달
+      Android.downloadBlob(base64Data, filename);
     };
-
-    reader.readAsDataURL(blob); // 🔥 base64로 변환해서 다운로드 강제 처리
+    reader.readAsDataURL(blob);
   } else {
     const link = document.createElement("a");
     link.href = downloadUrl;
