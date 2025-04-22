@@ -49,7 +49,7 @@ export const downloadFromS3 = async (filename) => {
     params: { filename },
   });
 
-  if (navigator.userAgent.includes("Android")) {
+  if (navigator.userAgent.includes("Android") && Android.isApp()) {
     // 1. presigned URL로 파일(blob) 다운로드
     const response = await apiClient.get(downloadUrl, {
       responseType: "blob",
