@@ -7,9 +7,8 @@ import Put from "@/view/Legacy/Put.vue";
 import List from "@/view/Legacy/List.vue";
 import Save from "@/view/Legacy/Save.vue";
 import Upload from "@/view/Util/Upload.vue";
-import QR from "@/view/Legacy/QR.vue";
-import ColorPicker from "@/view/Legacy/ColorPicker.vue";
 import Todo from "@/view/Util/Todo.vue";
+import S3 from "@/view/Util/S3.vue";
 // 라우트 정의
 const routes = [
   {
@@ -43,19 +42,14 @@ const routes = [
     component: Upload,
   },
   {
-    path: "/qr",
-    name: "QR",
-    component: QR,
-  },
-  {
-    path: "/colorPicker",
-    name: "ColorPicker",
-    component: ColorPicker,
-  },
-  {
     path: "/todo",
     name: "Todo",
     component: Todo,
+  },
+  {
+    path: "/s3",
+    name: "S3",
+    component: S3,
   },
 ];
 

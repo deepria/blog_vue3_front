@@ -65,7 +65,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import "@/assets/styles/navigation.css";
 import "@/assets/styles/layout.css";
@@ -76,8 +76,6 @@ const menus = ref([
   {
     name: "Legacy",
     children: [
-      // { name: "QR", path: "/qr" },
-      // { name: "ColorPicker", path: "/colorPicker" },
       { name: "Put-private", path: "/put" },
       { name: "Get-private", path: "/get" },
       { name: "Put-public", path: "/save" },
@@ -89,6 +87,7 @@ const menus = ref([
     children: [
       { name: "Todo", path: "/todo" },
       { name: "Upload", path: "/upload" },
+      { name: "S3", path: "/s3" },
     ],
   },
 ]);

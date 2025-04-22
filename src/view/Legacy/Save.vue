@@ -84,7 +84,6 @@ const put = async () => {
 onMounted(() => {
   if (useDynamoStore().getEntity) {
     const objFromGet = useDynamoStore().getEntity;
-    console.log(JSON.stringify(objFromGet, null, 2));
     id.value = objFromGet.id;
     value.value = objFromGet.value;
   }
