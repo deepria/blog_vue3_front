@@ -54,15 +54,25 @@ export const downloadFromS3 = async (filename) => {
     const response = await axios.get(downloadUrl, {
       responseType: "blob",
     });
-    // 2. 다운로드 트리거
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", filename); // 저장할 파일 이름
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+
+    const blob = new Blob([response.data]);
+    const reader = new FileReader();
+
+    reader.onloadend = function () {
+      if (typeof reader.result === "string") {
+        const base64data = reader.result;
+        const link = document.createElement("a");
+        link.href = base64data;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        console.error("파일 변환 실패: 예상과 다른 결과 타입", reader.result);
+      }
+    };
+
+    reader.readAsDataURL(blob); // 🔥 base64로 변환해서 다운로드 강제 처리
   } else {
     const link = document.createElement("a");
     link.href = downloadUrl;
