@@ -27,7 +27,7 @@ export const uploadToS3 = async (selectedFile) => {
   let uploadProgress;
   // 2. S3로 직접 업로드
   await apiClient.put(uploadUrl, file, {
-    headers: { "Content-Type": file.type },
+    headers: { "Content-Type": file.type, "x-amz-storage-class": "GLACIER_IR" },
     onUploadProgress: (progress) => {
       uploadProgress = Math.round((progress.loaded * 100) / progress.total);
       message
