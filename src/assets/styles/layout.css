@@ -280,14 +280,49 @@ button,
 
 @media (min-width: 1024px) {
     body {
+        /* 기존 스타일 유지 */
         display: flex;
         place-items: center;
+        /* 추가: 데스크탑용 padding 및 중앙 정렬 */
+        padding: 2rem;
+        justify-content: center;
+    }
+
+    html, body {
+        height: auto;
+        overflow: auto;
+    }
+
+    html {
+        font-size: 14px;
     }
 
     #app {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        padding: 0 2rem;
+        position: relative;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+        display: block;
+        /* 기존 그리드 레이아웃은 필요하다면 아래에 추가하세요 */
+        /* display: grid; */
+        /* grid-template-columns: 1fr 1fr; */
+        /* padding: 0 2rem; */
+    }
+
+    .container {
+        max-width: 1280px;
+        padding: 2rem;
+    }
+
+    /* 마우스 hover 인터랙션 강화 */
+    .button-primary:hover {
+        background-color: var(--link-hover-color);
+        opacity: 0.9;
+    }
+
+    a:hover {
+        text-decoration: underline;
+        background-color: rgba(255, 255, 255, 0.05);
     }
 }
 

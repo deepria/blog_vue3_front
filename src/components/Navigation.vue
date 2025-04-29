@@ -11,13 +11,14 @@
         v-for="menu in menus"
         :key="menu.name"
         class="nav-item"
+        @click="desktopSelectMenu(menu)"
         @touchstart="startHold(menu, $event)"
         @mousedown="startHold(menu, $event)"
         @touchmove="optimizedTouchMove"
         @mousemove="moveSelection"
         @touchend="selectMenu"
         @mouseup="selectMenu"
-        @mouseleave="resetMenu"
+        @mouseleave="handleMouseLeave"
       >
         {{ menu.name }}
       </div>
@@ -56,6 +57,7 @@
           class="tree-item"
           :class="{ selected: index === selectedIndex }"
           :style="{ transform: `translateY(-${index * 48}px)` }"
+          @click="selectTreeItem(index)"
         >
           {{ child.name }}
         </div>
@@ -155,5 +157,33 @@ const resetMenu = () => {
   selectedIndex.value = null;
   isMenuVisible.value = false;
   clearTimeout(holdTimeout);
+};
+
+// 모바일에서만 mouseleave로 메뉴 닫기
+const handleMouseLeave = (event) => {
+  if (window.innerWidth <= 600) {
+    resetMenu();
+  }
+};
+
+// 데스크탑 클릭 메뉴 활성화 (600px 초과만), 토글 기능 추가
+const desktopSelectMenu = (menu) => {
+  if (window.innerWidth > 600) {
+    if (activeMenu.value === menu && isMenuVisible.value) {
+      resetMenu();
+    } else {
+      activeMenu.value = menu;
+      isMenuVisible.value = true;
+    }
+  }
+};
+
+// 트리 메뉴 항목 클릭 시 라우팅
+const selectTreeItem = (index) => {
+  if (activeMenu.value && activeMenu.value.children[index]) {
+    const selectedPath = activeMenu.value.children[index].path;
+    router.push(selectedPath);
+    resetMenu();
+  }
 };
 </script>
