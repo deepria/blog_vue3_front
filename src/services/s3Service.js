@@ -46,7 +46,7 @@ export const uploadToS3 = async (selectedFile) => {
 // 파일 다운로드
 export const downloadFromS3 = async (filename) => {
   const { data: downloadUrl } = await apiClient.get("/api/s3/download-url", {
-    params: { filename: encodeURIComponent(filename) },
+    params: { filename: filename },
   });
 
   if (navigator.userAgent.includes("Android") && Android.isApp()) {
@@ -75,7 +75,7 @@ export const downloadFromS3 = async (filename) => {
 
 export const previewFromS3 = async (filename) => {
   const { data: downloadUrl } = await apiClient.get("/api/s3/download-url", {
-    params: { filename: encodeURIComponent(filename) },
+    params: { filename: filename },
   });
   return downloadUrl;
 };

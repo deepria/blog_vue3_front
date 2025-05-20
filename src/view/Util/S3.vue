@@ -134,7 +134,10 @@ const truncateFileName = (name) => {
 };
 
 const getAuthKey = async (file) => {
-  const key = await getData("file", "file:" + file.replace("upload/", ""));
+  const key = await getData(
+    "file",
+    "file:" + encodeURIComponent(file.replace("upload/", "")),
+  );
   try {
     return decodeAndDecompress(key);
   } catch (e) {
