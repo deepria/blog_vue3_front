@@ -13,7 +13,7 @@ export const loadFiles = async () => {
 export const downloadFile = async (authKey, downloadPath, fileName) => {
   try {
     const response = await apiClient.get(
-      `/api/download?path=${encodeURIComponent(downloadPath)}&key=${encodeURIComponent(authKey)}`,
+      `/api/download?path=${downloadPath}&key=${authKey}`,
       {
         responseType: "blob", // 응답 형식 설정
       },
@@ -41,12 +41,9 @@ export const downloadFile = async (authKey, downloadPath, fileName) => {
 
 export const previewFile = async (fileName) => {
   try {
-    const response = await apiClient.get(
-      `/api/${encodeURIComponent(fileName)}`,
-      {
-        responseType: "blob", // 이미지 데이터 반환
-      },
-    );
+    const response = await apiClient.get(`/api/${fileName}`, {
+      responseType: "blob", // 이미지 데이터 반환
+    });
 
     return URL.createObjectURL(response.data); // Blob URL 생성
   } catch (error) {

@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref } from "vue";
+import { compressAndEncode, decodeAndDecompress } from "@/utils/compressor.js";
 import { getData, postData, deleteData } from "@/services/dynamoService.js";
 import {
   load,
@@ -41,14 +42,9 @@ const loadDirectory = async () => {
 const upload = async () => {
   try {
     const originalName = selectedFile.value.name;
-    const baseName = customFileName.value.trim()
-      ? customFileName.value.trim() +
-        originalName.substring(originalName.lastIndexOf("."))
-      : originalName
-          .replace(/\s+/g, "_")
-          .replace(/[^a-zA-Z0-9_.-]/g, "_")
-          .replace(/_+/g, "_")
-          .replace(/^_|_$/g, "");
+    const baseName = compressAndEncode(
+      customFileName.value.trim() || originalName,
+    );
     const uuid = uuid_v4();
     const newFileName = `${uuid}_${baseName}`;
     const newFile = new File([selectedFile.value], newFileName, {
@@ -57,7 +53,12 @@ const upload = async () => {
     });
     const response = await uploadToS3(newFile);
     if (response !== false) {
-      await postData("file", "file:" + newFileName, "authKey", authKey.value);
+      await postData(
+        "file",
+        "file:" + newFileName,
+        "authKey",
+        compressAndEncode(authKey.value),
+      );
       await loadDirectory();
       showPopup.value = false;
 
@@ -123,12 +124,23 @@ const handleFileChange = (event) => {
 };
 const truncateFileName = (name) => {
   name = name.replace("upload/", "");
-  return name.replace(/^[a-f0-9-]{36}_/, "");
+  const encoded = name.replace(/^[a-f0-9-]{36}_/, "");
+  try {
+    return decodeAndDecompress(encoded);
+  } catch (e) {
+    console.error("디코딩 실패:", e);
+    return encoded;
+  }
 };
 
 const getAuthKey = async (file) => {
   const key = await getData("file", "file:" + file.replace("upload/", ""));
-  return key || false;
+  try {
+    return decodeAndDecompress(key);
+  } catch (e) {
+    console.error("비밀번호 디코딩 실패:", e);
+    return key;
+  }
 };
 
 const handleAuth = async (file, action) => {
