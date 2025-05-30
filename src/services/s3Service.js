@@ -61,7 +61,7 @@ export const downloadFromS3 = async (filename) => {
     reader.onload = function () {
       const base64Data = reader.result.split(",")[1];
       // Android Interface 로 데이터 전달
-      Android.downloadBlob(base64Data, decodeAndDecompress(filename));
+      Android.downloadBlob(base64Data, filename);
     };
     reader.readAsDataURL(blob);
   } else {
