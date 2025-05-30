@@ -94,11 +94,7 @@ const previewFileClick = async (file) => {
 };
 const download = (file) => {
   try {
-    downloadFile(
-      authKey.value,
-      file.name,
-      file.name.replace(/^[a-f0-9-]{36}_/, ""),
-    );
+    downloadFile(authKey.value, encodeURIComponent(file.name), file.name);
   } catch (error) {
     message.warn("파일 다운로드 실패").then();
   }
@@ -139,7 +135,7 @@ const truncateFileName = (name) => {
 };
 
 const getAuthKey = async (file) => {
-  const key = await getData("file", "file:" + file.name);
+  const key = await getData("file", "file:" + encodeURIComponent(file.name));
   try {
     return decodeAndDecompress(key);
   } catch (e) {
