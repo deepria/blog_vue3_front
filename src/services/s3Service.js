@@ -1,5 +1,6 @@
 import apiClient from "./api";
 import { message } from "ant-design-vue";
+import { decodeAndDecompress } from "@/utils/compressor.js";
 
 // 디렉터리 파일 목록 로드
 export const load = async () => {
@@ -60,13 +61,13 @@ export const downloadFromS3 = async (filename) => {
     reader.onload = function () {
       const base64Data = reader.result.split(",")[1];
       // Android Interface 로 데이터 전달
-      Android.downloadBlob(base64Data, filename);
+      Android.downloadBlob(base64Data, decodeAndDecompress(filename));
     };
     reader.readAsDataURL(blob);
   } else {
     const link = document.createElement("a");
     link.href = downloadUrl;
-    link.download = filename; // 원하는 파일명
+    link.download = decodeAndDecompress(filename); // 원하는 파일명
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
