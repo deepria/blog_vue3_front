@@ -9,6 +9,7 @@ import Save from "@/view/Legacy/Save.vue";
 import Upload from "@/view/Util/Upload.vue";
 import Todo from "@/view/Util/Todo.vue";
 import S3 from "@/view/Util/S3.vue";
+import CCA from "@/view/Util/CreditCardAnalysis.vue";
 // 라우트 정의
 const routes = [
   {
@@ -37,14 +38,19 @@ const routes = [
     component: Save,
   },
   {
-    path: "/upload",
-    name: "Upload",
-    component: Upload,
-  },
-  {
     path: "/todo",
     name: "Todo",
     component: Todo,
+  },
+  {
+    path: "/cca",
+    name: "CCA",
+    component: CCA,
+  },
+  {
+    path: "/upload",
+    name: "Upload",
+    component: Upload,
   },
   {
     path: "/s3",
