@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 
 // 뷰 컴포넌트 import
-import HomeView from "@/view/HomeView.vue";
+import HomeView from "@/view/Legacy/HomeView.vue";
 import Get from "@/view/Legacy/Get.vue";
 import Put from "@/view/Legacy/Put.vue";
 import List from "@/view/Legacy/List.vue";
@@ -10,10 +10,16 @@ import Upload from "@/view/Util/Upload.vue";
 import Todo from "@/view/Util/Todo.vue";
 import S3 from "@/view/Util/S3.vue";
 import CCA from "@/view/Util/CreditCardAnalysis.vue";
+import Index from "@/view/Index.vue";
 // 라우트 정의
 const routes = [
   {
     path: "/",
+    name: "index",
+    component: Index,
+  },
+  {
+    path: "/homeView",
     name: "Home",
     component: HomeView,
   },

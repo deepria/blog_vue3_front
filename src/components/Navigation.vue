@@ -78,6 +78,7 @@ const menus = ref([
   {
     name: "Legacy",
     children: [
+      { name: "Home-legacy", path: "/homeView" },
       { name: "Put-private", path: "/put" },
       { name: "Get-private", path: "/get" },
       { name: "Put-public", path: "/save" },

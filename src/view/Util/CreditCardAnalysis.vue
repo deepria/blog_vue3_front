@@ -6,11 +6,15 @@ const tableData = ref([]);
 const allColumns = ref([]);
 const visibleColumnKeys = ref([]);
 
+// Toggle for grouping by 이용가맹점 and summing 결제 금액
+const isGrouped = ref(true);
+
 const sortKey = ref("");
 const sortOrder = ref("asc");
 
 const groupedTableData = computed(() => {
   if (
+    !isGrouped.value ||
     !tableData.value.length ||
     !allColumns.value.some((col) => col.field === "이용가맹점") ||
     !allColumns.value.some((col) => col.field === "결제 금액")
@@ -67,6 +71,17 @@ const sortedTableData = computed(() => {
 const columns = computed(() =>
   allColumns.value.filter((col) => visibleColumnKeys.value.includes(col.field)),
 );
+
+// Compute max content length per column for column width
+const columnWidths = computed(() => {
+  const widths = {};
+  for (const col of allColumns.value) {
+    const values = tableData.value.map((row) => String(row[col.field] || ""));
+    const maxLen = Math.max(col.label.length, ...values.map((v) => v.length));
+    widths[col.field] = `${maxLen + 5}ch`;
+  }
+  return widths;
+});
 
 const handleSort = (key) => {
   if (sortKey.value === key) {
@@ -162,7 +177,7 @@ const handleFileUpload = (event) => {
 
 <template>
   <div class="p-6 max-w-4xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">×ls 사용내역 업로드 및 포탈변경</h1>
+    <h1 class="text-2xl font-bold mb-4">xls 사용내역 업로드 및 포탈변경</h1>
 
     <input
       type="file"
@@ -171,10 +186,7 @@ const handleFileUpload = (event) => {
       class="mb-4"
     />
 
-    <div
-      v-if="allColumns.length"
-      class="mb-4 column-selector p-3 border border-white flex flex-col gap-1"
-    >
+    <div class="p-3 !border !border-white flex flex-col gap-1 w-1/2">
       <label
         v-for="col in allColumns"
         :key="col.field"
@@ -185,14 +197,26 @@ const handleFileUpload = (event) => {
       </label>
     </div>
 
+    <div class="p-3 !border !border-white flex flex-col gap-1 w-1/2">
+      <label class="flex items-center gap-2">
+        <input type="checkbox" v-model="isGrouped" />
+        이용가맹점 그룹 및 결제 합산
+      </label>
+    </div>
+  </div>
+
+  <div
+    v-if="allColumns.length"
+    class="mb-4 flex justify-between items-start w-full gap-4"
+  >
     <div class="overflow-auto">
-      <table class="min-w-full table-auto border border-white">
+      <table class="my-table min-w-full table-auto border border-white">
         <thead>
           <tr>
             <th
               v-for="col in columns"
               :key="col.field"
-              class="text-left px-4 py-2 border border-white cursor-pointer select-none"
+              class="text-center px-4 py-2 border border-white cursor-pointer select-none"
               @click="handleSort(col.field)"
             >
               {{ col.label }}
@@ -211,9 +235,14 @@ const handleFileUpload = (event) => {
             <td
               v-for="col in columns"
               :key="col.field"
+              :style="{ width: columnWidths[col.field] }"
               :class="[
                 'px-4 py-2 border border-white',
-                col.field === '결제 금액' ? 'text-right' : '',
+                col.field.includes('금액') ||
+                col.field.includes('잔액') ||
+                col.field.includes('수수료')
+                  ? 'text-right'
+                  : '',
               ]"
             >
               {{
@@ -230,9 +259,14 @@ const handleFileUpload = (event) => {
 </template>
 
 <style scoped>
-th,
-td {
+.my-table th {
+  text-align: center;
+}
+.my-table th,
+.my-table td {
+  border: 1px solid white;
   white-space: nowrap;
+  padding: 0.75rem 1rem;
 }
 
 @media (max-width: 768px) {
@@ -250,15 +284,12 @@ td {
 
   .overflow-auto {
     overflow-x: auto;
+    overflow-y: auto;
   }
 
-  th,
-  td {
-    padding: 0.5rem;
+  .my-table th,
+  .my-table td {
+    padding: 0.5rem 0.75rem;
   }
-}
-
-.column-selector {
-  border: 1px solid white;
 }
 </style>
