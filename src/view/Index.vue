@@ -160,6 +160,8 @@ onMounted(async () => {
 }
 
 .fix {
+  white-space: nowrap;
+  vertical-align: top;
   display: inline-block;
   text-align: center;
   overflow: hidden;
