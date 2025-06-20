@@ -18,13 +18,12 @@
         v-for="a in active"
         :key="a.item.id"
         class="danmaku"
+        :ref="(el) => (danmakuRefs[a.item.id] = el)"
         :style="{
           top: `${a.line * GAP}%`,
-          animation: `moveLeft ${a.duration}s linear forwards`,
           background: `${a.item.color + 80}`,
         }"
-        @animationend="handleEnd(a.line, a.item.id)"
-        @click="showDetail(a.item)"
+        @click="onClickLine(a)"
       >
         <span
           class="priority-icon"
@@ -65,21 +64,25 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from "vue";
+import { computed, nextTick, onMounted, reactive, ref } from "vue";
 import { getData } from "@/services/dynamoService.js";
+import { animate, createDraggable, utils } from "animejs";
 
 // Constants
 const GAP = 8;
 const NUM_LINE = Math.floor(100 / GAP);
 const MIN_DUR = 6;
 const MAX_DUR = 12;
+const VH = window.innerHeight;
 
 const randDur = () =>
   +(Math.random() * (MAX_DUR - MIN_DUR) + MIN_DUR).toFixed(2);
 
+const blobs = ["", "", "", "", "", "", "", "", "", "", "", ""];
+
 // Data
-const what = ref(["그것을", "순간을", "영감을", "아이디어를"]);
-const does = ref(["저장하다.", "기억하다.", "기록하다.", "정리한다."]);
+const what = ref(["그것", "순간", "영감", "아이디어", "문도"]);
+const does = ref(["저장한다.", "기억한다.", "기록한다.", "정리한다."]);
 
 const idx = reactive({ what: 0, does: 0 });
 const dir = reactive({ what: "slide-down", does: "slide-down" });
@@ -87,7 +90,15 @@ const dir = reactive({ what: "slide-down", does: "slide-down" });
 const items = ref([]);
 const lineQueues = ref(Array.from({ length: NUM_LINE }, () => []));
 const active = ref([]);
+const danmakuRefs = reactive({});
 const selected = ref(null);
+
+// Lifecycle
+onMounted(async () => {
+  items.value = await getData("todo", "todo");
+  initQueues();
+  setInterval(shuffleTitle, 1500);
+});
 
 // Computed
 const maxWhatLen = computed(
@@ -117,7 +128,10 @@ function startNext(line) {
   const q = lineQueues.value[line];
   if (!q.length) return;
   const item = q.shift();
-  active.value.push({ item, line, duration: randDur() });
+  active.value.push({ item, line });
+  nextTick(() => {
+    createRandomAnimation(item, line);
+  });
 }
 
 function handleEnd(line, id) {
@@ -129,16 +143,78 @@ function handleEnd(line, id) {
   startNext(line);
 }
 
-function showDetail(it) {
-  selected.value = it;
+function onClickLine(a) {
+  const el = danmakuRefs[a.item.id];
+  if (el.ani.paused) {
+    el.ani.play();
+  } else {
+    el.ani.pause();
+  }
+  utils.set(el, { z: 100 });
+  createDraggable(el, {
+    x: { mapTo: "rotateY", modifier: utils.wrap(-128, 128) },
+    y: { mapTo: "z" },
+  });
 }
 
-// Lifecycle
-onMounted(async () => {
-  items.value = await getData("todo", "todo");
-  initQueues();
-  setInterval(shuffleTitle, 1500);
-});
+function createRandomAnimation(item, line) {
+  const el = danmakuRefs[item.id];
+  if (!el) return;
+  const du = Math.floor(Math.random() * 4001) + 4000;
+  const r = Math.floor(Math.random() * 4);
+  switch (r) {
+    case 0:
+      el.ani = animate(el, {
+        x: { from: "100vw", to: "-100vw" },
+        y: {
+          to: "50vw",
+          modifier: (v) => Math.cos(v) / 2, // Specific modifier to y property
+        },
+        duration: du,
+        onComplete: () => {
+          handleEnd(line, item.id);
+        },
+      });
+      break;
+    case 1:
+      el.ani = animate(el, {
+        x: { from: "100vw", to: "5vw" },
+        duration: 400,
+        onComplete: () => {
+          setTimeout(() => {
+            handleEnd(line, item.id);
+          }, 1500);
+        },
+      });
+      break;
+    case 2:
+      el.ani = animate(el, {
+        x: { from: "100vw", to: "-100vw" },
+        duration: du,
+        onComplete: () => {
+          handleEnd(line, item.id);
+        },
+      });
+      break;
+    case 3:
+      el.ani = animate(el, {
+        rotate: {
+          to: 360,
+          duration: 1500,
+        },
+        x: { from: "100vw", to: "-100vw" },
+        y: {
+          to: "50vw",
+          modifier: (v) => Math.cos(v) / 2, // Specific modifier to y property
+        },
+        duration: du,
+        onComplete: () => {
+          handleEnd(line, item.id);
+        },
+      });
+      break;
+  }
+}
 </script>
 
 <style scoped>
@@ -177,7 +253,7 @@ onMounted(async () => {
 .danmaku {
   display: flex;
   position: absolute;
-  left: 100%;
+  //left: 100%;
   white-space: nowrap;
   padding: 8px 16px;
   border-radius: 16px;
