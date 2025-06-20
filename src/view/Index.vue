@@ -2,12 +2,12 @@
   <div class="index-page">
     <h1 class="title">
       <transition :name="dir.what" mode="out-in">
-        <span :key="idx.what" class="fix" :style="{ width: maxWhatLen + 'ch' }">
+        <span :key="idx.what" class="fix" :style="{ width: maxWhatLen + 'em' }">
           {{ what[idx.what] }}
         </span>
       </transition>
       <transition :name="dir.does" mode="out-in">
-        <span :key="idx.does" class="fix" :style="{ width: maxDoesLen + 'ch' }">
+        <span :key="idx.does" class="fix" :style="{ width: maxDoesLen + 'em' }">
           {{ does[idx.does] }}
         </span>
       </transition>
@@ -91,10 +91,10 @@ const selected = ref(null);
 
 // Computed
 const maxWhatLen = computed(
-  () => Math.max(...what.value.map((s) => s.length)) + 2,
+  () => Math.max(...what.value.map((s) => s.length)) * 1.1,
 );
 const maxDoesLen = computed(
-  () => Math.max(...does.value.map((s) => s.length)) + 2,
+  () => Math.max(...does.value.map((s) => s.length)) * 1.1,
 );
 
 // Functions
