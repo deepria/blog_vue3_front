@@ -90,9 +90,9 @@ const previewFileClick = async (file) => {
     message.warn("미리보기를 불러올 수 없습니다.").then();
   }
 };
-const download = (file) => {
+const download = (filename) => {
   try {
-    downloadFromS3(file);
+    downloadFromS3(filename,truncateFileName(filename) );
   } catch (error) {
     message.warn("파일 다운로드 실패").then();
   }

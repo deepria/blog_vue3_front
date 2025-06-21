@@ -45,7 +45,7 @@ export const uploadToS3 = async (selectedFile) => {
 };
 
 // 파일 다운로드
-export const downloadFromS3 = async (filename) => {
+export const downloadFromS3 = async (filename,originalFileName) => {
   const { data: downloadUrl } = await apiClient.get("/api/s3/download-url", {
     params: { filename: filename },
   });
@@ -61,16 +61,25 @@ export const downloadFromS3 = async (filename) => {
     reader.onload = function () {
       const base64Data = reader.result.split(",")[1];
       // Android Interface 로 데이터 전달
-      Android.downloadBlob(base64Data, filename);
+      Android.downloadBlob(base64Data, originalFileName);
     };
     reader.readAsDataURL(blob);
   } else {
+    // Web 브라우저 전용
+    const response = await apiClient.get(downloadUrl, {
+      responseType: "blob",
+    });
+    const blob = new Blob([response.data]);
+
+// Safari 대응: createObjectURL + download 속성으로 파일 저장
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = filename; // 원하는 파일명
+    link.href = url;
+    link.download = originalFileName; // 복호화된 파일명, 예: "보고서.csv"
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   }
 };
 
