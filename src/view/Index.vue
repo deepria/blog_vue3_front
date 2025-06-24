@@ -162,6 +162,20 @@ function createRandomAnimation(item, line) {
   if (!el) return;
   const du = Math.floor(Math.random() * 4001) + 4000;
   const r = Math.floor(Math.random() * 4);
+
+  const priorityZMap = {
+    high: 0,
+    medium: 250,
+    low: 500,
+  };
+  const z = priorityZMap[item.priority] ?? 250;
+
+  utils.set(el, {
+    z,
+    scale: 1 - z / 1000,
+    opacity: 1 - z / 800,
+  });
+
   switch (r) {
     case 0:
       el.ani = animate(el, {
@@ -181,9 +195,13 @@ function createRandomAnimation(item, line) {
         x: { from: "100vw", to: "5vw" },
         duration: 400,
         onComplete: () => {
-          setTimeout(() => {
-            handleEnd(line, item.id);
-          }, 1500);
+          el.ani = animate(el, {
+            x: { from: "5vw", to: "-100vw" },
+            duration: 6000,
+            onComplete: () => {
+              handleEnd(line, item.id);
+            },
+          });
         },
       });
       break;
