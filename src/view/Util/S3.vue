@@ -92,7 +92,7 @@ const previewFileClick = async (file) => {
 };
 const download = (filename) => {
   try {
-    downloadFromS3(filename,truncateFileName(filename) );
+    downloadFromS3(filename, truncateFileName(filename));
   } catch (error) {
     message.warn("파일 다운로드 실패").then();
   }
@@ -186,6 +186,15 @@ const closeAuthPopup = () => {
   showAuthPopup.value = false;
 };
 
+const refreshDirectory = async () => {
+  try {
+    await loadDirectory();
+  } catch (error) {
+    console.error("Directory refresh error:", error);
+    message.warn("Failed to refresh directory.").then();
+  }
+};
+
 onMounted(loadDirectory);
 </script>
 
@@ -235,6 +244,9 @@ onMounted(loadDirectory);
       </div>
     </div>
     <div class="button-container">
+      <button class="refresh-button" @click="refreshDirectory()">
+        <i class="fa-solid fa-rotate refresh-icon"></i>
+      </button>
       <button class="add-button" @click="showPopup = true">
         <svg
           xmlns="http://www.w3.org/2000/svg"
