@@ -63,7 +63,8 @@
               fontWeight: 700,
               margin: '12px 0 6px',
               letterSpacing: '0.5px',
-              transform: `translateY(${dragOffset}px)`,
+              willChange: 'transform',
+              transform: `translate3d(0, ${dragOffset}px, 0)`,
             }"
           >
             {{ getGroupNameByKey(item.groupKey) }}
@@ -72,7 +73,8 @@
             class="list-item"
             :style="{
               backgroundColor: getGroupBgByKey(item.groupKey),
-              transform: `translateY(${dragOffset}px)`,
+              willChange: 'transform',
+              transform: `translate3d(0, ${dragOffset}px, 0)`,
               boxShadow: `0 0 ${GLOW_BLUR_PX * 2}px ${getGroupGlowByKey(item.groupKey)}`,
             }"
             @click="openSettings(item)"
@@ -279,6 +281,16 @@ const GLOW_BLUR_PX = 3; // 형광 효과 번짐(픽셀)
 const GLOW_ALPHA = 0.28; // 형광 효과 투명도(낮출수록 약해짐)
 const ITEM_ROW_HEIGHT = 50; // px, list item height used for drag bounds
 const HEADER_ROW_HEIGHT = 28; // px, group header height used for drag bounds
+
+// Throttle dragOffset update with requestAnimationFrame
+let rafId = null;
+const setDragOffset = (val) => {
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(() => {
+    dragOffset.value = val;
+    rafId = null;
+  });
+};
 
 const hexToRgb = (hex) => {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || "");
@@ -639,7 +651,7 @@ const onDrag = (e) => {
   const minOffset = -(totalHeight - viewportHeight);
 
   if (newOffset <= maxOffset && newOffset >= minOffset) {
-    dragOffset.value = newOffset;
+    setDragOffset(newOffset);
   }
 
   dragStartY.value = currentY;
