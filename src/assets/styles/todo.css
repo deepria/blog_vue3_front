@@ -1,7 +1,7 @@
 /* Todo 컨테이너 */
 .todo-container {
   width: 100%;
-  height: calc(100vh - 80px);
+  height: calc(100dvh - 80px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -73,7 +73,6 @@
 /* 버튼 컨테이너 */
 .button-container {
   position: fixed;
-  bottom: 80px;
   right: 20px;
   display: flex;
   flex-direction: row;
@@ -104,116 +103,6 @@
 
 .button-container button:active {
   transform: scale(0.95);
-}
-
-/* 팝업 입력 영역 */
-.popup-input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  margin-bottom: var(--spacing-medium);
-}
-
-.popup-input-wrapper .popup-input {
-  flex: 1;
-  height: 48px;
-  padding: 0 16px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-color);
-  font-size: var(--font-size-medium);
-}
-
- 
-.popup-input-wrapper .button-primary:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.popup-input-wrapper .button-primary:active {
-  transform: scale(0.95);
-}
-
-/* 설정 팝업 */
-.settings-popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.settings-content {
-  background: var(--background-dark);
-  padding: var(--spacing-large);
-  border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-/* 설정 버튼 */
-.settings-button {
-  width: var(--touch-target-size);
-  height: var(--touch-target-size);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #FFFFFF;
-  background-color: var(--primary-color);
-  border: none;
-  border-radius: 8px;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.settings-button svg {
-  width: 24px;
-  height: 24px;
-  stroke: #FFFFFF;
-  stroke-width: 2.5;
-}
-
-.settings-button:active {
-  opacity: 0.8;
-}
-
-/* 우선순위 선택 */
-.priority-select {
-  width: 100%;
-  padding: 12px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-color);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: var(--spacing-medium);
-  position: relative;
-  z-index: 1;
-}
-
-.priority-select option {
-  background: var(--background-dark);
-  color: var(--text-color);
-  padding: 12px;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  margin-top: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 2;
 }
 
 /* 색상 선택 옵션 */
@@ -273,4 +162,3 @@
   background-color: var(--primary-color);
   border-color: var(--primary-color);
 }
-
