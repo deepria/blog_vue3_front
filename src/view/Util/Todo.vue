@@ -63,6 +63,7 @@
               fontWeight: 700,
               margin: '12px 0 6px',
               letterSpacing: '0.5px',
+              transform: `translateY(${dragOffset}px)`,
             }"
           >
             {{ getGroupNameByKey(item.groupKey) }}
@@ -276,6 +277,8 @@ import "@/assets/styles/todo.css";
 const GRID_BG_ALPHA = 0.32; // 공통 투명도(가시성 강화)
 const GLOW_BLUR_PX = 3; // 형광 효과 번짐(픽셀)
 const GLOW_ALPHA = 0.28; // 형광 효과 투명도(낮출수록 약해짐)
+const ITEM_ROW_HEIGHT = 50; // px, list item height used for drag bounds
+const HEADER_ROW_HEIGHT = 28; // px, group header height used for drag bounds
 
 const hexToRgb = (hex) => {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || "");
@@ -626,10 +629,14 @@ const onDrag = (e) => {
   const newOffset = dragOffset.value + delta;
 
   const maxOffset = 0;
-  const minOffset = -(
-    sortedItems.value.length * 50 -
-    (70 * window.innerHeight) / 100
-  );
+  // Estimate total content height = items + headers
+  const groupCount = Array.from(
+    new Set(sortedItems.value.map((it) => it.groupKey)),
+  ).length;
+  const totalHeight =
+    sortedItems.value.length * ITEM_ROW_HEIGHT + groupCount * HEADER_ROW_HEIGHT;
+  const viewportHeight = (70 * window.innerHeight) / 100; // matches existing layout usage
+  const minOffset = -(totalHeight - viewportHeight);
 
   if (newOffset <= maxOffset && newOffset >= minOffset) {
     dragOffset.value = newOffset;
