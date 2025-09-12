@@ -1,6 +1,9 @@
 <template>
   <div class="todo-container">
     <div class="button-container">
+      <button class="refresh-button" @click="refresh()">
+        <i class="fa-solid fa-rotate refresh-icon"></i>
+      </button>
       <button @click="saveTodos">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -97,24 +100,23 @@
         </div>
       </transition-group>
     </div>
-
+  </div>
+  <teleport to="body">
     <div v-if="showPopup" class="popup" @click.self="showPopup = false">
       <div class="popup-content">
-        <label>내용 수정:</label>
-        <input
-          v-model="selectedItem.text"
-          class="styled-input"
-          placeholder="내용을 입력하세요"
-        />
+        <div class="grid-input">
+          <select v-model="selectedItem.group" class="styled-input">
+            <option value="low">낮음</option>
+            <option value="medium">보통</option>
+            <option value="high">높음</option>
+          </select>
+          <select v-model="selectedItem.priority" class="styled-input">
+            <option value="low">낮음</option>
+            <option value="medium">보통</option>
+            <option value="high">높음</option>
+          </select>
+        </div>
 
-        <label>중요도:</label>
-        <select v-model="selectedItem.priority" class="styled-input">
-          <option value="low">낮음</option>
-          <option value="medium">보통</option>
-          <option value="high">높음</option>
-        </select>
-
-        <label>그룹:</label>
         <div class="color-options">
           <label
             v-for="(color, index) in colorOptions"
@@ -133,6 +135,12 @@
           </label>
         </div>
 
+        <textarea
+          v-model="selectedItem.text"
+          class="styled-input"
+          placeholder="내용을 입력하세요"
+        />
+
         <div class="popup-buttons" style="margin-top: 24px">
           <button class="button-secondary" @click="closePopup()">취소</button>
           <button class="button-primary" @click="showPopup = false">
@@ -141,7 +149,53 @@
         </div>
       </div>
     </div>
-  </div>
+  </teleport>
+  <!--    <div v-if="showPopup" class="popup" @click.self="showPopup = false">-->
+  <!--      <div class="popup-content">-->
+  <!--        <div class="grid-input">-->
+  <!--          <select v-model="selectedItem.group" class="styled-input">-->
+  <!--            <option value="low">낮음</option>-->
+  <!--            <option value="medium">보통</option>-->
+  <!--            <option value="high">높음</option>-->
+  <!--          </select>-->
+  <!--          <select v-model="selectedItem.priority" class="styled-input">-->
+  <!--            <option value="low">낮음</option>-->
+  <!--            <option value="medium">보통</option>-->
+  <!--            <option value="high">높음</option>-->
+  <!--          </select>-->
+  <!--        </div>-->
+  <!--        <div class="color-options">-->
+  <!--          <label-->
+  <!--            v-for="(color, index) in colorOptions"-->
+  <!--            :key="index"-->
+  <!--            class="color-label"-->
+  <!--          >-->
+  <!--            <input-->
+  <!--              type="radio"-->
+  <!--              v-model="selectedItem.color"-->
+  <!--              :value="color.value"-->
+  <!--            />-->
+  <!--            <span-->
+  <!--              class="color-icon"-->
+  <!--              :style="{ backgroundColor: color.value }"-->
+  <!--            ></span>-->
+  <!--          </label>-->
+  <!--        </div>-->
+
+  <!--        <textarea-->
+  <!--          v-model="selectedItem.text"-->
+  <!--          class="styled-input"-->
+  <!--          placeholder="내용을 입력하세요"-->
+  <!--        />-->
+
+  <!--        <div class="popup-buttons" style="margin-top: 24px">-->
+  <!--          <button class="button-secondary" @click="closePopup()">취소</button>-->
+  <!--          <button class="button-primary" @click="showPopup = false">-->
+  <!--            확인-->
+  <!--          </button>-->
+  <!--        </div>-->
+  <!--      </div>-->
+  <!--    </div>-->
 </template>
 
 <script setup>
@@ -157,7 +211,6 @@ const selectedItem = ref(null);
 const isNewItem = ref(false);
 
 const showPopup = ref(false);
-
 const dragStartY = ref(0);
 const dragOffset = ref(0);
 const isDragging = ref(false);
@@ -179,6 +232,10 @@ const priorityOrder = {
   low: 1,
 };
 
+onMounted(async () => {
+  await loadItems();
+});
+
 watch(showPopup, async (newVal) => {
   if (newVal) {
     await nextTick();
@@ -186,16 +243,29 @@ watch(showPopup, async (newVal) => {
   }
 });
 
-onMounted(async () => {
-  await loadItems();
-});
-
 const loadItems = async () => {
   try {
     items.value = await getData("todo", "todo");
   } catch (error) {
     console.error("데이터 로드 실패:", error);
-    message.error("데이터를 불러오는데 실패했습니다.");
+    message.warn("데이터를 불러오는데 실패했습니다.");
+  }
+};
+const saveTodos = async () => {
+  try {
+    await postData("todo", "todo", "todo", JSON.stringify(items.value));
+    message.success("저장되었습니다.");
+  } catch (error) {
+    console.error("저장 실패:", error);
+    message.error("저장에 실패했습니다.");
+  }
+};
+const refresh = async () => {
+  try {
+    await loadItems();
+  } catch (error) {
+    console.error("refresh error:", error);
+    message.warn("Failed to refresh .").then();
   }
 };
 const sortedItems = computed(() => {
@@ -209,7 +279,6 @@ const sortedItems = computed(() => {
     return priorityOrder[b.priority] - priorityOrder[a.priority];
   });
 });
-
 const openSettings = (item) => {
   if (!item) {
     const newItem = {
@@ -227,7 +296,6 @@ const openSettings = (item) => {
   }
   showPopup.value = true;
 };
-
 const closePopup = () => {
   if (isNewItem.value) {
     items.value.shift();
@@ -236,17 +304,6 @@ const closePopup = () => {
   isNewItem.value = false;
   selectedItem.value = null;
 };
-
-const saveTodos = async () => {
-  try {
-    await postData("todo", "todo", "todo", JSON.stringify(items.value));
-    message.success("저장되었습니다.");
-  } catch (error) {
-    console.error("저장 실패:", error);
-    message.error("저장에 실패했습니다.");
-  }
-};
-
 const toggleCompletion = (item) => {
   if (item.completed) {
     setTimeout(() => {
@@ -257,12 +314,10 @@ const toggleCompletion = (item) => {
     }, 300);
   }
 };
-
 const startDrag = (e) => {
   isDragging.value = true;
   dragStartY.value = e.touches ? e.touches[0].clientY : e.clientY;
 };
-
 const onDrag = (e) => {
   if (!isDragging.value) return;
 
@@ -282,7 +337,6 @@ const onDrag = (e) => {
 
   dragStartY.value = currentY;
 };
-
 const endDrag = () => {
   isDragging.value = false;
 };

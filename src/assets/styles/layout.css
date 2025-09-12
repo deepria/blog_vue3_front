@@ -9,6 +9,19 @@
     user-select: none;
 }
 
+/* 폼 컨트롤에는 선택/콜아웃 허용 (오버라이드) */
+input, select, textarea, button, label, [role="button"] {
+    -webkit-user-select: auto !important;
+    user-select: auto !important;
+    -webkit-touch-callout: default !important;
+}
+
+/* iOS에서 네이티브 select 피커 사용 */
+select.styled-input {
+    -webkit-appearance: menulist;
+    appearance: auto;
+}
+
 html {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
@@ -16,7 +29,7 @@ html {
 
 html, body {
     height: 100%;
-    overflow: hidden;
+    overflow: auto;
     background-color: var(--background-dark);
     color: var(--text-color);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
@@ -24,6 +37,9 @@ html, body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+
+/* 모달 오픈 시에만 스크롤 락 */
+body.no-scroll { overflow: hidden; }
 
 /* 링크 스타일 */
 a {
@@ -149,31 +165,41 @@ button,
 /* 공통 팝업 스타일 */
 .popup {
     position: fixed;
-    top: 0;
-    left: 0;
+    /*top: 0;*/
+    /*left: 0;*/
     width: 100%;
     height: 100%;
+    inset: 0;
     background: rgba(0, 0, 0, 0.7);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
-    overflow: hidden;
+    z-index: 2147483647;
+    /*overflow: hidden;*/
 }
 
 .popup-content {
     background: var(--background-dark);
-    padding: var(--spacing-large);
+    padding: var(--spacing-medium);
     border-radius: 12px;
     width: 90%;
     max-width: 400px;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+    /*top: 50%;*/
+    /*left: 50%;*/
+    /*position: fixed;*/
+    /*transform: translate(-50%, -50%);*/
+}
+
+.popup-content > div { margin-bottom: var(--spacing-medium); }
+
+.grid-input {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-small);
 }
 
 /* 공통 입력 필드 스타일 */
@@ -185,8 +211,9 @@ button,
     color: var(--text-color);
     margin-bottom: var(--spacing-medium);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 1;
 }
-
 
 /* 공통 팝업 버튼 스타일 */
 .popup-buttons {
