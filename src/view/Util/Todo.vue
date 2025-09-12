@@ -20,7 +20,7 @@
           <polyline points="7 3 7 8 15 8"></polyline>
         </svg>
       </button>
-      <button @click="showPopup = true">
+      <button @click="openSettings(null)">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -37,35 +37,6 @@
         </svg>
       </button>
     </div>
-
-    <div v-if="showPopup" class="popup" @click.self="showPopup = false">
-      <div class="popup-content">
-        <div class="popup-input-wrapper">
-          <input
-            class="popup-input"
-            ref="inputRef"
-            v-model="inputText"
-            placeholder="입력하세요"
-          />
-          <button class="button-primary" @click="confirmInput">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
     <div
       class="item-container"
       @mousedown="startDrag"
@@ -127,11 +98,7 @@
       </transition-group>
     </div>
 
-    <div
-      v-if="showSettingsPopup"
-      class="popup"
-      @click.self="showSettingsPopup = false"
-    >
+    <div v-if="showPopup" class="popup" @click.self="showPopup = false">
       <div class="popup-content">
         <label>내용 수정:</label>
         <input
@@ -167,10 +134,8 @@
         </div>
 
         <div class="popup-buttons" style="margin-top: 24px">
-          <button class="button-secondary" @click="showSettingsPopup = false">
-            취소
-          </button>
-          <button class="button-primary" @click="showSettingsPopup = false">
+          <button class="button-secondary" @click="closePopup()">취소</button>
+          <button class="button-primary" @click="showPopup = false">
             확인
           </button>
         </div>
@@ -186,22 +151,16 @@ import { message } from "ant-design-vue";
 import "@/assets/styles/layout.css";
 import "@/assets/styles/todo.css";
 
-const showPopup = ref(false);
-const inputText = ref("");
 const items = ref([]);
 const inputRef = ref(null);
-const showSettingsPopup = ref(false);
 const selectedItem = ref(null);
+const isNewItem = ref(false);
+
+const showPopup = ref(false);
+
 const dragStartY = ref(0);
 const dragOffset = ref(0);
 const isDragging = ref(false);
-
-watch(showPopup, async (newVal) => {
-  if (newVal) {
-    await nextTick();
-    inputRef.value?.focus();
-  }
-});
 
 const colorOptions = ref([
   { value: "#664040", label: "빨강" },
@@ -211,7 +170,7 @@ const colorOptions = ref([
   { value: "#404066", label: "파랑" },
   { value: "#4B4060", label: "남색" },
   { value: "#604066", label: "보라" },
-  { value: "#1A1A1A", label: "검정" },
+  { value: "#0D0D0D", label: "검정" },
 ]);
 
 const priorityOrder = {
@@ -220,6 +179,25 @@ const priorityOrder = {
   low: 1,
 };
 
+watch(showPopup, async (newVal) => {
+  if (newVal) {
+    await nextTick();
+    inputRef.value?.focus();
+  }
+});
+
+onMounted(async () => {
+  await loadItems();
+});
+
+const loadItems = async () => {
+  try {
+    items.value = await getData("todo", "todo");
+  } catch (error) {
+    console.error("데이터 로드 실패:", error);
+    message.error("데이터를 불러오는데 실패했습니다.");
+  }
+};
 const sortedItems = computed(() => {
   return [...items.value].sort((a, b) => {
     if (a.color !== b.color) {
@@ -232,6 +210,43 @@ const sortedItems = computed(() => {
   });
 });
 
+const openSettings = (item) => {
+  if (!item) {
+    const newItem = {
+      id: Date.now(),
+      text: "",
+      priority: "medium",
+      completed: false,
+      color: "#121212",
+    };
+    items.value.unshift(newItem);
+    selectedItem.value = newItem;
+    isNewItem.value = true;
+  } else {
+    selectedItem.value = item;
+  }
+  showPopup.value = true;
+};
+
+const closePopup = () => {
+  if (isNewItem.value) {
+    items.value.shift();
+  }
+  showPopup.value = false;
+  isNewItem.value = false;
+  selectedItem.value = null;
+};
+
+const saveTodos = async () => {
+  try {
+    await postData("todo", "todo", "todo", JSON.stringify(items.value));
+    message.success("저장되었습니다.");
+  } catch (error) {
+    console.error("저장 실패:", error);
+    message.error("저장에 실패했습니다.");
+  }
+};
+
 const toggleCompletion = (item) => {
   if (item.completed) {
     setTimeout(() => {
@@ -241,27 +256,6 @@ const toggleCompletion = (item) => {
       }
     }, 300);
   }
-};
-
-const confirmInput = () => {
-  if (!inputText.value.trim()) return;
-
-  const newItem = {
-    id: Date.now(),
-    text: inputText.value,
-    priority: "medium",
-    completed: false,
-    color: "#121212",
-  };
-
-  items.value.unshift(newItem);
-  inputText.value = "";
-  showPopup.value = false;
-};
-
-const openSettings = (item) => {
-  selectedItem.value = item;
-  showSettingsPopup.value = true;
 };
 
 const startDrag = (e) => {
@@ -291,28 +285,5 @@ const onDrag = (e) => {
 
 const endDrag = () => {
   isDragging.value = false;
-};
-
-const loadItems = async () => {
-  try {
-    items.value = await getData("todo", "todo");
-  } catch (error) {
-    console.error("데이터 로드 실패:", error);
-    message.error("데이터를 불러오는데 실패했습니다.");
-  }
-};
-
-onMounted(async () => {
-  await loadItems();
-});
-
-const saveTodos = async () => {
-  try {
-    await postData("todo", "todo", "todo", JSON.stringify(items.value));
-    message.success("저장되었습니다.");
-  } catch (error) {
-    console.error("저장 실패:", error);
-    message.error("저장에 실패했습니다.");
-  }
 };
 </script>
