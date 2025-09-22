@@ -414,11 +414,6 @@ const removePriority = (idx) => {
 };
 
 // --- Group color helpers ---
-const getGroupColorByKey = (groupKey) => {
-  const g = groupOptions.value.find((x) => x.key === groupKey);
-  return g?.color || "#121212";
-};
-
 const getGroupNameByKey = (groupKey) => {
   const g = groupOptions.value.find((x) => x.key === groupKey);
   return g?.name || "기타";
@@ -610,14 +605,6 @@ const openSettings = (item) => {
     ensureValidSelection();
   }
   showPopup.value = true;
-};
-const closePopup = () => {
-  if (isNewItem.value) {
-    items.value.shift();
-  }
-  showPopup.value = false;
-  isNewItem.value = false;
-  selectedItem.value = null;
 };
 const toggleCompletion = (item) => {
   if (item.completed) {
