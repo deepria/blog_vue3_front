@@ -9,7 +9,7 @@ import Save from "@/view/Legacy/Save.vue";
 import Upload from "@/view/Util/Upload.vue";
 import Todo from "@/view/Util/Todo.vue";
 import S3 from "@/view/Util/S3.vue";
-import CCA from "@/view/Util/CreditCardAnalysis.vue";
+import Filter from "@/view/Util/Filter.vue";
 import Index from "@/view/Index.vue";
 // 라우트 정의
 const routes = [
@@ -49,9 +49,9 @@ const routes = [
     component: Todo,
   },
   {
-    path: "/cca",
-    name: "CCA",
-    component: CCA,
+    path: "/filter",
+    name: "Filter",
+    component: Filter,
   },
   {
     path: "/upload",
