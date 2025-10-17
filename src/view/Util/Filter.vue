@@ -1,6 +1,6 @@
 <template>
-  <div class="p-4 max-w-4xl mx-auto space-y-4">
-    <h1 class="text-xl font-bold">로그 단어 필터 (프론트 전용)</h1>
+  <div class="container space-y-4">
+    <h1 class="text-xl font-bold">로그 단어 필터</h1>
 
     <!-- 1) File input -->
     <div class="space-y-2">
@@ -24,22 +24,24 @@
           type="number"
           v-model.number="minWordLength"
           min="1"
-          class="w-20 border rounded px-2 py-1"
+          class="styled-input"
+          style="max-width: 6rem"
         />
       </label>
       <label class="flex items-center gap-2">
         <input type="checkbox" v-model="excludeNumbers" /> 숫자 제외
       </label>
       <button
-        class="px-3 py-1.5 rounded bg-black text-white disabled:opacity-50"
+        class="button-primary"
         :disabled="loading || !file"
         @click="analyze"
+        type="button"
       >
         {{ loading ? "분석 중…" : "단어 분석 실행" }}
       </button>
       <label class="flex items-center gap-2">
         <span class="text-sm">통계 정렬 기준</span>
-        <select v-model="sortMode" class="border rounded px-2 py-1">
+        <select v-model="sortMode" class="styled-input">
           <option value="length">길이(내림차순)</option>
           <option value="freq">빈도(내림차순)</option>
           <option value="alpha">알파벳(A→Z)</option>
@@ -75,13 +77,17 @@
         <input
           v-model="manualWord"
           placeholder="단어 수동 추가…"
-          class="border rounded px-2 py-1"
+          class="styled-input"
           @keyup.enter="addManual"
         />
-        <button class="px-3 py-1.5 rounded border" @click="addManual">
+        <button class="button-secondary" @click="addManual" type="button">
           추가
         </button>
-        <button class="px-3 py-1.5 rounded border" @click="selected.clear()">
+        <button
+          class="button-secondary"
+          @click="selected.clear()"
+          type="button"
+        >
           선택 해제
         </button>
       </div>
@@ -91,9 +97,10 @@
     <div v-if="file && (selected.size > 0 || analyzed)" class="space-y-3">
       <div class="flex items-center gap-3">
         <button
-          class="px-3 py-1.5 rounded bg-blue-600 text-white disabled:opacity-50"
+          class="button-primary"
           :disabled="!file || selected.size === 0 || filtering"
           @click="makePreview"
+          type="button"
         >
           {{ filtering ? "필터링 중…" : "미리보기 생성" }}
         </button>
@@ -105,7 +112,7 @@
           v-if="downloadUrl"
           :href="downloadUrl"
           download="cleaned.log"
-          class="px-3 py-1.5 rounded border"
+          class="button-secondary"
           >cleaned.log 다운로드</a
         >
       </div>
@@ -136,11 +143,24 @@
             @keyup.enter="applySearch"
           />
           <div class="topbar-actions">
-            <button class="btn" @click="applySearch">검색</button>
+            <label class="ctx-ctl">
+              <span class="ctx-label">전후 라인</span>
+              <input
+                type="number"
+                min="0"
+                max="50"
+                v-model.number="contextRadius"
+                class="ctx-input"
+              />
+            </label>
+            <button class="button-primary" @click="applySearch" type="button">
+              검색
+            </button>
             <button
-              class="btn btn-border"
+              class="button-secondary"
               v-if="searchQuery"
               @click="clearSearch"
+              type="button"
             >
               초기화
             </button>
@@ -148,15 +168,50 @@
               v-if="downloadUrl"
               :href="downloadUrl"
               download="cleaned.log"
-              class="btn btn-border"
+              class="button-secondary"
               >cleaned.log 다운로드</a
             >
-            <button class="btn" @click="showPreview = false">닫기</button>
+            <button
+              class="button-secondary"
+              @click="showPreview = false"
+              type="button"
+            >
+              닫기
+            </button>
           </div>
         </div>
-        <div class="modal-body">
-          <template v-if="filteredPreview.length">
-            <pre class="preview-pre" v-html="highlightedPreview"></pre>
+        <div
+          class="modal-body"
+          tabindex="0"
+          ref="modalBodyRef"
+          @keydown="onModalKey"
+        >
+          <template v-if="renderItems.length">
+            <div class="preview-lines">
+              <template v-for="(it, idx) in renderItems" :key="it.key">
+                <div
+                  v-if="it.type === 'line'"
+                  class="line-row"
+                  v-html="it.html"
+                ></div>
+                <div
+                  v-else-if="it.type === 'sep-top'"
+                  class="sep-row"
+                  @click="expandAbove(it.anchor)"
+                  title="경계선 클릭: 위로 5줄 확장"
+                >
+                  <div class="wavy-sep"></div>
+                </div>
+                <div
+                  v-else-if="it.type === 'sep-bottom'"
+                  class="sep-row"
+                  @click="expandBelow(it.anchor)"
+                  title="경계선 클릭: 아래로 5줄 확장"
+                >
+                  <div class="wavy-sep"></div>
+                </div>
+              </template>
+            </div>
           </template>
           <template v-else>
             <div class="empty-state">
@@ -170,7 +225,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, nextTick } from "vue";
 
 const file = ref(null);
 const loading = ref(false);
@@ -191,6 +246,19 @@ const showPreview = ref(false);
 const keptAll = ref([]); // full kept lines after filtering
 const searchQuery = ref("");
 const searchDraft = ref("");
+
+// Modal controls for preview
+const modalBodyRef = ref(null);
+const contextRadius = ref(0); // experimental context lines around matches
+
+function focusModalBodySoon() {
+  nextTick(() => {
+    try {
+      modalBodyRef.value && modalBodyRef.value.focus();
+    } catch {}
+  });
+}
+
 function applySearch() {
   searchQuery.value = (searchDraft.value || "").trim();
 }
@@ -217,6 +285,7 @@ const formatBytes = (n) => {
 function onPick(e) {
   resetAll();
   file.value = e.target.files?.[0] || null;
+  extraIdxs.value = new Set();
 }
 
 function resetAll() {
@@ -333,13 +402,42 @@ async function makePreview() {
   downloadUrl.value = URL.createObjectURL(blob);
   filtering.value = false;
   showPreview.value = true;
+  focusModalBodySoon();
 }
 
-const filteredPreview = computed(() => {
-  if (!searchQuery.value) return keptAll.value;
-  const q = searchQuery.value.toLowerCase();
-  return keptAll.value.filter((l) => l.toLowerCase().includes(q));
-});
+function onModalKey(e) {
+  const el = modalBodyRef.value;
+  if (!el) return;
+  const lineHeight = 24; // px
+  const page = Math.max(0, el.clientHeight - 40);
+
+  switch (e.key) {
+    case "PageDown":
+      el.scrollTop += page;
+      e.preventDefault();
+      break;
+    case "PageUp":
+      el.scrollTop -= page;
+      e.preventDefault();
+      break;
+    case "ArrowDown":
+      el.scrollTop += lineHeight;
+      e.preventDefault();
+      break;
+    case "ArrowUp":
+      el.scrollTop -= lineHeight;
+      e.preventDefault();
+      break;
+    case "Home":
+      el.scrollTop = 0;
+      e.preventDefault();
+      break;
+    case "End":
+      el.scrollTop = el.scrollHeight;
+      e.preventDefault();
+      break;
+  }
+}
 
 function escapeHtml(s) {
   return s
@@ -354,21 +452,102 @@ function escapeRegExpLite(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, (r) => `\\${r}`);
 }
 
-const highlightedPreview = computed(() => {
-  const lines = filteredPreview.value;
-  if (!lines || !lines.length) return "";
-  const q = (searchQuery.value || "").trim();
-  if (!q) {
-    // just escaped text
-    return escapeHtml(lines.join("\n"));
+const baseMatchedIdxs = computed(() => {
+  const lines = keptAll.value;
+  const q = (searchQuery.value || "").toLowerCase();
+  const radius = Number(contextRadius.value) || 0;
+
+  if (!q) return new Set(lines.map((_, i) => i));
+
+  const idxs = new Set();
+  for (let i = 0; i < lines.length; i++) {
+    if ((lines[i] || "").toLowerCase().includes(q)) {
+      if (radius === 0) {
+        idxs.add(i);
+      } else {
+        const s = Math.max(0, i - radius);
+        const e = Math.min(lines.length - 1, i + radius);
+        for (let k = s; k <= e; k++) idxs.add(k);
+      }
+    }
   }
-  const re = new RegExp(escapeRegExpLite(q), "ig");
-  // escape then mark
-  const marked = lines.map((line) => {
-    const safe = escapeHtml(line);
-    return safe.replace(re, (m) => `<mark class="hl">${escapeHtml(m)}</mark>`);
-  });
-  return marked.join("\n");
+  return idxs;
+});
+
+const extraIdxs = ref(new Set());
+
+function expandAbove(anchor) {
+  const set = new Set(extraIdxs.value);
+  let added = 0;
+  for (let i = anchor - 1; i >= 0 && added < 5; i--) {
+    if (!set.has(i) && !baseMatchedIdxs.value.has(i)) {
+      set.add(i);
+      added++;
+    }
+  }
+  extraIdxs.value = set;
+}
+function expandBelow(anchor) {
+  const lines = keptAll.value;
+  const set = new Set(extraIdxs.value);
+  let added = 0;
+  for (let i = anchor + 1; i < lines.length && added < 5; i++) {
+    if (!set.has(i) && !baseMatchedIdxs.value.has(i)) {
+      set.add(i);
+      added++;
+    }
+  }
+  extraIdxs.value = set;
+}
+
+const renderIndices = computed(() => {
+  const u = new Set();
+  baseMatchedIdxs.value.forEach((i) => u.add(i));
+  extraIdxs.value.forEach((i) => u.add(i));
+  return Array.from(u).sort((a, b) => a - b);
+});
+
+const renderItems = computed(() => {
+  const items = [];
+  const indices = renderIndices.value;
+  const lines = keptAll.value;
+  const q = (searchQuery.value || "").trim();
+  const re = q ? new RegExp(escapeRegExpLite(q), "ig") : null;
+
+  if (indices.length === 0) return items;
+
+  const mergeGap = 2; // 작은 공백은 같은 블록으로 병합
+  const blocks = [];
+  let start = indices[0];
+  let prev = indices[0];
+  for (let k = 1; k < indices.length; k++) {
+    const cur = indices[k];
+    if (cur <= prev + 1 + mergeGap) {
+      prev = cur;
+    } else {
+      blocks.push([start, prev]);
+      start = cur;
+      prev = cur;
+    }
+  }
+  blocks.push([start, prev]);
+
+  for (const [s, e] of blocks) {
+    // TOP boundary
+    items.push({ type: "sep-top", key: `sep-top-${s}`, anchor: s });
+    // LINES
+    for (let i = s; i <= e; i++) {
+      const raw = lines[i] ?? "";
+      const safe = escapeHtml(raw);
+      const html = re
+        ? safe.replace(re, (m) => `<mark class="hl">${escapeHtml(m)}</mark>`)
+        : safe;
+      items.push({ type: "line", key: `line-${i}`, html });
+    }
+    // BOTTOM boundary
+    items.push({ type: "sep-bottom", key: `sep-bottom-${e}`, anchor: e });
+  }
+  return items;
 });
 </script>
 
@@ -376,16 +555,6 @@ const highlightedPreview = computed(() => {
 /* Basic sensible defaults (works without Tailwind) */
 * {
   box-sizing: border-box;
-}
-.p-4 {
-  padding: 1rem;
-}
-.max-w-4xl {
-  max-width: 64rem;
-}
-.mx-auto {
-  margin-left: auto;
-  margin-right: auto;
 }
 .space-y-4 > * + * {
   margin-top: 1rem;
@@ -429,15 +598,6 @@ const highlightedPreview = computed(() => {
 .text-gray-600 {
   color: #4b5563;
 }
-.bg-black {
-  background: #111827;
-}
-.bg-blue-600 {
-  background: #2563eb;
-}
-.text-white {
-  color: #fff;
-}
 .rounded {
   border-radius: 0.5rem;
 }
@@ -466,21 +626,6 @@ const highlightedPreview = computed(() => {
 .h-72 {
   height: 18rem;
 }
-.grid {
-  display: grid;
-}
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.md\:grid-cols-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-.lg\:grid-cols-4 {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-.gap-2 {
-  gap: 0.5rem;
-}
 .ml-auto {
   margin-left: auto;
 }
@@ -488,9 +633,6 @@ const highlightedPreview = computed(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.disabled\:opacity-50:disabled {
-  opacity: 0.5;
 }
 textarea,
 input[type="text"],
@@ -503,12 +645,7 @@ select {
 button {
   cursor: pointer;
 }
-button.border {
-  background: #fff;
-}
-.underline {
-  text-decoration: underline;
-}
+/* button.border and .underline removed as unused */
 
 /* New styles for word list layout */
 .word-list {
@@ -560,17 +697,6 @@ button.border {
   flex: 1;
   overflow: auto;
 }
-.preview-pre {
-  margin: 0;
-  padding: 0.75rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
-  font-size: 0.875rem;
-  white-space: pre-wrap; /* 줄바꿈 허용: 긴 라인도 화면에 표시됨 */
-  word-break: break-word; /* 너무 긴 토큰도 줄바꿈 */
-  color: #111; /* 텍스트 색상 명시 */
-  background: #fff; /* 배경을 확실히 흰색으로 */
-}
 
 .empty-state {
   padding: 1rem;
@@ -579,20 +705,62 @@ button.border {
 .modal-content {
   color: #111;
 }
-.btn {
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.5rem;
-  background: #111827;
-  color: #fff;
+
+.modal-content {
+  user-select: text;
 }
-.btn-border {
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  color: #111827;
+.ctx-ctl {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.ctx-label {
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+.ctx-input {
+  width: 4.5rem;
+}
+
+mark.hl {
+  background: #fde047;
+  color: #111;
+  padding: 0 0.1em;
+  border-radius: 0.2em;
+}
+
+.preview-lines {
+  padding: 0.25rem 0.75rem;
+}
+.line-row {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #111;
+}
+
+.line-row,
+.preview-lines {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+.sep-row {
+  display: flex;
+  justify-content: center;
+  padding: 0.25rem 0;
+}
+.wavy-sep {
+  width: 100%;
+  height: 0;
+  cursor: pointer;
+  border-top: 2px dashed #6b7280;
+}
+.wavy-sep:hover {
+  border-top-color: #374151;
 }
 </style>
-
-mark.hl { background: #fde047; color: #111; padding: 0 .1em; border-radius:
-.2em; }
