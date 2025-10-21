@@ -1,348 +1,384 @@
 <template>
-  <div class="index-page">
-    <h1 class="title">
-      <transition :name="dir.what" mode="out-in">
-        <span :key="idx.what" class="fix" :style="{ width: maxWhatLen + 'em' }">
-          {{ what[idx.what] }}
-        </span>
-      </transition>
-      <transition :name="dir.does" mode="out-in">
-        <span :key="idx.does" class="fix" :style="{ width: maxDoesLen + 'em' }">
-          {{ does[idx.does] }}
-        </span>
-      </transition>
-    </h1>
-
-    <div class="danmaku-container">
-      <div
-        v-for="a in active"
-        :key="a.item.id"
-        class="danmaku"
-        :ref="(el) => (danmakuRefs[a.item.id] = el)"
-        :style="{
-          top: `${a.line * GAP}%`,
-          background: `${a.item.color + 80}`,
-        }"
-        @click="onClickLine(a)"
-      >
-        <span
-          class="priority-icon"
-          :class="{
-            'text-red': a.item.priority === 'high',
-            'text-yellow': a.item.priority === 'medium',
-            'text-green': a.item.priority === 'low',
-          }"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            ></path>
-          </svg>
-        </span>
-        &nbsp;{{ a.item.text }}
-      </div>
-    </div>
-
-    <div v-if="selected" class="detail-modal" @click.self="selected = null">
-      <div class="detail-content">
-        <h2>상세 정보</h2>
-        <p>{{ selected.text }}</p>
-        <button @click="selected = null">닫기</button>
-      </div>
-    </div>
-  </div>
+  <div class="sketch"></div>
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, reactive, ref } from "vue";
-import { getData } from "@/services/dynamoService.js";
-import { animate, createDraggable, utils } from "animejs";
+//Created by kusakari
+//https://twitter.com/kusakarism
 
-// Constants
-const GAP = 8;
-const NUM_LINE = Math.floor(100 / GAP);
-const MIN_DUR = 6;
-const MAX_DUR = 12;
-const VH = window.innerHeight;
+import { onMounted, onBeforeUnmount } from "vue";
 
-const randDur = () =>
-  +(Math.random() * (MAX_DUR - MIN_DUR) + MIN_DUR).toFixed(2);
-
-const blobs = ["", "", "", "", "", "", "", "", "", "", "", ""];
-
-// Data
-const what = ref(["그것", "순간", "영감", "아이디어", "문도"]);
-const does = ref(["저장한다.", "기억한다.", "기록한다.", "정리한다."]);
-
-const idx = reactive({ what: 0, does: 0 });
-const dir = reactive({ what: "slide-down", does: "slide-down" });
-
-const items = ref([]);
-const lineQueues = ref(Array.from({ length: NUM_LINE }, () => []));
-const active = ref([]);
-const danmakuRefs = reactive({});
-const selected = ref(null);
-
-// Lifecycle
-onMounted(async () => {
-  items.value = await getData("todo", "todo");
-  initQueues();
-  setInterval(shuffleTitle, 1500);
+// 🔧 p5 전역 모드에서 찾을 수 있도록 window에 바인딩
+onMounted(() => {
+  window.setup = setup;
+  window.draw = draw;
+  window.windowResized = windowResized;
 });
 
-// Computed
-const maxWhatLen = computed(
-  () => Math.max(...what.value.map((s) => s.length)) * 1.1,
-);
-const maxDoesLen = computed(
-  () => Math.max(...does.value.map((s) => s.length)) * 1.1,
-);
-
-// Functions
-function shuffleTitle() {
-  ["what", "does"].forEach((k) => {
-    const list = k === "what" ? what.value : does.value;
-    const next = Math.floor(Math.random() * list.length);
-    dir[k] = next > idx[k] ? "slide-down" : next < idx[k] ? "slide-up" : dir[k];
-    idx[k] = next;
-  });
-}
-
-function initQueues() {
-  lineQueues.value.forEach((q) => (q.length = 0));
-  items.value.forEach((it, i) => lineQueues.value[i % NUM_LINE].push(it));
-  for (let l = 0; l < NUM_LINE; l++) startNext(l);
-}
-
-function startNext(line) {
-  const q = lineQueues.value[line];
-  if (!q.length) return;
-  const item = q.shift();
-  active.value.push({ item, line });
-  nextTick(() => {
-    createRandomAnimation(item, line);
-  });
-}
-
-function handleEnd(line, id) {
-  const pos = active.value.findIndex((a) => a.item.id === id);
-  if (pos > -1) {
-    const [finished] = active.value.splice(pos, 1);
-    lineQueues.value[line].push(finished.item);
+onBeforeUnmount(() => {
+  // p5 스케치 정리(필요 시)
+  // 전역 모드에서는 모든 캔버스를 추적하기 어렵지만,
+  // 다음과 같이 마지막 생성 캔버스가 있다면 제거 가능:
+  if (window._renderer && typeof window._renderer.remove === "function") {
+    window._renderer.remove();
   }
-  startNext(line);
+});
+
+let _minW;
+let _maxW;
+let aryRegionRect = [];
+
+function setup() {
+  createCanvas(windowWidth, windowHeight, WEBGL);
+  colorMode(HSB, 360, 100, 100, 255);
+  setObject();
 }
 
-function onClickLine(a) {
-  const el = danmakuRefs[a.item.id];
-  if (el.ani.paused) {
-    el.ani.play();
-  } else {
-    el.ani.pause();
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  setObject();
+}
+
+function setObject() {
+  _minW = min(width, height) * 1;
+  _maxW = max(width, height) * 1;
+  ellipseMode(RADIUS);
+  rectMode(CENTER);
+  strokeWeight(((_minW / 800) * pixelDensity()) / 2);
+
+  aryRegionRect = [];
+
+  const numRegionRect = 1;
+  const regionClearanceRatio = 0.3;
+  const minRegionX = (-_minW / 2) * (1 - regionClearanceRatio);
+  const maxRegionX = (_minW / 2) * (1 - regionClearanceRatio);
+  const minRegionY = (-_minW / 2) * (1 - regionClearanceRatio);
+  const maxRegionY = (_minW / 2) * (1 - regionClearanceRatio);
+
+  for (let i = 0; i < numRegionRect; i++) {
+    aryRegionRect.push(
+      new RegionRect(minRegionX, maxRegionX, minRegionY, maxRegionY),
+    );
   }
-  utils.set(el, { z: 100 });
-  createDraggable(el, {
-    x: { mapTo: "rotateY", modifier: utils.wrap(-128, 128) },
-    y: { mapTo: "z" },
-  });
 }
 
-function createRandomAnimation(item, line) {
-  const el = danmakuRefs[item.id];
-  if (!el) return;
-  const du = Math.floor(Math.random() * 4001) + 4000;
-  const r = Math.floor(Math.random() * 4);
+class RegionRect {
+  constructor(minRegionX, maxRegionX, minRegionY, maxRegionY) {
+    this.minRegionX = minRegionX;
+    this.maxRegionX = maxRegionX;
+    this.minRegionY = minRegionY;
+    this.maxRegionY = maxRegionY;
+    this.setPolygon();
+  }
 
-  const priorityZMap = {
-    high: 0,
-    medium: 250,
-    low: 500,
-  };
-  const z = priorityZMap[item.priority] ?? 250;
+  setPolygon() {
+    const maxTrial = 100;
+    const numPolygon = 300;
+    const maxPolygonR =
+      min(
+        this.maxRegionX - this.minRegionX,
+        this.maxRegionY - this.minRegionY,
+      ) / 3;
+    const stepR = _minW / 500;
+    const shrink =
+      min(
+        this.maxRegionX - this.minRegionX,
+        this.maxRegionY - this.minRegionY,
+      ) / 400;
+    const palette = [];
+    this.aryPolygon = [];
+    this.aryAryCornerXy = [];
 
-  utils.set(el, {
-    z,
-    scale: 1 - z / 1000,
-    opacity: 1 - z / 800,
-  });
+    for (let i = 0; i < numPolygon; i++) {
+      let areaXy = setAreaXy(
+        this.minRegionX,
+        this.maxRegionX,
+        this.minRegionY,
+        this.maxRegionY,
+      );
+      const rotateAng = random(2 * PI);
+      const numCorner = int(random(3, 9));
+      const numInner = int(random(3, 10));
+      const hi = random(_minW / 200, (_minW / 200) * 10);
 
-  switch (r) {
-    case 0:
-      el.ani = animate(el, {
-        x: { from: "100vw", to: "-100vw" },
-        y: {
-          to: "50vw",
-          modifier: (v) => Math.cos(v) / 2, // Specific modifier to y property
-        },
-        duration: du,
-        onComplete: () => {
-          handleEnd(line, item.id);
-        },
-      });
+      if (i > 0) {
+        let isInside = checkInside(this.aryAryCornerXy, areaXy);
+        let countTrial = 0;
+        while (isInside === true) {
+          countTrial++;
+          areaXy = setAreaXy(
+            this.minRegionX,
+            this.maxRegionX,
+            this.minRegionY,
+            this.maxRegionY,
+          );
+          isInside = checkInside(this.aryAryCornerXy, areaXy);
+          if (countTrial > maxTrial) break;
+        }
+        if (countTrial > maxTrial) break;
+      }
+
+      const [aryCornerXy, areaR] = growPolygon(
+        numCorner,
+        this.aryAryCornerXy,
+        areaXy,
+        rotateAng,
+        maxPolygonR,
+        stepR,
+        this.minRegionX,
+        this.maxRegionX,
+        this.minRegionY,
+        this.maxRegionY,
+      );
+
+      if (areaR > 0) {
+        this.aryPolygon.push(
+          new AreaPolygon(
+            areaXy,
+            areaR,
+            rotateAng,
+            shrink,
+            palette,
+            numInner,
+            numCorner,
+            hi,
+          ),
+        );
+        this.aryAryCornerXy.push(aryCornerXy);
+      }
+    }
+  }
+
+  draw() {
+    push();
+    for (let i = 0; i < this.aryPolygon.length; i++) {
+      this.aryPolygon[i].draw();
+    }
+    pop();
+  }
+}
+
+function setAreaXy(minRegionX, maxRegionX, minRegionY, maxRegionY) {
+  return createVector(
+    random(minRegionX, maxRegionX),
+    random() * (maxRegionY - minRegionY) + minRegionY,
+  );
+}
+
+function growPolygon(
+  numCorner,
+  aryAryXyPolygon,
+  areaXy,
+  rotateAng,
+  maxPolygonR,
+  stepR,
+  minRegionX,
+  maxRegionX,
+  minRegionY,
+  maxRegionY,
+) {
+  let areaR = 0;
+  let isCross = false;
+  const stepAng = (2 * PI) / numCorner;
+
+  while (isCross === false) {
+    areaR += stepR;
+    let aryCornerXy = [];
+    for (let i = 0; i < numCorner; i++) {
+      aryCornerXy[i] = p5.Vector.add(
+        areaXy,
+        createVector(0, -areaR)
+          .rotate(stepAng * (i - 0.5))
+          .rotate(rotateAng),
+      );
+    }
+
+    for (let i = 0; i < aryAryXyPolygon.length; i++) {
+      for (let j = 0; j < aryAryXyPolygon[i].length; j++) {
+        const next_j = (j + 1) % aryAryXyPolygon[i].length;
+        for (let k = 0; k < numCorner; k++) {
+          const next_k = (k + 1) % numCorner;
+          if (
+            checkCrossLineSegment(
+              aryCornerXy[k],
+              aryCornerXy[next_k],
+              aryAryXyPolygon[i][j],
+              aryAryXyPolygon[i][next_j],
+            )
+          ) {
+            isCross = true;
+            break;
+          }
+        }
+        if (isCross) break;
+      }
+      if (isCross) break;
+    }
+
+    for (let i = 0; i < numCorner; i++) {
+      if (
+        aryCornerXy[i].x < minRegionX ||
+        aryCornerXy[i].x > maxRegionX ||
+        aryCornerXy[i].y < minRegionY ||
+        aryCornerXy[i].y > maxRegionY
+      ) {
+        isCross = true;
+      }
+    }
+
+    if (isCross === true) areaR -= stepR;
+    if (areaR > maxPolygonR) {
+      areaR = maxPolygonR;
       break;
-    case 1:
-      el.ani = animate(el, {
-        x: { from: "100vw", to: "5vw" },
-        duration: 400,
-        onComplete: () => {
-          el.ani = animate(el, {
-            x: { from: "5vw", to: "-100vw" },
-            duration: 6000,
-            onComplete: () => {
-              handleEnd(line, item.id);
-            },
-          });
-        },
-      });
-      break;
-    case 2:
-      el.ani = animate(el, {
-        x: { from: "100vw", to: "-100vw" },
-        duration: du,
-        onComplete: () => {
-          handleEnd(line, item.id);
-        },
-      });
-      break;
-    case 3:
-      el.ani = animate(el, {
-        rotate: {
-          to: 360,
-          duration: 1500,
-        },
-        x: { from: "100vw", to: "-100vw" },
-        y: {
-          to: "50vw",
-          modifier: (v) => Math.cos(v) / 2, // Specific modifier to y property
-        },
-        duration: du,
-        onComplete: () => {
-          handleEnd(line, item.id);
-        },
-      });
-      break;
+    }
+  }
+
+  const aryCornerXy = [];
+  for (let i = 0; i < numCorner; i++) {
+    aryCornerXy[i] = p5.Vector.add(
+      areaXy,
+      createVector(0, -areaR)
+        .rotate(stepAng * (i - 0.5))
+        .rotate(rotateAng),
+    );
+  }
+
+  return [aryCornerXy, areaR];
+}
+
+function checkCrossLineSegment(xy_a, xy_b, xy_c, xy_d) {
+  const vec_a_b = p5.Vector.sub(xy_b, xy_a);
+  const vec_a_c = p5.Vector.sub(xy_c, xy_a);
+  const vec_a_d = p5.Vector.sub(xy_d, xy_a);
+  const vec_c_d = p5.Vector.sub(xy_d, xy_c);
+  const vec_c_a = p5.Vector.sub(xy_a, xy_c);
+  const vec_c_b = p5.Vector.sub(xy_b, xy_c);
+  const cr_ab_ac = p5.Vector.cross(vec_a_b, vec_a_c);
+  const cr_ab_ad = p5.Vector.cross(vec_a_b, vec_a_d);
+  const cr_cd_ca = p5.Vector.cross(vec_c_d, vec_c_a);
+  const cr_cd_cb = p5.Vector.cross(vec_c_d, vec_c_b);
+  return cr_ab_ac.z * cr_ab_ad.z <= 0 && cr_cd_ca.z * cr_cd_cb.z <= 0;
+}
+
+function checkInside(aryAryXy, areaXy) {
+  let isInside = false;
+  for (let i = 0; i < aryAryXy.length; i++) {
+    for (let j = 0; j < aryAryXy[i].length; j++) {
+      const next_j = (j + 1) % aryAryXy[i].length;
+      const vec_a_b = p5.Vector.sub(aryAryXy[i][next_j], aryAryXy[i][j]);
+      const vec_a_c = p5.Vector.sub(areaXy, aryAryXy[i][j]);
+      const cr_ab_ac = p5.Vector.cross(vec_a_b, vec_a_c);
+      if (cr_ab_ac.z < 0) break;
+      else if (j === aryAryXy[i].length - 1) isInside = true;
+    }
+    if (isInside) break;
+  }
+  return isInside;
+}
+
+class AreaPolygon {
+  constructor(
+    areaXy,
+    areaR,
+    rotateAng,
+    shrink,
+    palette,
+    numInner,
+    numCorner,
+    hi,
+  ) {
+    this.areaXy = areaXy;
+    this.areaR = areaR;
+    this.rotateAng = rotateAng;
+    this.shrink = shrink;
+    this.r = this.areaR - this.shrink;
+    this.numCorner = numCorner;
+    this.stepAng = (2 * PI) / this.numCorner;
+    this.hi = hi;
+    this.hiStep = this.hi / 2;
+
+    this.palette = palette;
+    this.numInner = numInner;
+    this.setInner();
+  }
+
+  setInner() {
+    this.aryInnerR = [];
+    this.aryInnerAng = [];
+    this.aryGrad = [];
+    const stepR = (this.r / ((this.numInner + 1) * 2 - 1)) * 2;
+    for (let i = 0; i < this.numInner; i++) {
+      this.aryInnerR[i] = this.r - stepR * (i + 1);
+      this.aryInnerAng[i] =
+        ((2 * PI) / this.numCorner) * int(random(this.numCorner));
+    }
+  }
+
+  draw() {
+    if (this.r > 0) {
+      push();
+      fill(0, 0, 100);
+      stroke(0, 0, 0);
+      translate(this.areaXy.x, this.areaXy.y);
+      drawCylinder(this.numCorner, this.r, this.hi, this.rotateAng, 16);
+      pop();
+      this.drawInner();
+    }
+  }
+
+  drawInner() {
+    for (let i = 0; i < this.numInner; i++) {
+      push();
+      fill(0, 0, 100);
+      stroke(0, 0, 0);
+      translate(this.areaXy.x, this.areaXy.y, this.hi + this.hiStep * i);
+      drawCylinder(
+        this.numCorner,
+        this.aryInnerR[i],
+        this.hiStep,
+        this.rotateAng,
+        Math.round(1 + (15 * (1 - (1 / this.numInner) * (i + 1))) / 2),
+      );
+      pop();
+    }
+  }
+}
+
+function drawCylinder(numCorner, r, hi, rotateAng, detailY) {
+  push();
+  rotateX(PI / 2);
+  if (numCorner % 2 === 0) rotateY((-2 * PI) / numCorner / 2);
+  translate(0, hi / 2);
+  rotateY(rotateAng + PI);
+  cylinder(r, hi, numCorner + 1, detailY, true, true);
+  pop();
+}
+
+function draw() {
+  orbitControl();
+  background(0, 0, 0);
+  ortho(-width / 2, width / 2, -height / 2, height / 2, 0, width * 2);
+  translate(0, _minW / 10, 0);
+  rotateX(PI / 2 - PI / 6);
+  rotateZ(PI / 4);
+  rotateZ((frameCount - 1) * 0.003);
+
+  for (let i = 0; i < aryRegionRect.length; i++) {
+    aryRegionRect[i].draw();
   }
 }
 </script>
 
 <style scoped>
-.index-page {
-  position: relative;
-  overflow: hidden;
-  height: 90vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.title {
-  margin-bottom: 2rem;
-  font-size: 2rem;
-  color: #f0f0f0;
-  z-index: 900;
-}
-
-.fix {
-  white-space: nowrap;
-  vertical-align: top;
-  display: inline-block;
-  text-align: center;
-  overflow: hidden;
-}
-
-.danmaku-container {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 800;
-}
-
-.danmaku {
-  display: flex;
-  position: absolute;
-  //left: 100%;
-  white-space: nowrap;
-  padding: 8px 16px;
-  border-radius: 16px;
-  font-size: 1.1rem;
-  pointer-events: auto;
-  cursor: pointer;
-}
-
-.priority-icon.text-red {
-  color: #e63946;
-}
-
-.priority-icon.text-yellow {
-  color: #f1c40f;
-}
-
-.priority-icon.text-green {
-  color: #2ecc71;
-}
-
-.detail-modal {
+.sketch {
+  width: 100%;
+  height: 100%;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
 }
-
-.detail-content {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  max-width: 90%;
-}
-
-/* Title transition animations */
-.slide-down-enter-active,
-.slide-down-leave-active,
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition:
-    transform 0.4s,
-    opacity 0.4s;
-}
-.slide-down-enter-from {
-  transform: translateY(-100%);
-  opacity: 0;
-}
-.slide-down-leave-to {
-  transform: translateY(100%);
-  opacity: 0;
-}
-.slide-up-enter-from {
-  transform: translateY(100%);
-  opacity: 0;
-}
-.slide-up-leave-to {
-  transform: translateY(-100%);
-  opacity: 0;
-}
-</style>
-
-<style>
-@keyframes moveLeft {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(calc(-100vw - 100%));
-  }
+html,
+body,
+#app {
+  height: 100%;
 }
 </style>

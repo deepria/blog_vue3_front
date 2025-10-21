@@ -11,12 +11,18 @@ import Todo from "@/view/Util/Todo.vue";
 import S3 from "@/view/Util/S3.vue";
 import Filter from "@/view/Util/Filter.vue";
 import Index from "@/view/Index.vue";
+import IndexFlowTodo from "@/view/Legacy/IndexFlowTodo.vue";
 // 라우트 정의
 const routes = [
   {
     path: "/",
     name: "index",
     component: Index,
+  },
+  {
+    path: "/indexFlowTodo",
+    name: "indexFlowTodo",
+    component: IndexFlowTodo,
   },
   {
     path: "/homeView",
