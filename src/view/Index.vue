@@ -1,529 +1,641 @@
+<!--
+  Index.vue (Vue 3 + p5.js)
+
+  이 파일은 p5.js 스케치를 Vue 3 컴포넌트 안에서 실행하는 예제입니다.
+  - p5의 전역 콜백(window.setup/window.draw/window.windowResized)을 Vue 마운트 시점에 등록하여 루프를 구동합니다.
+  - createCanvas(..., WEBGL)로 3D 컨텍스트를 사용하며, 오소그래픽 카메라(ortho)로 평면적인 깊이를 연출합니다.
+  - 원본 알고리즘(다각형 성장 → 원기둥 적층 → 서서히 이동/소멸)을 최대한 보존하고, 모바일/WebView 안정화를 위해 DPR 제한과 리사이즈 동기화를 추가했습니다。
+-->
 <template>
-  <div class="sketch">
-    <canvas id="canvas2D"></canvas>
-    <canvas id="canvasWebGL"></canvas>
-  </div>
+  <!-- p5 캔버스를 parent()로 붙일 컨테이너. 전체 화면을 차지하도록 CSS에서 고정 레이아웃을 설정 -->
+  <div class="sketch"></div>
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount } from "vue";
+//작품 원작자 정보
+//Created by kusakari
+//https://twitter.com/kusakarism
 
-let rafId = null;
-let gl = null;
-let program = null;
-let vao = null; // WebGL2 only
-let pointCount = 0;
-let isWebGL2 = false;
+/*
+  [스크립트 개요]
+  - p5.js를 Vue 3 SFC 내부에서 사용하는 패턴.
+  - onMounted에서 window.setup/draw/windowResized에 콜백을 바인딩하여 p5 루프를 동작시킵니다.
+  - DPR(픽셀 밀도) 상한을 두어 모바일 WebView에서 과도한 해상도 연산을 방지합니다.
+  - setObject() → RegionRect → AreaPolygon 구조로, 영역을 분할/샘플링하여 다각형을 성장시키고,
+    각 다각형을 원기둥(cylinder) 형태로 적층하여 3D 구조를 만듭니다.
+*/
 
-// Adaptive density and point size
-let densityDiv = 2; // base: cols = width / densityDiv
-let pointSizePx = 1.0;
+// p5가 생성한 캔버스/렌더러 참조를 저장 (언마운트 시 제거에 사용)
+import { onBeforeUnmount, onMounted } from "vue";
 
-// Normalized speed and displacement for mobile/desktop
-let timeScale = 1.0; // multiplies motion speed inside shader
-let displaceWeight = 0.2; // base displacement weight
+let _renderer = null;
 
-// ------------------ Original GLSL (ES 3.00) ------------------
-// (kept exactly as your source intended)
-const snoise4D = `
-	/*
-		Description : Array and textureless GLSL 4D simplex
-		              noise functions.
-		     Author : Ian McEwan, Ashima Arts.
-		 Maintainer : stegu
-		    Lastmod : 20110822 (ijm)
-		    License : Copyright (C) 2011 Ashima Arts. All rights reserved.
-		              Distributed under the MIT License. See LICENSE file.
-		              https://github.com/ashima/webgl-noise
-		              https://github.com/stegu/webgl-noise
+function setup() {
+  // 1) p5 캔버스 생성: 3D 렌더러(WEBGL) 사용
+  _renderer = createCanvas(windowWidth, windowHeight, WEBGL);
 
-		Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-		The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-		THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-	*/
+  // 2) 모바일/WebView 안정화를 위한 DPR 상한(최대 2배)
+  //    - 너무 높은 DPR은 연산량과 메모리 소비를 급격히 올려 프레임 저하를 유발
+  pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
 
-	vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-	float mod289(float x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-	vec4 permute(vec4 x) { return mod289(((x*34.0)+10.0)*x); }
-	float permute(float x) { return mod289(((x*34.0)+10.0)*x); }
-	vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-	float taylorInvSqrt(float r) { return 1.79284291400159 - 0.85373472095314 * r; }
-
-	vec4 grad4(float j, vec4 ip) {
-		const vec4 ones = vec4(1.0, 1.0, 1.0, -1.0);
-		vec4 p,s;
-
-		p.xyz = floor( fract (vec3(j) * ip.xyz) * 7.0) * ip.z - 1.0;
-		p.w = 1.5 - dot(abs(p.xyz), ones.xyz);
-		s = vec4(lessThan(p, vec4(0.0)));
-		p.xyz = p.xyz + (s.xyz*2.0 - 1.0) * s.www;
-
-		return p;
-	}
-
-	#define F4 0.309016994374947451
-
-	float snoise(vec4 v) {
-		const vec4  C = vec4( 0.138196601125011,  // (5 - sqrt(5))/20  G4
-													0.276393202250021,  // 2 * G4
-													0.414589803375032,  // 3 * G4
-												-0.447213595499958);  // -1 + 4 * G4
-
-		vec4 i  = floor(v + dot(v, vec4(F4)) );
-		vec4 x0 = v -   i + dot(i, C.xxxx);
-
-		vec4 i0;
-		vec3 isX = step( x0.yzw, x0.xxx );
-		vec3 isYZ = step( x0.zww, x0.yyz );
-
-		i0.x = isX.x + isX.y + isX.z;
-		i0.yzw = 1.0 - isX;
-
-		i0.y += isYZ.x + isYZ.y;
-		i0.zw += 1.0 - isYZ.xy;
-		i0.z += isYZ.z;
-		i0.w += 1.0 - isYZ.z;
-
-		vec4 i3 = clamp( i0, 0.0, 1.0 );
-		vec4 i2 = clamp( i0-1.0, 0.0, 1.0 );
-		vec4 i1 = clamp( i0-2.0, 0.0, 1.0 );
-
-		vec4 x1 = x0 - i1 + C.xxxx;
-		vec4 x2 = x0 - i2 + C.yyyy;
-		vec4 x3 = x0 - i3 + C.zzzz;
-		vec4 x4 = x0 + C.wwww;
-
-		i = mod289(i);
-		float j0 = permute( permute( permute( permute(i.w) + i.z) + i.y) + i.x);
-		vec4 j1 = permute( permute( permute( permute (
-							i.w + vec4(i1.w, i2.w, i3.w, 1.0 ))
-						+ i.z + vec4(i1.z, i2.z, i3.z, 1.0 ))
-						+ i.y + vec4(i1.y, i2.y, i3.y, 1.0 ))
-						+ i.x + vec4(i1.x, i2.x, i3.x, 1.0 ));
-
-		vec4 ip = vec4(1.0/294.0, 1.0/49.0, 1.0/7.0, 0.0) ;
-
-		vec4 p0 = grad4(j0,   ip);
-		vec4 p1 = grad4(j1.x, ip);
-		vec4 p2 = grad4(j1.y, ip);
-		vec4 p3 = grad4(j1.z, ip);
-		vec4 p4 = grad4(j1.w, ip);
-
-		vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-		p0 *= norm.x;
-		p1 *= norm.y;
-		p2 *= norm.z;
-		p3 *= norm.w;
-		p4 *= taylorInvSqrt(dot(p4,p4));
-
-		vec3 m0 = max(0.6 - vec3(dot(x0,x0), dot(x1,x1), dot(x2,x2)), 0.0);
-		vec2 m1 = max(0.6 - vec2(dot(x3,x3), dot(x4,x4)            ), 0.0);
-		m0 = m0 * m0;
-		m1 = m1 * m1;
-		return 49.0 * ( dot(m0*m0, vec3( dot( p0, x0 ), dot( p1, x1 ), dot( p2, x2 )))
-								+ dot(m1*m1, vec2( dot( p3, x3 ), dot( p4, x4 ) ) ) ) ;
-	}
-`;
-
-const snoise4DImage = `
-	// MIT License
-	// Copyright © 2023 Zaron
-	// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-	// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-	vec4 snoise4DImage(vec2 uv, float scal, float gain, float ofst, vec4 move) {
-		uv *= scal;
-		float R = snoise(vec4(uv, 100., 200.)+move);
-		float G = snoise(vec4(uv, 300., 400.)+move);
-		float B = snoise(vec4(uv, 500., 600.)+move);
-		vec3 color = ofst+gain*vec3(R, G, B);
-		return vec4(color, 1.);
-	}
-
-	vec4 snoise4DImage(vec2 uv, float scal, float gain, float ofst, float expo, vec4 move) {
-		uv *= scal;
-		float R = snoise(vec4(uv, 100., 200.)+move);
-		float G = snoise(vec4(uv, 300., 400.)+move);
-		float B = snoise(vec4(uv, 500., 600.)+move);
-		vec3 col;
-		col.r = pow(abs(R), expo)*(step(0., R)*2.-1.);
-		col.g = pow(abs(G), expo)*(step(0., G)*2.-1.);
-		col.b = pow(abs(B), expo)*(step(0., B)*2.-1.);
-		return vec4(ofst+gain*col, 1.);
-	}
-`;
-
-const displace = `
-	// MIT License
-	// Copyright © 2023 Zaron
-	// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-	// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-	vec2 displace(vec2 uv, vec2 duv, float off, float wei) {
-		//uv.x *= iResolution.x/iResolution.y; // square
-		duv -= off;
-		return uv-duv*wei;
-	}
-
-	vec4 displace(vec2 uv, sampler2D img, vec2 duv, float off, float wei) {
-		duv -= off;
-		return texture(img, uv-duv*wei);
-	}
-`;
-
-const vert300 = `#version 300 es
-  in vec2 aPosition;
-  in vec2 aTexCoord;
-  uniform vec2 uRandomVec2;
-  uniform float uTime;
-  uniform float uPointSize;
-  uniform float uTimeScale;
-  uniform float uDisplaceWeight;
-  ${snoise4D}
-  ${snoise4DImage}
-  ${displace}
-  vec4 noise(vec2 uv, float scal, float gain, float ofst, float expo, vec4 move) {
-    vec4 noise;
-    noise  =     1.*snoise4DImage((uv-vec2(421., 132))*1., scal, gain, ofst, move);
-    noise +=     .5*snoise4DImage((uv-vec2(913., 687))*2., scal, gain, ofst, move);
-    noise +=    .25*snoise4DImage((uv-vec2(834., 724))*4., scal, gain, ofst, move);
-    noise +=   .125*snoise4DImage((uv-vec2(125., 209))*8., scal, gain, ofst, move);
-    noise +=  .0625*snoise4DImage((uv-vec2(387., 99))*16., scal, gain, ofst, move);
-    noise /= 1.9375;
-    return noise;
-  }
-  out vec2 vTexCoord;
-  out vec2 vCol;
-  void main() {
-    vTexCoord = aTexCoord;
-    vec2 pos = aPosition;
-    float circle = smoothstep(1., .0, length(0.-aPosition));
-    vec2 n = noise(pos, 2., 5., .5, 1., vec4(vec2(0.), vec2(cos(uTime*.5*uTimeScale), sin(uTime*.5*uTimeScale))+uRandomVec2)).rg*circle;
-    vec2 dpos = displace(pos, n, .5, uDisplaceWeight*circle);
-    vCol = n.rg*noise(pos*1000., 1., 1., .5, 1., vec4(0.)).r;
-    gl_Position = vec4(dpos, 0., 1.);
-    gl_PointSize = uPointSize;
-  }`;
-
-const frag300 = `#version 300 es
-  precision mediump float;
-  in vec2 vTexCoord;
-  in vec2 vCol;
-  out vec4 fragColor;
-  void main() {
-    vec2 uv = vTexCoord;
-    fragColor = vec4(vCol.rrr, 1.);
-  }`;
-
-// ------------------ WebGL1 fallback (GLSL ES 1.00) ------------------
-// Converted 1:1 from the ES 3.00 code above
-const vert100 = `
-  attribute vec2 aPosition;
-  attribute vec2 aTexCoord;
-  uniform vec2 uRandomVec2;
-  uniform float uTime;
-  uniform float uPointSize;
-  uniform float uTimeScale;
-  uniform float uDisplaceWeight;
-  varying vec2 vTexCoord;
-  varying vec2 vCol;
-  ${snoise4D}
-  ${snoise4DImage}
-  ${displace}
-  vec4 noise(vec2 uv, float scal, float gain, float ofst, float expo, vec4 move) {
-    vec4 noise;
-    noise  =     1.*snoise4DImage((uv-vec2(421., 132))*1., scal, gain, ofst, move);
-    noise +=     .5*snoise4DImage((uv-vec2(913., 687))*2., scal, gain, ofst, move);
-    noise +=    .25*snoise4DImage((uv-vec2(834., 724))*4., scal, gain, ofst, move);
-    noise +=   .125*snoise4DImage((uv-vec2(125., 209))*8., scal, gain, ofst, move);
-    noise +=  .0625*snoise4DImage((uv-vec2(387., 99))*16., scal, gain, ofst, move);
-    noise /= 1.9375;
-    return noise;
-  }
-  void main() {
-    vTexCoord = aTexCoord;
-    vec2 pos = aPosition;
-    float circle = smoothstep(1., .0, length(0.-aPosition));
-    vec2 n = noise(pos, 2., 5., .5, 1., vec4(vec2(0.), vec2(cos(uTime*.5*uTimeScale), sin(uTime*.5*uTimeScale))+uRandomVec2)).rg*circle;
-    vec2 dpos = displace(pos, n, .5, uDisplaceWeight*circle);
-    vCol = n.rg*noise(pos*1000., 1., 1., .5, 1., vec4(0.)).r;
-    gl_Position = vec4(dpos, 0., 1.);
-    gl_PointSize = uPointSize;
-  }`;
-
-const frag100 = `
-  precision mediump float;
-  varying vec2 vTexCoord;
-  varying vec2 vCol;
-  void main() {
-    vec2 uv = vTexCoord;
-    gl_FragColor = vec4(vCol.rrr, 1.0);
-  }`;
-
-onMounted(() => {
-  main();
-  window.addEventListener("resize", handleResize, { passive: true });
-});
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", handleResize);
-  if (rafId) cancelAnimationFrame(rafId);
-});
-
-async function main() {
-  const canvasGL = document.getElementById("canvasWebGL");
-  const canvas2D = document.getElementById("canvas2D");
-  if (!canvasGL || !canvas2D) return;
-
-  // Try WebGL2 first, then WebGL1
-  gl =
-    canvasGL.getContext("webgl2", {
-      alpha: false,
-      antialias: true,
-      premultipliedAlpha: false,
-      preserveDrawingBuffer: false,
-    }) ||
-    canvasGL.getContext("webgl", {
-      alpha: false,
-      antialias: true,
-      premultipliedAlpha: false,
-      preserveDrawingBuffer: false,
-    });
-  if (!gl) {
-    console.warn("WebGL not supported in this environment");
-    return;
-  }
-  isWebGL2 = gl instanceof WebGL2RenderingContext;
-
-  // ---- Diagnostics: which WebGL version/context are we using?
-  try {
-    const ctxName = isWebGL2 ? "WebGL2" : "WebGL1";
-    const version = gl.getParameter(gl.VERSION);
-    const shading = gl.getParameter(gl.SHADING_LANGUAGE_VERSION);
-    const renderer = gl.getParameter(gl.RENDERER);
-    const vendor = gl.getParameter(gl.VENDOR);
-    console.info(`[WebGL] Context: ${ctxName}`);
-    console.info(`[WebGL] VERSION: ${version}`);
-    console.info(`[WebGL] SHADING_LANGUAGE_VERSION: ${shading}`);
-    console.info(`[WebGL] RENDERER: ${renderer}`);
-    console.info(`[WebGL] VENDOR: ${vendor}`);
-  } catch (e) {
-    console.warn("[WebGL] Could not query context parameters:", e);
+  // 3) 생성된 p5 캔버스를 Vue 템플릿의 .sketch 컨테이너에 붙임
+  const host = document.querySelector(".sketch");
+  if (host && _renderer && typeof _renderer.parent === "function") {
+    _renderer.parent(host);
   }
 
-  program = gl.createProgram();
-  if (isWebGL2) {
-    setShader(gl, program, vert300, frag300);
-  } else {
-    setShader(gl, program, vert100, frag100);
-  }
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error("Program link error:", gl.getProgramInfoLog(program));
-    return;
-  }
-  gl.useProgram(program);
+  // 4) 색상 공간: HSB (채도/명도 조절에 직관적)
+  colorMode(HSB, 360, 100, 100, 255);
 
-  // WebGL2 requires VAO for attribute state
-  if (isWebGL2) {
-    vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
-  }
+  // 5) 프레임레이트: 원본 대비 살짝 안정적인 30fps
+  frameRate(30);
 
-  // Additive blending (filament effect)
-  gl.disable(gl.DEPTH_TEST);
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.ONE, gl.ONE);
-
-  // Uniforms
-  const uRandomVec2Loc = gl.getUniformLocation(program, "uRandomVec2");
-  const uTimeLoc = gl.getUniformLocation(program, "uTime");
-  const uPointSizeLoc = gl.getUniformLocation(program, "uPointSize");
-  const uTimeScaleLoc = gl.getUniformLocation(program, "uTimeScale");
-  const uDisplaceWeightLoc = gl.getUniformLocation(program, "uDisplaceWeight");
-  const randomVec2 = new Float32Array([
-    Math.random() * 300,
-    Math.random() * 300,
-  ]);
-  if (uRandomVec2Loc) gl.uniform2fv(uRandomVec2Loc, randomVec2);
-  // initialize point size (handleResize will refine based on device)
-  if (uPointSizeLoc) gl.uniform1f(uPointSizeLoc, pointSizePx || 1.5);
-  if (uTimeScaleLoc) gl.uniform1f(uTimeScaleLoc, timeScale);
-  if (uDisplaceWeightLoc) gl.uniform1f(uDisplaceWeightLoc, displaceWeight);
-
-  // Buffers
-  const positionData = [];
-  const texCoordData = [];
-
-  // initial size
-  handleResize();
-  // build buffers for current viewport size (use internal pixel size)
-  pointCount = buildBuffers(positionData, texCoordData);
-
-  // 2D layer setup
-  const ctx2d = canvas2D.getContext("2d", { alpha: false });
-  ctx2d.imageSmoothingEnabled = true;
-
-  // Draw loop
-  let time = 0;
-  const draw = () => {
-    gl.clearColor(0, 0, 0, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    if (uTimeLoc) gl.uniform1f(uTimeLoc, time);
-    if (uPointSizeLoc) gl.uniform1f(uPointSizeLoc, pointSizePx);
-    if (uTimeScaleLoc) gl.uniform1f(uTimeScaleLoc, timeScale);
-    if (uDisplaceWeightLoc) gl.uniform1f(uDisplaceWeightLoc, displaceWeight);
-    if (isWebGL2) gl.bindVertexArray(vao);
-    gl.drawArrays(gl.POINTS, 0, pointCount);
-
-    // Composite to 2D with faint trail
-    compositeTo2D(canvasGL, canvas2D);
-
-    time += 0.02;
-    rafId = requestAnimationFrame(draw);
-  };
-  draw();
+  // 6) 화면 크기/밀도 기반 파라미터 초기화 및 객체 생성
+  setObject();
 }
 
-function buildBuffers(positionData, texCoordData) {
-  positionData.length = 0;
-  texCoordData.length = 0;
-  // Use current drawingbuffer size (already DPR-scaled by handleResize)
-  const cols = Math.max(1, Math.floor(gl.drawingBufferWidth / densityDiv));
-  const rows = Math.max(1, Math.floor(gl.drawingBufferHeight / densityDiv));
-  const xOff = 2 / cols;
-  const yOff = 2 / rows;
-  const uOff = 1 / cols;
-  const vOff = 1 / rows;
-  for (let col = 0; col < cols; col++) {
-    for (let row = 0; row < rows; row++) {
-      // clip-space positions (-1..1)
-      positionData.push(-1 + xOff * col + 1 / cols);
-      positionData.push(1 - yOff * row - 1 / rows);
-      // UV (center of cell for stability)
-      texCoordData.push((col + 0.5) / cols);
-      texCoordData.push((row + 0.5) / rows);
+// ----- 전역 상태 변수 -----
+// _minW/_maxW: 현재 화면 크기에 기반한 최소/최대 치수 (스케일 기준)
+// _aryRegionRect: 화면에 표현될 RegionRect 인스턴스 목록
+// _aryRotate: 회전값 저장(원본 소스에서 사용하던 배열; 현재는 생성/애니메이션에 사용하지 않지만 보존)
+let _minW;
+let _maxW;
+let _aryRegionRect = [];
+let _aryRotate = [];
+
+/*
+  화면 크기와 픽셀 밀도(DPR)를 반영하여 그리기 모드/선 굵기를 설정하고,
+  사각형 영역(RegionRect)을 1개 생성합니다.
+  - _minW/_maxW: 스케일 기준
+  - strokeWeight: 해상도가 달라져도 선 두께가 비슷하게 보이도록 DPR 반영
+  - RegionRect: 내부에서 다각형을 생성/성장시키고, 원기둥으로 적층/이동 처리
+*/
+function setObject() {
+  _minW = min(width, height) * 1;
+  _maxW = max(width, height) * 1;
+
+  // 타원/사각형의 기준 모드 설정 (p5 3D에서도 2D 프리미티브 사용 가능)
+  ellipseMode(RADIUS);
+  rectMode(CENTER);
+
+  // 라인/면 스타일 기본값
+  stroke(0); // 검정 선
+  strokeWeight(((_minW / 800) * pixelDensity()) / 2); // 해상도 보정
+
+  // 생성 목록 초기화
+  _aryRegionRect = [];
+
+  // 표현할 영역 개수(원본은 1개). 필요 시 늘릴 수 있음
+  let numRegionRect = 1; // int(random(1,7)) 등으로 변형 가능
+
+  // 표현 영역: X는 전체 폭, Y는 정사각 기준의 70% 범위로 제한 (가시성/구도 안정화)
+  let minRegionX = (-width / 2) * 1;
+  let maxRegionX = (width / 2) * 1;
+  let minRegionY = (-_minW / 2) * 0.7;
+  let maxRegionY = (_minW / 2) * 0.7;
+
+  // RegionRect 인스턴스 생성
+  for (let i = 0; i < numRegionRect; i++) {
+    _aryRegionRect.push(
+      new RegionRect(minRegionX, maxRegionX, minRegionY, maxRegionY),
+    );
+  }
+
+  // 회전값 초기화(원본 보존; 현재 사용 X)
+  _aryRotate = [];
+  for (let i = 0; i < 3; i++) {
+    _aryRotate[i] = random(2 * PI);
+  }
+}
+
+// 뷰포트 변경(회전/주소창 변화 등) 시 캔버스를 리사이즈하고,
+// DPR을 다시 반영한 뒤, 모든 객체를 재생성하여 스케일을 일치시킵니다.
+function windowResized() {
+  // keep canvas in sync with viewport
+  resizeCanvas(windowWidth, windowHeight);
+  // recompute dependent sizes/weights and regenerate objects
+  pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
+  setObject();
+}
+
+// 하나의 가시 영역을 나타내는 컨테이너 클래스
+// - setPolygon()에서 다각형을 여러 개 생성하여 aryPolygon에 보관
+// - draw()에서 폴리곤을 이동/소멸시키고, 주기적으로 addPolygon()으로 보충
+class RegionRect {
+  constructor(minRegionX, maxRegionX, minRegionY, maxRegionY) {
+    this.minRegionX = minRegionX;
+    this.maxRegionX = maxRegionX;
+    this.minRegionY = minRegionY;
+    this.maxRegionY = maxRegionY;
+    this.setPolygon();
+  }
+
+  // 초기 다각형 배치
+  // - maxTrial: 충돌/중복 방지를 위한 좌표 재시도 횟수
+  // - maxPolygonR/stepR/shrink: 성장 최대 반경/증가 단위/내부 수축량
+  // - speedX/triggerX: 전체 폴리곤의 좌측 이동 속도와 생성 트리거 위치
+  // - addRate: 몇 프레임마다 새로운 폴리곤을 추가할지 (밀도 제어)
+  setPolygon() {
+    this.maxTrial = 100;
+    let numPolygon = 5; //300;
+
+    this.maxPolygonR =
+      min(
+        this.maxRegionX - this.minRegionX,
+        this.maxRegionY - this.minRegionY,
+      ) / 3;
+    this.stepR = _minW / 500;
+    this.shrink =
+      min(
+        this.maxRegionX - this.minRegionX,
+        this.maxRegionY - this.minRegionY,
+      ) / 400; //100;
+    let palette = []; //this.setCol();
+    this.speedX = -_minW / 400;
+    this.triggerX = this.maxRegionX / 2;
+    let minX = this.triggerX;
+    let maxX = this.triggerX + _minW * 0.5;
+    this.addRate = 4; //frame per an object
+    this.aryPolygon = [];
+    this.aryAryCornerXy = [];
+
+    // 초기 다각형을 여러 개 생성 (원본값은 300, 퍼포먼스상 5로 낮춤)
+    for (let i = 0; i < numPolygon; i++) {
+      let areaXy = setAreaXy(minX, maxX, this.minRegionY, this.maxRegionY);
+      let rotateAng = random(2 * PI);
+      let numCorner = int(random(3, 9));
+      let numInner = int(random(3, 10));
+      let hi = random(_minW / 100, (_minW / 100) * 7);
+
+      // 이전에 생성된 다각형들과의 포함/충돌 여부를 검사하여 겹치지 않게 배치
+      if (i > 0) {
+        let isInside = checkInside(this.aryAryCornerXy, areaXy);
+        let countTrial = 0;
+        while (isInside == true) {
+          countTrial++;
+          areaXy = setAreaXy(minX, maxX, this.minRegionY, this.maxRegionY);
+          isInside = checkInside(this.aryAryCornerXy, areaXy);
+          if (countTrial > this.maxTrial) {
+            break;
+          }
+        }
+        if (countTrial > this.maxTrial) {
+          break;
+        }
+      }
+
+      // 중심에서부터 반경을 키워가며, 경계/다른 다각형과 충돌하기 직전까지 성장
+      let aryTemp = growPolygon(
+        numCorner,
+        this.aryAryCornerXy,
+        areaXy,
+        rotateAng,
+        this.maxPolygonR,
+        this.stepR,
+        this.minRegionX,
+        this.maxRegionX * 2,
+        this.minRegionY,
+        this.maxRegionY,
+      ); //maxRegionX * 2
+      let aryCornerXy = aryTemp[0];
+      let areaR = aryTemp[1];
+
+      // 성장 성공 시 AreaPolygon(원기둥 적층 표현)으로 래핑하여 보관
+      if (areaR > 0) {
+        this.aryPolygon.push(
+          new AreaPolygon(
+            areaXy,
+            areaR,
+            rotateAng,
+            this.shrink,
+            palette,
+            numInner,
+            numCorner,
+            hi,
+            this.speedX,
+            this.triggerX,
+          ),
+        ); // col, col2));
+        this.aryAryCornerXy.push(aryCornerXy);
+      }
     }
   }
-  setAttributeVec2(gl, program, "aPosition", new Float32Array(positionData));
-  setAttributeVec2(gl, program, "aTexCoord", new Float32Array(texCoordData));
-  if (isWebGL2) gl.bindVertexArray(vao);
-  return cols * rows;
+
+  // 주기적으로 새 다각형을 생성하여 오른쪽에서 유입시키는 로직
+  addPolygon() {
+    let minX = this.triggerX;
+    let maxX = this.triggerX + _minW * 0.5;
+    let areaXy = setAreaXy(minX, maxX, this.minRegionY, this.maxRegionY);
+    let rotateAng = random(2 * PI);
+    let numCorner = int(random(3, 9));
+    let numInner = int(random(3, 10));
+    let hi = random(_minW / 100, (_minW / 100) * 7);
+    let palette = [];
+    let isInside = checkInside(this.aryAryCornerXy, areaXy);
+    let countTrial = 0;
+    while (isInside == true) {
+      countTrial++;
+      areaXy = setAreaXy(minX, maxX, this.minRegionY, this.maxRegionY);
+      isInside = checkInside(this.aryAryCornerXy, areaXy);
+      if (countTrial > this.maxTrial) {
+        break;
+      }
+    }
+    if (countTrial > this.maxTrial) {
+      return;
+    }
+    let aryTemp = growPolygon(
+      numCorner,
+      this.aryAryCornerXy,
+      areaXy,
+      rotateAng,
+      this.maxPolygonR,
+      this.stepR,
+      this.minRegionX,
+      this.maxRegionX * 2,
+      this.minRegionY,
+      this.maxRegionY,
+    ); //maxRegionX * 2
+    let aryCornerXy = aryTemp[0];
+    let areaR = aryTemp[1];
+    if (areaR > 0) {
+      this.aryPolygon.push(
+        new AreaPolygon(
+          areaXy,
+          areaR,
+          rotateAng,
+          this.shrink,
+          palette,
+          numInner,
+          numCorner,
+          hi,
+          this.speedX,
+          this.triggerX,
+        ),
+      ); // col, col2));
+      this.aryAryCornerXy.push(aryCornerXy);
+    }
+  }
+
+  // 모든 폴리곤을 그리면서 왼쪽으로 이동시킴.
+  // 트리거를 지나 왼쪽 바깥으로 빠져나간 폴리곤은 리스트에서 제거(메모리/퍼포먼스 관리).
+  // addRate 주기에 맞춰 새로운 폴리곤을 추가하여 스트림을 유지.
+  draw() {
+    for (let i = this.aryPolygon.length - 1; i >= 0; i--) {
+      this.aryPolygon[i].draw();
+      for (let j = 0; j < this.aryAryCornerXy[i].length; j++) {
+        this.aryAryCornerXy[i][j].x += this.speedX;
+      }
+      if (
+        this.aryPolygon[i].areaXy.x <
+        (this.minRegionX - this.maxPolygonR) * 1.5
+      ) {
+        this.aryPolygon.splice(i, 1);
+        this.aryAryCornerXy.splice(i, 1);
+      }
+    }
+    if (frameCount % this.addRate === 0) {
+      this.addPolygon();
+    }
+  }
 }
 
-function setShader(gl, program, vertSrc, fragSrc) {
-  const vs = gl.createShader(gl.VERTEX_SHADER);
-  gl.shaderSource(vs, vertSrc);
-  gl.compileShader(vs);
-  if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
-    console.error("VS error:", gl.getShaderInfoLog(vs));
-  }
-  const fs = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(fs, fragSrc);
-  gl.compileShader(fs);
-  if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
-    console.error("FS error:", gl.getShaderInfoLog(fs));
-  }
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-}
-
-function setAttributeVec2(gl, program, name, data) {
-  const loc = gl.getAttribLocation(program, name);
-  if (loc === -1) return;
-  const buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-  gl.enableVertexAttribArray(loc);
-  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-}
-
-function handleResize() {
-  const canvasGL = document.getElementById("canvasWebGL");
-  const canvas2D = document.getElementById("canvas2D");
-  if (!canvasGL || !gl) return;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const w = Math.max(1, Math.floor(window.innerWidth));
-  const h = Math.max(1, Math.floor(window.innerHeight));
-
-  // size canvases
-  resizeCanvasGL(canvasGL, w, h, dpr);
-  resizeCanvas2D(canvas2D, w, h, dpr);
-
-  // adaptive density for mobile (bigger visuals) — halve point count on mobile
-  const longEdge = Math.max(w, h);
-  if (longEdge <= 600) {
-    densityDiv = 8; // coarse grid (fewer points)
-    pointSizePx = 3.2 * dpr;
-    timeScale = 0.65; // slower motion on small screens
-    displaceWeight = 0.12; // smaller displacement so flow doesn't look too fast
-  } else if (longEdge <= 900) {
-    densityDiv = 6;
-    pointSizePx = 2.7 * dpr;
-    timeScale = 0.8;
-    displaceWeight = 0.16;
-  } else {
-    densityDiv = 2; // desktop
-    pointSizePx = 1.5 * dpr;
-    timeScale = 1.0;
-    displaceWeight = 0.2;
-  }
-
-  // update uniforms immediately when available
-  if (program) {
-    const pLoc = gl.getUniformLocation(program, "uPointSize");
-    if (pLoc) gl.uniform1f(pLoc, pointSizePx);
-    const tsLoc = gl.getUniformLocation(program, "uTimeScale");
-    if (tsLoc) gl.uniform1f(tsLoc, timeScale);
-    const dwLoc = gl.getUniformLocation(program, "uDisplaceWeight");
-    if (dwLoc) gl.uniform1f(dwLoc, displaceWeight);
-  }
-
-  // ---- Diagnostics: viewport & tuning
-  console.info(
-    "[WebGL] Resize -> css:",
-    { w, h, dpr },
-    "drawBuffer:",
-    { dbw: gl.drawingBufferWidth, dbh: gl.drawingBufferHeight },
-    "params:",
-    { densityDiv, pointSizePx, timeScale, displaceWeight },
+// 주어진 영역(min/max X,Y) 안에서 임의의 중심 좌표를 반환
+function setAreaXy(minRegionX, maxRegionX, minRegionY, maxRegionY) {
+  let areaXy = createVector(
+    random(minRegionX, maxRegionX),
+    random() * (maxRegionY - minRegionY) + minRegionY,
   );
 
-  // rebuild buffers for new viewport/density
-  if (gl && program) {
-    pointCount = buildBuffers([], []);
-  }
-}
-function resizeCanvasGL(canvas, cssW, cssH, dpr = 1) {
-  canvas.style.width = cssW + "px";
-  canvas.style.height = cssH + "px";
-  canvas.width = Math.floor(cssW * dpr);
-  canvas.height = Math.floor(cssH * dpr);
-  gl.viewport(0, 0, canvas.width, canvas.height);
-}
-function resizeCanvas2D(canvas, cssW, cssH, dpr = 1) {
-  canvas.style.width = cssW + "px";
-  canvas.style.height = cssH + "px";
-  canvas.width = Math.floor(cssW * dpr);
-  canvas.height = Math.floor(cssH * dpr);
+  return areaXy;
 }
 
-function compositeTo2D(srcCanvas, dstCanvas) {
-  const ctx = dstCanvas.getContext("2d", { alpha: false });
-  // subtle trail fade
-  ctx.globalCompositeOperation = "source-over";
-  ctx.globalAlpha = 0.18;
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, dstCanvas.width, dstCanvas.height);
-  // additive composite
-  ctx.globalCompositeOperation = "lighter";
-  ctx.globalAlpha = 1;
-  ctx.drawImage(srcCanvas, 0, 0, dstCanvas.width, dstCanvas.height);
+// 다각형을 '중심에서 바깥으로' 서서히 성장시키는 핵심 알고리즘
+// - 각 코너는 중심에서 일정 각도를 두고 배치됨(stepAng)
+// - 반경을 stepR씩 증가시키며, 기존 다각형의 변과 교차하거나 영역 경계를 넘기 직전까지 확장
+// - 최종적으로 가능한 최대 반경 areaR과 코너 좌표 배열을 반환
+function growPolygon(
+  numCorner,
+  aryAryXyPolygon,
+  areaXy,
+  rotateAng,
+  maxPolygonR,
+  stepR,
+  minRegionX,
+  maxRegionX,
+  minRegionY,
+  maxRegionY,
+) {
+  // areaR: 현재 반경, isCross: 충돌 여부 플래그
+  let areaR = 0;
+  let isCross = false;
+  let stepAng = (2 * PI) / numCorner;
+  let aryCornerXy = [];
+  while (isCross == false) {
+    areaR += stepR;
+    aryCornerXy = [];
+    for (let i = 0; i < numCorner; i++) {
+      aryCornerXy[i] = p5.Vector.add(
+        areaXy,
+        createVector(0, -areaR)
+          .rotate(stepAng * (i - 0.5))
+          .rotate(rotateAng),
+      ); // side toward upper direction
+    }
+    // 기존 폴리곤들의 각 변과 현재 성장 중인 다각형의 각 변이 교차하는지 검사
+    for (let i = 0; i < aryAryXyPolygon.length; i++) {
+      for (let j = 0; j < aryAryXyPolygon[i].length; j++) {
+        let next_j = (j + 1) % aryAryXyPolygon[i].length;
+        for (let k = 0; k < numCorner; k++) {
+          let next_k = (k + 1) % numCorner;
+          if (
+            checkCrossLineSegment(
+              aryCornerXy[k],
+              aryCornerXy[next_k],
+              aryAryXyPolygon[i][j],
+              aryAryXyPolygon[i][next_j],
+            ) === true
+          ) {
+            isCross = true;
+            break;
+          }
+        }
+        if (isCross === true) {
+          break;
+        }
+      }
+      if (isCross === true) {
+        break;
+      }
+    }
+    // 성장한 코너가 영역 경계를 벗어나는지 검사 (벗어나면 직전 반경에서 정지)
+    for (let i = 0; i < numCorner; i++) {
+      if (
+        aryCornerXy[i].x < minRegionX ||
+        aryCornerXy[i].x > maxRegionX ||
+        aryCornerXy[i].y < minRegionY ||
+        aryCornerXy[i].y > maxRegionY
+      ) {
+        isCross = true;
+      }
+    }
+    if (isCross === true) {
+      areaR -= stepR;
+    }
+    if (areaR > maxPolygonR) {
+      areaR = maxPolygonR;
+      break;
+    }
+  }
+
+  // 최종 areaR에 맞춰 코너 좌표를 한 번 더 정확히 계산
+  aryCornerXy = [];
+  for (let i = 0; i < numCorner; i++) {
+    aryCornerXy[i] = p5.Vector.add(
+      areaXy,
+      createVector(0, -areaR)
+        .rotate(stepAng * (i - 0.5))
+        .rotate(rotateAng),
+    ); //side toward upper direction
+  }
+
+  return [aryCornerXy, areaR];
 }
+
+// 두 선분(xy_a-xy_b, xy_c-xy_d)이 교차하는지 검사
+// p5.Vector.cross의 z성분 부호를 이용하여 양쪽에서 교차 여부를 확인
+function checkCrossLineSegment(xy_a, xy_b, xy_c, xy_d) {
+  //line xy_a to xy_b, line xy_c to xy_d
+  let isCross = false;
+  let vec_a_b = p5.Vector.sub(xy_b, xy_a);
+  let vec_a_c = p5.Vector.sub(xy_c, xy_a);
+  let vec_a_d = p5.Vector.sub(xy_d, xy_a);
+  let vec_c_d = p5.Vector.sub(xy_d, xy_c);
+  let vec_c_a = p5.Vector.sub(xy_a, xy_c);
+  let vec_c_b = p5.Vector.sub(xy_b, xy_c);
+  let cr_ab_ac = p5.Vector.cross(vec_a_b, vec_a_c);
+  let cr_ab_ad = p5.Vector.cross(vec_a_b, vec_a_d);
+  let cr_cd_ca = p5.Vector.cross(vec_c_d, vec_c_a);
+  let cr_cd_cb = p5.Vector.cross(vec_c_d, vec_c_b);
+  if (cr_ab_ac.z * cr_ab_ad.z <= 0 && cr_cd_ca.z * cr_cd_cb.z <= 0) {
+    isCross = true;
+  }
+
+  return isCross;
+}
+
+// 점(areaXy)이 주어진 다각형 집합(aryAryXy) 내부에 포함되는지 검사
+// 각 변에 대해 동일한 방향으로 외적(z>0)이 유지되면 내부로 판단
+function checkInside(aryAryXy, areaXy) {
+  let isInside = false;
+  for (let i = 0; i < aryAryXy.length; i++) {
+    for (let j = 0; j < aryAryXy[i].length; j++) {
+      let next_j = (j + 1) % aryAryXy[i].length;
+      let vec_a_b = p5.Vector.sub(aryAryXy[i][next_j], aryAryXy[i][j]);
+      let vec_a_c = p5.Vector.sub(areaXy, aryAryXy[i][j]);
+      let cr_ab_ac = p5.Vector.cross(vec_a_b, vec_a_c);
+      if (cr_ab_ac.z < 0) {
+        break;
+      } else if (j === aryAryXy[i].length - 1) {
+        isInside = true;
+      }
+    }
+    if (isInside === true) {
+      break;
+    }
+  }
+
+  return isInside;
+}
+
+// 하나의 다각형을 3D 원기둥들의 적층으로 표현하는 클래스
+// - hi/hiStep: 전체 높이 및 각 내부 링의 단 높이
+// - growSpeed/count: 프레임 기반 성장 제어 (서서히 쌓이는 연출)
+// - palette: 색상 팔레트(현재는 HSB/회색계로 단순화)
+// - speedX/triggerX: 좌측 이동 및 그리기 중단 트리거(화면 우측 생성 → 좌측 소멸)
+class AreaPolygon {
+  constructor(
+    areaXy,
+    areaR,
+    rotateAng,
+    shrink,
+    palette,
+    numInner,
+    numCorner,
+    hi,
+    speedX,
+    triggerX,
+  ) {
+    this.areaXy = areaXy;
+    this.areaR = areaR;
+    this.rotateAng = rotateAng;
+    this.shrink = shrink;
+    this.r = this.areaR - this.shrink;
+    this.numCorner = numCorner;
+    this.stepAng = (2 * PI) / this.numCorner;
+    this.hi = hi; //_minW / 50;
+    this.hiStep = this.hi / 2; //_minW / 100;
+    this.speedX = speedX;
+    this.triggerX = triggerX;
+
+    this.growSpeed = random(10, 20); //count per a floor
+    this.count = 0;
+    this.currentHi = 0;
+    this.currentCol = [];
+
+    this.palette = palette;
+    this.numInner = numInner;
+    this.setInner();
+  }
+
+  // 내부 링(Inner) 반경/회전각/그라데이션/현재 높이 초기화
+  // numInner 개수만큼 concentric ring을 생성
+  setInner() {
+    this.aryInnerR = [];
+    this.aryInnerAng = [];
+    this.aryGrad = [];
+    this.aryCurrentHi = [];
+    this.aryCurrentCol = [];
+    let stepR = (this.r / ((this.numInner + 1) * 2 - 1)) * 2;
+    for (let i = 0; i < this.numInner; i++) {
+      this.aryInnerR[i] = this.r - stepR * (i + 1);
+      this.aryInnerAng[i] =
+        ((2 * PI) / this.numCorner) * int(random(this.numCorner));
+      this.aryCurrentHi[i] = 0;
+      this.aryCurrentCol[i] = [];
+    }
+  }
+
+  // 1) 전체 다각형의 중심을 좌측으로 이동
+  // 2) 트리거를 지나가면 더 이상 그리지 않음 (오른쪽에서 왼쪽으로 흘러가는 느낌)
+  // 3) count(프레임 카운트)에 비례해 높이/색을 서서히 증가시켜 성장 연출
+  draw() {
+    this.areaXy.x += this.speedX;
+    if (this.areaXy.x > this.triggerX) {
+      return;
+    }
+    if (this.r < 0) {
+      return;
+    }
+    if (this.count > 0) {
+      if (this.count <= this.growSpeed) {
+        let ratio = this.count / this.growSpeed;
+        this.currentHi = this.hi * ratio;
+        this.currentCol = [color(100, 50 * ratio), color(100, 30 * ratio)];
+      }
+      push();
+      stroke(this.currentCol[0]);
+      fill(this.currentCol[1]);
+      translate(this.areaXy.x, this.areaXy.y);
+      drawCylinder(this.numCorner, this.r, this.currentHi, this.rotateAng, 8);
+      pop();
+
+      this.drawInner();
+    }
+    this.count++;
+  }
+
+  // 내부 링들을 계단식으로 일정 프레임 간격을 두고 성장시키는 루프
+  drawInner() {
+    for (let i = 0; i < this.numInner; i++) {
+      if (
+        this.count > (i + 1) * this.growSpeed &&
+        this.count <= (i + 2) * this.growSpeed
+      ) {
+        let ratio = (this.count - (i + 1) * this.growSpeed) / this.growSpeed;
+        this.aryCurrentHi[i] = this.hiStep * ratio;
+        this.aryCurrentCol[i] = [
+          color(100, 50 * ratio),
+          color(100, 30 * ratio),
+        ];
+      }
+      if (this.aryCurrentHi[i] > 0) {
+        push();
+        stroke(this.aryCurrentCol[i][0]);
+        fill(this.aryCurrentCol[i][1]);
+        translate(this.areaXy.x, this.areaXy.y, this.hi + this.hiStep * i);
+        drawCylinder(
+          this.numCorner,
+          this.aryInnerR[i],
+          this.aryCurrentHi[i],
+          this.rotateAng,
+          8,
+        );
+        pop();
+      }
+    }
+  }
+}
+
+// p5의 WEBGL 프리미티브 cylinder()를 사용하여 각 링/바디를 렌더
+// - 정육각형/팔각형 느낌을 위해 side(세그먼트 수)를 numCorner+1로 지정
+// - 정렬 보정: rotateX/rotateY 및 상하 중앙 정렬(translate(0, hi/2))
+function drawCylinder(numCorner, r, hi, rotateAng, detailY) {
+  push();
+  rotateX(PI / 2);
+  if (numCorner % 2 == 0) {
+    rotateY((-2 * PI) / numCorner / 2);
+  }
+  translate(0, hi / 2);
+  rotateY(rotateAng + PI);
+  cylinder(r, hi, numCorner + 1, detailY, true, true);
+  pop();
+}
+
+// 매 프레임 초기화(검정 배경)
+// 오소그래픽 카메라 설정
+//  - 원근 왜곡이 없는 등각 투영에 가까운 느낌
+//  - 근/원거리 클리핑을 넉넉히 잡아(0 ~ width*2) Z깊이 표현 안정화
+// 장면의 전체 위치/각도를 적당히 틀어 입체감 부여
+// 모든 RegionRect를 그리기(내부에서 폴리곤 이동/성장/소멸 관리)
+function draw() {
+  // 매 프레임 초기화(검정 배경)
+  background(0);
+
+  // 오소그래픽 카메라 설정
+  //  - 원근 왜곡이 없는 등각 투영에 가까운 느낌
+  //  - 근/원거리 클리핑을 넉넉히 잡아(0 ~ width*2) Z깊이 표현 안정화
+  ortho(-width / 2, width / 2, -height / 2, height / 2, 0, width * 2);
+
+  // 장면의 전체 위치/각도를 적당히 틀어 입체감 부여
+  translate(0, _minW / 10, 0);
+  rotateX(PI / 2 - PI / 4);
+  rotateZ(PI / 4);
+
+  // 모든 RegionRect를 그리기(내부에서 폴리곤 이동/성장/소멸 관리)
+  for (let i = 0; i < _aryRegionRect.length; i++) {
+    _aryRegionRect[i].draw();
+  }
+}
+
+// ----- Vue 라이프사이클: p5 전역 콜백 등록/해제 -----
+onMounted(() => {
+  // Vue가 DOM을 마운트한 뒤 p5가 전역 콜백을 인식하도록 설정
+  // expose p5 callbacks so p5 runs the loop
+  window.setup = setup;
+  window.draw = draw;
+  window.windowResized = windowResized;
+});
+
+onBeforeUnmount(() => {
+  // p5 전역 콜백 해제 (다른 페이지로 이동 시 루프 정지)
+  // 생성된 캔버스 제거(메모리 누수 방지)
+  delete window.setup;
+  delete window.draw;
+  delete window.windowResized;
+  if (_renderer && typeof _renderer.remove === "function") {
+    _renderer.remove();
+  }
+});
 </script>
 
 <style scoped>
+/*
+  전체 화면 고정 레이아웃
+  - 스크롤/바운스 방지(overscroll-behavior, touch-action)
+  - .sketch 컨테이너를 화면에 고정하고, p5 캔버스를 절대 배치로 꽉 채움
+  - 배경은 검정(#000)으로 설정하여 3D 형태 대비를 높임
+*/
 :root,
 html,
 body,
@@ -534,6 +646,7 @@ body,
   overscroll-behavior: none;
   touch-action: none;
 }
+/* p5 캔버스가 붙을 컨테이너 (전체 화면) */
 .sketch {
   position: fixed;
   inset: 0;
@@ -542,6 +655,7 @@ body,
   background: #000;
   z-index: 1;
 }
+/* p5가 생성한 canvas 엘리먼트가 컨테이너를 꽉 채우도록 설정 */
 .sketch canvas {
   position: absolute;
   inset: 0;
