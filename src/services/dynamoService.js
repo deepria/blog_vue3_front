@@ -4,7 +4,7 @@ import { useDynamoStore } from "@/stores/dynamoStore.js";
 export const getData = async (part, index) => {
   try {
     const response = await apiClient.get(
-      `/dynamodb/item?part=${part}&index=${index}`,
+      `/dynamodb/item?part=${part}&idx=${index}`,
     );
     return response.data; // API 응답 데이터 반환
   } catch (error) {
@@ -17,7 +17,7 @@ export const postData = async (part, index, pk, value) => {
   try {
     const param = {
       part: part,
-      index: index,
+      idx: index,
       pk: pk,
       value: value,
     };
@@ -32,7 +32,7 @@ export const postData = async (part, index, pk, value) => {
 export const deleteData = async (part, index) => {
   try {
     const response = await apiClient.delete(
-      `/dynamodb/item?part=${part}&index=${index}`,
+      `/dynamodb/item?part=${part}&idx=${index}`,
     );
     return response.data;
   } catch (error) {
