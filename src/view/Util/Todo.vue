@@ -2,7 +2,7 @@
   <div class="todo-container">
     <div class="button-container">
       <button class="refresh-button" @click="refresh()">
-        <i class="fa-solid fa-rotate refresh-icon"></i>
+        <font-awesome-icon icon="rotate" class="refresh-icon" />
       </button>
       <button @click="saveTodos">
         <svg

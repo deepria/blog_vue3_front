@@ -9,7 +9,6 @@ import {
   previewFromS3,
   deleteFromS3,
 } from "@/services/s3Service.js";
-import { v4 as uuid_v4 } from "uuid";
 import { message } from "ant-design-vue";
 import "@/assets/styles/layout.css";
 import "@/assets/styles/s3.css";
@@ -45,7 +44,7 @@ const upload = async () => {
     const baseName = compressAndEncode(
       customFileName.value.trim() || originalName,
     );
-    const uuid = uuid_v4();
+    const uuid = crypto.randomUUID();
     const newFileName = `${uuid}_${baseName}`;
     const newFile = new File([selectedFile.value], newFileName, {
       type: selectedFile.value.type,
@@ -62,7 +61,7 @@ const upload = async () => {
       await loadDirectory();
       showPopup.value = false;
 
-      // ✅ 업로드 후 파일 정보 초기화
+      //  업로드 후 파일 정보 초기화
       selectedFile.value = null;
       authKey.value = "";
       customFileName.value = "";
@@ -245,7 +244,7 @@ onMounted(loadDirectory);
     </div>
     <div class="button-container">
       <button class="refresh-button" @click="refreshDirectory()">
-        <i class="fa-solid fa-rotate refresh-icon"></i>
+        <font-awesome-icon icon="rotate" class="refresh-icon" />
       </button>
       <button class="add-button" @click="showPopup = true">
         <svg

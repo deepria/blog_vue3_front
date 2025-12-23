@@ -1,25 +1,23 @@
 import { createRouter, createWebHistory } from "vue-router";
 
 // vue 컴포넌트 import
-import Todo from "@/view/Util/Todo.vue";
-import S3 from "@/view/Util/S3.vue";
-import Index from "@/view/Index.vue";
+
 // 라우트 정의
 const routes = [
   {
     path: "/",
     name: "index",
-    component: Index,
+    component: () => import("@/view/Index.vue"),
   },
   {
     path: "/todo",
     name: "Todo",
-    component: Todo,
+    component: () => import("@/view/Util/Todo.vue"),
   },
   {
     path: "/s3",
     name: "S3",
-    component: S3,
+    component: () => import("@/view/Util/S3.vue"),
   },
 ];
 
