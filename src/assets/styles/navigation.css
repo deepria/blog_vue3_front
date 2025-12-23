@@ -1,100 +1,195 @@
-/* Bottom Navigation */
+/* =========================================================
+   Bottom Navigation
+   ---------------------------------------------------------
+   역할:
+   - 하단 네비게이션을 고정 표시
+   - WebView / 모바일 / 웹 공통으로 안정적인 UX 제공
+   - 레이아웃/스크롤 책임은 layout.css에 위임
+   ========================================================= */
+
 .bottom-nav {
-  position: fixed;
-  bottom: env(safe-area-inset-bottom);
-  left: 0;
-  right: 0;
-  height: 56px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background: #ffffff;
-  border-top: 1px solid #e5e5e5;
-  z-index: 100;
+    position: fixed;
+    bottom: env(safe-area-inset-bottom);
+    left: 0;
+    right: 0;
+    height: 56px; /* 모바일 표준 하단 네비 높이 */
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: #000000;
+    border-top: 1px solid #222222;
+    z-index: 100;
 }
+
+/* ---------------------------------------------------------
+   Nav Item
+   - 버튼 전체는 레이아웃을 바꾸지 않음
+   - 시각적 피드백은 내부 요소(label, indicator)로만 처리
+   --------------------------------------------------------- */
 
 .nav-item {
-  flex: 1;
-  height: 100%;
-  border: none;
-  background: none;
-  font-size: 14px;
-  color: #666;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    position: relative; /* indicator 기준점 */
+    flex: 1;
+    height: 100%;
+    border: none;
+    background: none;
+    font-size: 20px;
+    font-weight: bolder;
+    color: #bbbbbb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+/* 활성 상태: 색상만 변경 (레이아웃 안정 유지) */
 .nav-item.active {
-  color: #000;
-  font-weight: 600;
+    color: #ffffff;
+    font-weight: 1000;
 }
 
-.nav-item.home {
-  font-weight: 500;
+/* ---------------------------------------------------------
+   Nav Label
+   - 텍스트만 미세하게 scale
+   - 버튼 전체 크기는 절대 변경하지 않음
+   --------------------------------------------------------- */
+
+.nav-label {
+    display: inline-block;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-/* Overlay */
+.nav-item.active .nav-label {
+    transform: scale(1.05); /* 눌렸다는 감각만 제공 */
+    opacity: 1;
+}
+
+/* ---------------------------------------------------------
+   Nav Indicator (Active Dot)
+   - 활성 메뉴를 직관적으로 인지시키는 최소 장치
+   - 위치 이동 없음 → WebView 안정
+   --------------------------------------------------------- */
+
+.nav-indicator {
+    position: absolute;
+    bottom: 6px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.nav-item.active .nav-indicator {
+    background: #ffffff;
+    transform: scale(1.2);
+}
+
+/* =========================================================
+   Overlay (Dim + Bottom Sheet)
+   ---------------------------------------------------------
+   역할:
+   - 메뉴 포커스를 명확히 하기 위한 어두운 배경
+   - 클릭으로 닫히는 구조 (JS에서 제어)
+   ========================================================= */
+
 .overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 200;
-  display: flex;
-  align-items: flex-end;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6); /* WebView에서 충분한 대비 */
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
 }
 
-/* Bottom Sheet Panel */
+/* ---------------------------------------------------------
+   Bottom Sheet Panel
+   - 아래에서 올라오는 네이티브 앱 패턴
+   --------------------------------------------------------- */
+
 .overlay-panel {
-  width: 100%;
-  background: #ffffff;
-  border-radius: 12px 12px 0 0;
-  padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+    width: 100%;
+    background: #000000;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
 }
+
+/* ---------------------------------------------------------
+   Overlay Item
+   - 텍스트 단위로만 피드백
+   - ripple / hover 없이 WebView-safe
+   --------------------------------------------------------- */
 
 .overlay-item {
-  width: 100%;
-  padding: 14px 16px;
-  border: none;
-  background: none;
-  text-align: left;
-  font-size: 16px;
-  color: #111;
+    width: 90%;
+    margin: 5px 0 0 5%;
+    padding: 5px; /* 선택 영역을 살짝 더 여유롭게 */
+    background: rgba(255, 255, 255, 0.06); /* 선택 영역 인지를 높이기 위한 한 단계 밝은 레이어 */
+    border: 1px solid rgba(255, 255, 255,0.1); /* 영역 경계를 명확히 하되 과하지 않게 */
+    border-radius: 10px;
+    text-align: left;
+    font-size: 15px;
+    font-weight: bolder;
+    color: #ffffff;
 }
 
-/* Transition */
+.overlay-label {
+    display: inline-block;
+    transition: transform 0.15s ease;
+}
+
+/* 눌렀을 때 살짝 들어가는 느낌 */
+.overlay-item:active .overlay-label {
+    transform: scale(0.97);
+}
+
+/* =========================================================
+   Transition
+   ---------------------------------------------------------
+   - ease 대신 cubic-bezier 사용
+   - '툭 → 스윽' 네이티브 앱 리듬
+   ========================================================= */
+
 .menu-slide-enter-active,
 .menu-slide-leave-active {
-  transition: transform 0.25s ease, opacity 0.25s ease;
+    transition:
+        transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1),
+        opacity 0.28s ease;
 }
 
 .menu-slide-enter-from {
-  transform: translateY(100%);
-  opacity: 0;
+    transform: translateY(110%); /* 살짝 더 아래에서 시작 */
+    opacity: 0;
 }
 
 .menu-slide-enter-to {
-  transform: translateY(0);
-  opacity: 1;
+    transform: translateY(0);
+    opacity: 1;
 }
 
 .menu-slide-leave-from {
-  transform: translateY(0);
-  opacity: 1;
+    transform: translateY(0);
+    opacity: 1;
 }
 
 .menu-slide-leave-to {
-  transform: translateY(100%);
-  opacity: 0;
-}
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+    transform: translateY(110%);
+    opacity: 0;
 }
 
-.content {
-  flex: 1;
-  padding-bottom: calc(56px + env(safe-area-inset-bottom));
-  overflow-y: auto;
+/* =========================================================
+   Touch Feedback
+   ---------------------------------------------------------
+   - hover 사용 금지
+   - :active 기반 최소 피드백
+   ========================================================= */
+
+/*
+   터치 피드백 전용 스타일
+   - hover를 사용하지 않고 :active만 사용 (모바일 / WebView 기준)
+   - 배경만 살짝 강조하여 '눌렸다'는 감각만 전달
+   - 레이아웃 변화 없이 시각적 피드백만 제공
+*/
+.nav-item:active,
+.overlay-item:active {
+    background: rgba(255, 255, 255, 0.06);
 }

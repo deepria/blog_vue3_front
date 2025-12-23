@@ -35,6 +35,20 @@
     --mobile-width: 420px;
 }
 
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: #000000;
+    color: var(--text-color, rgba(255, 255, 255, 0.85));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+    min-height: 100vh;
+}
+
 /* 유틸리티 클래스 */
 .text-center {
     text-align: center;
@@ -125,28 +139,13 @@
 }
 
 @media (min-width: 1024px) {
-    html, body {
-        height: auto;
-        overflow: auto;
-    }
-
     html {
         font-size: 14px;
-    }
-
-    body {
-        display: flex;
-        place-items: center;
-        justify-content: center;
-        padding: 2rem;
     }
 
     #app {
         position: relative;
         width: 100%;
-        height: auto;
-        overflow: visible;
-        display: block;
     }
 
     .container {

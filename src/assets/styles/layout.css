@@ -5,8 +5,6 @@
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
 }
 
 /* 폼 컨트롤에는 선택/콜아웃 허용 (오버라이드) */
@@ -27,17 +25,6 @@ html {
     -webkit-text-size-adjust: 100%;
 }
 
-html, body {
-    height: 100%;
-    overflow: auto;
-    background-color: var(--background-dark);
-    color: var(--text-color);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
 /* 모달 오픈 시에만 스크롤 락 */
 body.no-scroll {
     overflow: hidden;
@@ -54,29 +41,18 @@ a:hover {
     color: var(--link-hover-color);
 }
 
-
-#app {
-    height: 100%;
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-}
-
 .app {
     display: flex;
     flex-direction: column;
-    height: 100dvh;
-    overflow: hidden;
+    min-height: 100vh;
+    /* overflow: hidden; removed */
 }
 
 .content {
-    height: var(--content-height);
+    flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: var(--spacing-medium);
-    flex: 1;
 }
 
 .container {
@@ -237,14 +213,16 @@ button,
     font-size: 1rem;
 
 }
+
 .styled-textarea:focus {
     border-color: #4f46e5; /* 진한 파란색 포커스 */
-    box-shadow: 0 0 0 3px rgba(79,70,229,0.3);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
 }
 
 textarea::-webkit-scrollbar {
     width: 8px;
 }
+
 textarea::-webkit-scrollbar-thumb {
     background: #9ca3af;
     border-radius: 4px;
@@ -341,36 +319,6 @@ textarea::-webkit-scrollbar-thumb {
 }
 
 @media (min-width: 1024px) {
-    body {
-        /* 기존 스타일 유지 */
-        display: flex;
-        place-items: center;
-        /* 추가: 데스크탑용 padding 및 중앙 정렬 */
-        padding: 2rem;
-        justify-content: center;
-    }
-
-    html, body {
-        height: auto;
-        overflow: auto;
-    }
-
-    html {
-        font-size: 14px;
-    }
-
-    #app {
-        position: relative;
-        width: 100%;
-        height: auto;
-        overflow: visible;
-        display: block;
-        /* 기존 그리드 레이아웃은 필요하다면 아래에 추가하세요 */
-        /* display: grid; */
-        /* grid-template-columns: 1fr 1fr; */
-        /* padding: 0 2rem; */
-    }
-
     .container {
         max-width: 1280px;
         padding: 2rem;
