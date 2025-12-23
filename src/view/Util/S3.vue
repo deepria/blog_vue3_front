@@ -12,7 +12,7 @@ import {
 import { v4 as uuid_v4 } from "uuid";
 import { message } from "ant-design-vue";
 import "@/assets/styles/layout.css";
-import "@/assets/styles/upload.css";
+import "@/assets/styles/s3.css";
 
 const fileInput = ref(null);
 const selectedFile = ref(null);

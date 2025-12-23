@@ -76,21 +76,9 @@ const router = useRouter();
 
 const menus = ref([
   {
-    name: "Legacy",
-    children: [
-      { name: "Home-legacy", path: "/homeView" },
-      { name: "Put-private", path: "/put" },
-      { name: "Get-private", path: "/get" },
-      { name: "Put-public", path: "/save" },
-      { name: "Get-public", path: "/list" },
-    ],
-  },
-  {
     name: "Util",
     children: [
       { name: "Todo", path: "/todo" },
-      { name: "Filter", path: "/filter" },
-      { name: "Upload", path: "/upload" },
       { name: "S3", path: "/s3" },
     ],
   },
