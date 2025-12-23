@@ -503,8 +503,9 @@ const saveMeta = async () => {
     updatedAt: Date.now(),
   };
   try {
-    await postData("todo", "meta", "meta", JSON.stringify(meta));
-    message.success("옵션이 저장되었습니다.");
+    await postData("todo", "meta", "meta", JSON.stringify(meta)).then(() => {
+      message.success("옵션 저장 완료");
+    });
   } catch (e) {
     message.error("옵션 저장 실패");
   }
@@ -559,16 +560,21 @@ const loadItems = async () => {
 };
 const saveTodos = async () => {
   try {
-    await postData("todo", "todo", "todo", JSON.stringify(items.value));
-    message.success("저장되었습니다.");
+    await postData("todo", "todo", "todo", JSON.stringify(items.value)).then(
+      () => {
+        message.success("저장 완료");
+      },
+    );
   } catch (error) {
     console.error("저장 실패:", error);
-    message.error("저장에 실패했습니다.");
+    message.error("저장 실패");
   }
 };
 const refresh = async () => {
   try {
-    await loadItems();
+    await loadItems().then(() => {
+      message.success("새로고침 완료");
+    });
   } catch (error) {
     console.error("refresh error:", error);
     message.warn("Failed to refresh .").then();

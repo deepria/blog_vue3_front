@@ -50,7 +50,9 @@ const upload = async () => {
       type: selectedFile.value.type,
       lastModified: selectedFile.value.lastModified,
     });
-    const response = await uploadToS3(newFile);
+    const response = await uploadToS3(newFile).then(() => {
+      message.success("업로드 완료");
+    });
     if (response !== false) {
       await postData(
         "file",
@@ -89,9 +91,11 @@ const previewFileClick = async (file) => {
     message.warn("미리보기를 불러올 수 없습니다.").then();
   }
 };
-const download = (filename) => {
+const download = async (filename) => {
   try {
-    downloadFromS3(filename, truncateFileName(filename));
+    await downloadFromS3(filename, truncateFileName(filename)).then(() => {
+      message.success("다운로드가 시작됩니다.");
+    });
   } catch (error) {
     message.warn("파일 다운로드 실패").then();
   }
@@ -100,7 +104,9 @@ const download = (filename) => {
 const remove = async (file) => {
   try {
     await deleteFromS3(file);
-    await deleteData("file", "file:" + file.replace("upload/", ""));
+    await deleteData("file", "file:" + file.replace("upload/", "")).then(() => {
+      message.success("삭제 완료");
+    });
     await loadDirectory(); // 파일 삭제 후 리스트 새로고침
   } catch (error) {
     message.warn("파일 삭제 실패").then();
@@ -159,7 +165,7 @@ const handleAuth = async (file, action) => {
       await previewFileClick(file);
       break;
     case "download":
-      download(file);
+      await download(file);
       break;
     case "remove":
       await remove(file);
@@ -187,7 +193,9 @@ const closeAuthPopup = () => {
 
 const refreshDirectory = async () => {
   try {
-    await loadDirectory();
+    await loadDirectory().then(() => {
+      message.success("새로고침 완료");
+    });
   } catch (error) {
     console.error("Directory refresh error:", error);
     message.warn("Failed to refresh directory.").then();
