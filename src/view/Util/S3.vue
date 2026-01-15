@@ -41,9 +41,25 @@ const loadDirectory = async () => {
 const upload = async () => {
   try {
     const originalName = selectedFile.value.name;
-    const baseName = compressAndEncode(
-      customFileName.value.trim() || originalName,
-    );
+
+    // 원본 파일의 확장자 추출 (.xlsx, .png 등)
+    const extMatch = originalName.match(/\.[^./\\]+$/);
+    const originalExt = extMatch ? extMatch[0] : "";
+
+    // 사용자 입력 파일명 (없으면 원본 파일명 사용)
+    let displayName = customFileName.value.trim() || originalName;
+
+    // 사용자가 파일명을 직접 입력했고 확장자를 넣지 않은 경우 원본 파일의 확장자 추가
+    if (
+      customFileName.value.trim() &&
+      !displayName.includes(".") &&
+      originalExt
+    ) {
+      displayName = `${displayName}${originalExt}`;
+    }
+
+    // 최종 파일명 인코딩 (uuid + 압축/인코딩된 파일명)
+    const baseName = compressAndEncode(displayName);
     const uuid = crypto.randomUUID();
     const newFileName = `${uuid}_${baseName}`;
     const newFile = new File([selectedFile.value], newFileName, {
