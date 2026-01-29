@@ -3,7 +3,7 @@ import { createPinia } from "pinia";
 import App from "./App.vue";
 import router from "./router";
 
-import Antd, { message } from "ant-design-vue";
+import { message } from "ant-design-vue";
 import "ant-design-vue/dist/reset.css";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -24,7 +24,6 @@ message.config({
 
 app.use(router);
 app.use(pinia);
-app.use(Antd);
 
 library.add(faUser, faPen, faRotate);
 app.component("font-awesome-icon", FontAwesomeIcon);
