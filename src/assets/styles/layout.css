@@ -77,8 +77,8 @@ a:hover {
 
 
 /* 버튼 및 클릭 가능한 요소 기본 스타일 */
-button,
-[role="button"],
+button:not(.toastui-editor-defaultUI button),
+[role="button"]:not(.toastui-editor-defaultUI [role="button"]),
 .clickable {
     min-height: var(--touch-target-size);
     min-width: var(--touch-target-size);

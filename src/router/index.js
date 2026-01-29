@@ -19,6 +19,17 @@ const routes = [
     name: "S3",
     component: () => import("@/view/Util/S3.vue"),
   },
+  {
+    path: "/notes",
+    name: "NoteList",
+    component: () => import("@/view/Note/NoteList.vue"),
+  },
+  {
+    path: "/notes/edit/:id?",
+    name: "NoteEditor",
+    component: () => import("@/view/Note/NoteEditor.vue"),
+    props: true,
+  },
 ];
 
 // 라우터 생성
