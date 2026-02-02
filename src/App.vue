@@ -1,7 +1,9 @@
 <template>
   <div class="app">
     <a-config-provider :theme="{ algorithm: theme.darkAlgorithm }">
-      <navigation />
+      <a-app>
+        <navigation />
+      </a-app>
     </a-config-provider>
   </div>
 </template>

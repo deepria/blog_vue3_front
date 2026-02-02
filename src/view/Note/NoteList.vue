@@ -59,7 +59,7 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import { message, Modal } from 'ant-design-vue';
+import { message, Modal, App } from 'ant-design-vue';
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons-vue';
 import Viewer from '@toast-ui/editor/dist/toastui-editor-viewer';
 import '@toast-ui/editor/dist/toastui-editor-viewer.css';
@@ -73,6 +73,7 @@ const notes = ref([]);
 const loading = ref(true);
 const expandedId = ref(null);
 const loadingPreview = ref(false);
+const { modal } = App.useApp();
 let viewerInstance = null;
 
 const loadNotes = async () => {
@@ -141,12 +142,13 @@ const togglePreview = async (note) => {
 };
 
 const confirmDelete = (note) => {
-  Modal.confirm({
+  modal.confirm({
     title: '노트 삭제',
     content: `"${note.title}" 노트를 삭제하시겠습니까?`,
     okText: '삭제',
     okType: 'danger',
     cancelText: '취소',
+    centered: true,
     onOk: async () => {
       try {
         await deleteNote(note.id);

@@ -8,7 +8,12 @@
 }
 
 /* 폼 컨트롤에는 선택/콜아웃 허용 (오버라이드) */
-input, select, textarea, button, label, [role="button"] {
+input,
+select,
+textarea,
+button,
+label,
+[role="button"] {
     -webkit-user-select: auto !important;
     user-select: auto !important;
     -webkit-touch-callout: default !important;
@@ -172,7 +177,7 @@ button:not(.toastui-editor-defaultUI button),
     /*transform: translate(-50%, -50%);*/
 }
 
-.popup-content > div {
+.popup-content>div {
     margin-bottom: var(--spacing-medium);
 }
 
@@ -207,15 +212,19 @@ button:not(.toastui-editor-defaultUI button),
     border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
     z-index: 1;
-    resize: vertical; /* 세로만 크기 조절 가능 (none, horizontal, both 가능) */
-    outline: none; /* 포커스 시 아웃라인 제거 */
-    font-family: inherit; /* 폰트 상속 */
+    resize: vertical;
+    /* 세로만 크기 조절 가능 (none, horizontal, both 가능) */
+    outline: none;
+    /* 포커스 시 아웃라인 제거 */
+    font-family: inherit;
+    /* 폰트 상속 */
     font-size: 1rem;
 
 }
 
 .styled-textarea:focus {
-    border-color: #4f46e5; /* 진한 파란색 포커스 */
+    border-color: #4f46e5;
+    /* 진한 파란색 포커스 */
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
 }
 
@@ -297,6 +306,7 @@ textarea::-webkit-scrollbar-thumb {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -306,6 +316,7 @@ textarea::-webkit-scrollbar-thumb {
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
@@ -336,7 +347,27 @@ textarea::-webkit-scrollbar-thumb {
     }
 }
 
-/* 다크 모드 지원 */
+/* Ant Design Modal 모바일 최적화 */
+.ant-modal-confirm .ant-modal-confirm-btns {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    margin-top: 24px !important;
+    float: none !important;
+}
+
+.ant-modal-confirm .ant-modal-confirm-btns button {
+    flex: 1 !important;
+    margin: 0 !important;
+    height: 48px !important;
+    /* 모달 버튼 크기 확대 */
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
 @media (prefers-color-scheme: dark) {
     :root {
         --text-light: #ffffff;
