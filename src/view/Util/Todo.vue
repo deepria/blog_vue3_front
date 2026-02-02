@@ -42,13 +42,6 @@
     </div>
     <div
       class="item-container"
-      @mousedown="startDrag"
-      @mousemove="onDrag"
-      @mouseup="endDrag"
-      @mouseleave="endDrag"
-      @touchstart="startDrag"
-      @touchmove="onDrag"
-      @touchend="endDrag"
     >
       <transition-group name="list" tag="div">
         <template v-for="(item, index) in sortedItems" :key="item.id">
@@ -63,8 +56,6 @@
               fontWeight: 700,
               margin: '12px 0 6px',
               letterSpacing: '0.5px',
-              willChange: 'transform',
-              transform: `translate3d(0, ${dragOffset}px, 0)`,
             }"
           >
             {{ getGroupNameByKey(item.groupKey) }}
@@ -73,8 +64,6 @@
             class="list-item"
             :style="{
               backgroundColor: getGroupBgByKey(item.groupKey),
-              willChange: 'transform',
-              transform: `translate3d(0, ${dragOffset}px, 0)`,
               boxShadow: `0 0 ${GLOW_BLUR_PX * 2}px ${getGroupGlowByKey(item.groupKey)}`,
             }"
             @click="openSettings(item)"
@@ -282,15 +271,7 @@ const GLOW_ALPHA = 0.28; // 형광 효과 투명도(낮출수록 약해짐)
 const ITEM_ROW_HEIGHT = 50; // px, list item height used for drag bounds
 const HEADER_ROW_HEIGHT = 28; // px, group header height used for drag bounds
 
-// Throttle dragOffset update with requestAnimationFrame
-let rafId = null;
-const setDragOffset = (val) => {
-  if (rafId) cancelAnimationFrame(rafId);
-  rafId = requestAnimationFrame(() => {
-    dragOffset.value = val;
-    rafId = null;
-  });
-};
+
 
 const hexToRgb = (hex) => {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || "");
@@ -313,9 +294,6 @@ const selectedItem = ref(null);
 const isNewItem = ref(false);
 
 const showPopup = ref(false);
-const dragStartY = ref(0);
-const dragOffset = ref(0);
-const isDragging = ref(false);
 
 const settingsMode = ref(false);
 
@@ -622,34 +600,5 @@ const toggleCompletion = (item) => {
     }, 300);
   }
 };
-const startDrag = (e) => {
-  isDragging.value = true;
-  dragStartY.value = e.touches ? e.touches[0].clientY : e.clientY;
-};
-const onDrag = (e) => {
-  if (!isDragging.value) return;
 
-  const currentY = e.touches ? e.touches[0].clientY : e.clientY;
-  const delta = currentY - dragStartY.value;
-  const newOffset = dragOffset.value + delta;
-
-  const maxOffset = 0;
-  // Estimate total content height = items + headers
-  const groupCount = Array.from(
-    new Set(sortedItems.value.map((it) => it.groupKey)),
-  ).length;
-  const totalHeight =
-    sortedItems.value.length * ITEM_ROW_HEIGHT + groupCount * HEADER_ROW_HEIGHT;
-  const viewportHeight = (70 * window.innerHeight) / 100; // matches existing layout usage
-  const minOffset = -(totalHeight - viewportHeight);
-
-  if (newOffset <= maxOffset && newOffset >= minOffset) {
-    setDragOffset(newOffset);
-  }
-
-  dragStartY.value = currentY;
-};
-const endDrag = () => {
-  isDragging.value = false;
-};
 </script>
