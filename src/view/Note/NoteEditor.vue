@@ -1,25 +1,27 @@
 <template>
   <div class="editor-page">
-    <div class="editor-header">
+    <header class="editor-header">
       <div class="left-section">
-        <button class="icon-btn" @click="goBack">
-          <arrow-left-outlined />
-        </button>
+        <BaseButton variant="ghost" @click="goBack">
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </BaseButton>
         <input
           v-model="title"
-          placeholder="제목 없는 노트"
-          class="title-input"
+          placeholder="Untitled Note"
+          class="title-input-naked"
         />
       </div>
       <div class="right-section">
-        <span v-if="saving" class="save-status">저장 중...</span>
-        <button class="button-primary save-btn" @click="save" :disabled="saving">
-          <save-outlined style="margin-right: 6px;" /> 저장
-        </button>
+        <span v-if="saving" class="save-indicator">Saving...</span>
+        <BaseButton variant="primary" :loading="saving" @click="save">
+           Save Note
+        </BaseButton>
       </div>
-    </div>
+    </header>
 
-    <div class="editor-wrapper" ref="editorRef"></div>
+    <div class="editor-container">
+        <div class="editor-wrapper" ref="editorRef"></div>
+    </div>
   </div>
 </template>
 
@@ -27,12 +29,11 @@
 import { ref, onMounted, onBeforeUnmount, defineProps } from 'vue';
 import { useRouter } from 'vue-router';
 import { message } from 'ant-design-vue';
-import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons-vue';
 import Editor from '@toast-ui/editor';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import '@toast-ui/editor/dist/theme/toastui-editor-dark.css';
 import { loadNote, saveNote } from '@/services/noteService';
-import "@/assets/styles/layout.css";
+import BaseButton from "@/components/base/BaseButton.vue";
 
 const props = defineProps({
   id: String,
@@ -44,9 +45,7 @@ const editorInstance = ref(null);
 const title = ref('');
 const saving = ref(false);
 
-const goBack = () => {
-  router.push('/notes');
-};
+const goBack = () => router.push('/notes');
 
 const initEditor = (initialValue = '') => {
   if (editorInstance.value) {
@@ -60,12 +59,12 @@ const initEditor = (initialValue = '') => {
     initialEditType: 'wysiwyg',
     previewStyle: 'vertical',
     initialValue: initialValue,
-    theme: 'dark', // Enable dark theme
+    theme: 'dark',
     usageStatistics: false,
     toolbarItems: [
       ['heading', 'bold', 'italic', 'strike'],
       ['hr', 'quote'],
-      ['ul', 'ol', 'task', 'indent', 'outdent'],
+      ['ul', 'ol', 'task'],
       ['table', 'image', 'link'],
       ['code', 'codeblock'],
     ],
@@ -84,18 +83,18 @@ const loadContent = async () => {
         title.value = note.title || '';
         initEditor(note.content || '');
     } else {
-        message.warn("노트를 찾을 수 없습니다.");
+        message.warn("Note not found");
         initEditor();
     }
   } catch (error) {
-    message.error("노트 내용을 불러오지 못했습니다.");
+    message.error("Failed to load content");
     initEditor();
   }
 };
 
 const save = async () => {
   if (!title.value.trim()) {
-    message.warn("제목을 입력해주세요.");
+    message.warn("Please enter a title");
     return;
   }
   
@@ -103,23 +102,22 @@ const save = async () => {
   try {
     const content = editorInstance.value.getMarkdown();
     const noteToSave = {
-        id: props.id, // undefined if new
+        id: props.id,
         title: title.value,
         content: content
     };
     
-    // saveNote returns the ID (new or existing)
     const savedId = await saveNote(noteToSave);
     
     if (!props.id) {
-       message.success("노트가 생성되었습니다.");
-       // Redirect to edit page with new ID
-       router.replace(`/notes/edit/${savedId}`);
+       message.success("Note created");
+       router.push('/notes');
     } else {
-       message.success("저장되었습니다.");
+       message.success("Saved");
+       router.push('/notes');
     }
   } catch (error) {
-    message.error("저장 실패");
+    message.error("Save failed");
   } finally {
     saving.value = false;
   }
@@ -141,84 +139,72 @@ onBeforeUnmount(() => {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--background-dark, #fff);
-  position: relative; 
-  z-index: 100; /* Ensure it sits on top if needed */
+  background-color: var(--bg-app);
 }
 
 .editor-header {
-  height: 64px;
+  height: var(--header-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  position: sticky;
-  top: 0;
+  padding: 0 var(--space-lg);
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
   z-index: 10;
 }
 
 .left-section {
   display: flex;
   align-items: center;
+  gap: var(--space-md);
   flex: 1;
-  gap: 12px;
 }
 
-.icon-btn {
-  background: none;
-  border: none;
-  color: var(--text-color, #333);
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.icon-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.title-input {
+.title-input-naked {
   background: transparent;
   border: none;
-  font-size: 1.2rem;
+  font-size: var(--text-lg);
   font-weight: 600;
-  color: var(--text-color, #333);
+  color: var(--text-main);
   width: 100%;
   outline: none;
+  font-family: var(--font-sans);
 }
-
-.title-input::placeholder {
-  color: rgba(150, 150, 150, 0.5);
+.title-input-naked::placeholder {
+  color: var(--text-disabled);
 }
 
 .right-section {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-md);
 }
 
-.save-status {
-  font-size: 0.85rem;
-  color: #888;
+.save-indicator {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
 }
 
-.save-btn {
-  width: auto !important;
-  padding: 0 20px !important;
-  font-weight: 600;
+.editor-container {
+  flex: 1;
+  overflow: hidden;
+  background-color: var(--bg-app); /* Match global bg */
 }
 
 .editor-wrapper {
-  flex: 1;
-  overflow: hidden;
-  background-color: #fff;
+  height: 100%;
+}
+
+/* Toast UI Overrides for seamless integration */
+:deep(.toastui-editor-defaultUI) {
+    border: none !important;
+    background-color: transparent !important;
+}
+:deep(.toastui-editor-toolbar) {
+    background-color: var(--bg-surface) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+:deep(.toastui-editor-md-container), :deep(.toastui-editor-ww-container) {
+    background-color: var(--bg-app) !important;
 }
 </style>

@@ -1,604 +1,489 @@
 <template>
-  <div class="todo-container">
-    <div class="button-container">
-      <button class="refresh-button" @click="refresh()">
-        <font-awesome-icon icon="rotate" class="refresh-icon" />
-      </button>
-      <button @click="saveTodos">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path
-            d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
-          ></path>
-          <polyline points="17 21 17 13 7 13 7 21"></polyline>
-          <polyline points="7 3 7 8 15 8"></polyline>
-        </svg>
-      </button>
-      <button @click="openSettings(null)">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-      </button>
-    </div>
-    <div
-      class="item-container"
-    >
-      <transition-group name="list" tag="div">
-        <template v-for="(item, index) in sortedItems" :key="item.id">
-          <div
-            v-if="
-              index === 0 || sortedItems[index - 1].groupKey !== item.groupKey
-            "
-            class="group-header"
-            :style="{
-              color: '#FFFFFF',
-              textShadow: `0 0 ${GLOW_BLUR_PX}px ${getGroupGlowByKey(item.groupKey)}`,
-              fontWeight: 700,
-              margin: '12px 0 6px',
-              letterSpacing: '0.5px',
-            }"
-          >
-            {{ getGroupNameByKey(item.groupKey) }}
-          </div>
-          <div
-            class="list-item"
-            :style="{
-              backgroundColor: getGroupBgByKey(item.groupKey),
-              boxShadow: `0 0 ${GLOW_BLUR_PX * 2}px ${getGroupGlowByKey(item.groupKey)}`,
-            }"
-            @click="openSettings(item)"
-          >
-            <div class="item-content">
-              <span
-                class="priority-icon"
-                :style="{
-                  color: getPriorityColorByKey(item.priorityKey),
-                  filter: `drop-shadow(0 0 ${GLOW_BLUR_PX}px ${getPriorityGlowByKey(item.priorityKey)})`,
-                }"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  ></path>
-                </svg>
-              </span>
-              <span
-                class="item-text"
-                :class="{ completed: item.completed }"
-                :style="{
-                  color: '#FFFFFF',
-                  textShadow: `0 0 ${GLOW_BLUR_PX}px ${getGroupGlowByKey(item.groupKey)}`,
-                  fontWeight: 600,
-                }"
-              >
-                {{ item.text }}
-              </span>
-            </div>
-            <input
-              type="checkbox"
-              v-model="item.completed"
-              class="task-checkbox"
-              @change="toggleCompletion(item)"
-              @click.stop
-            />
-          </div>
-        </template>
-      </transition-group>
-    </div>
-  </div>
-  <teleport to="body">
-    <div v-if="showPopup" class="popup" @click.self="confirmPopup">
-      <div class="popup-content">
-        <div class="grid-input">
-          <select v-model="selectedItem.groupKey" class="styled-input">
-            <option v-for="g in groupOptions" :key="g.key" :value="g.key">
-              {{ g.name }}
-            </option>
-          </select>
-          <select v-model="selectedItem.priorityKey" class="styled-input">
-            <option v-for="p in priorityOptions" :key="p.key" :value="p.key">
-              {{ p.name }}
-            </option>
-          </select>
-        </div>
-
-        <textarea
-          v-model="selectedItem.text"
-          class="styled-textarea"
-          placeholder="내용을 입력하세요"
-        />
-
-        <div class="popup-buttons" style="margin-top: 24px">
-          <button class="button-primary" @click="toggleSettingsMode">
-            옵션 관리
-          </button>
-          <button class="button-primary" @click="cancelPopup">취소</button>
-          <button class="button-primary" @click="confirmPopup">확인</button>
-        </div>
-        <div
-          v-if="settingsMode"
-          class="options-manager"
-          style="margin-top: 16px; display: grid; gap: 16px"
-        >
-          <!-- Group manager -->
-          <div>
-            <h4 style="margin-bottom: 8px">그룹 옵션</h4>
-            <div
-              v-for="(g, idx) in groupOptions"
-              :key="g.key"
-              style="
-                display: flex;
-                gap: 8px;
-                align-items: center;
-                margin-bottom: 8px;
-              "
-            >
-              <input
-                class="styled-input"
-                style="flex: 1"
-                v-model="g.name"
-                placeholder="그룹명"
-              />
-              <input
-                class="styled-input"
-                style="width: 56px; padding: 0"
-                type="color"
-                v-model="g.color"
-              />
-              <button class="button-secondary" @click="removeGroup(idx)">
-                삭제
-              </button>
-            </div>
-            <div style="display: flex; gap: 8px">
-              <input
-                class="styled-input"
-                style="flex: 1"
-                v-model="newGroup.name"
-                placeholder="그룹명"
-              />
-              <input
-                class="styled-input"
-                style="width: 56px; padding: 0"
-                type="color"
-                v-model="newGroup.color"
-              />
-              <button class="button-primary" @click="addGroup">추가</button>
-            </div>
-          </div>
-
-          <!-- Priority manager -->
-          <div>
-            <h4 style="margin-bottom: 8px">중요도 옵션</h4>
-            <div
-              v-for="(p, idx) in priorityOptions"
-              :key="p.key"
-              style="
-                display: flex;
-                gap: 8px;
-                align-items: center;
-                margin-bottom: 8px;
-              "
-            >
-              <input
-                class="styled-input"
-                style="flex: 1"
-                v-model="p.name"
-                placeholder="명칭"
-              />
-              <input
-                class="styled-input"
-                style="width: 56px; padding: 0"
-                type="color"
-                v-model="p.color"
-              />
-              <button class="button-secondary" @click="removePriority(idx)">
-                삭제
-              </button>
-            </div>
-            <div style="display: flex; gap: 8px">
-              <input
-                class="styled-input"
-                style="flex: 1"
-                v-model="newPriority.name"
-                placeholder="명칭"
-              />
-              <input
-                class="styled-input"
-                style="width: 56px; padding: 0"
-                type="color"
-                v-model="newPriority.color"
-              />
-              <button class="button-primary" @click="addPriority">추가</button>
-            </div>
-          </div>
-
-          <div
-            class="popup-buttons"
-            style="display: flex; justify-content: flex-end; gap: 8px"
-          >
-            <button class="button-primary" @click="resetDefaults">
-              초기화
-            </button>
-            <button class="button-primary" @click="saveMeta">저장</button>
-          </div>
-        </div>
+  <div class="todo-page">
+    <header class="todo-header">
+      <div class="header-content">
+        <h1 class="page-title">Tasks</h1>
+        <p class="page-subtitle">Manage your priorities</p>
       </div>
+      <div class="header-actions">
+         <BaseButton class="action-btn" variant="ghost" @click="refreshList">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+         </BaseButton>
+         <BaseButton class="action-btn" variant="secondary" @click="openSettings(null)">
+            <span>Options</span> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:6px"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 .51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+         </BaseButton>
+         <BaseButton class="icon-only-mobile" variant="primary" @click="saveTodos">
+            <span class="desktop-text">Save</span>
+            <span class="mobile-text"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg></span>
+         </BaseButton>
+      </div>
+    </header>
+
+    <!-- Quick Add -->
+    <div class="quick-add-container">
+        <BaseInput 
+            v-model="quickAddText" 
+            placeholder="Add new task..." 
+            @keyup.enter="handleQuickAdd"
+        >
+            <template #suffix>
+                 <button class="quick-add-btn" @click="handleQuickAdd">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                 </button>
+            </template>
+        </BaseInput>
     </div>
-  </teleport>
+
+    <div class="task-list-container">
+       <transition-group name="list" tag="div">
+          <template v-for="(item, index) in sortedItems" :key="item.id">
+             <!-- Group Header -->
+             <div 
+                v-if="index === 0 || sortedItems[index - 1].groupKey !== item.groupKey" 
+                class="group-header"
+                :style="{ color: getGroupColor(item.groupKey) }"
+             >
+                {{ getGroupNameByKey(item.groupKey) }}
+             </div>
+
+             <!-- Task Item -->
+             <div 
+                class="task-item"
+                :class="{ 'is-completed': item.completed }"
+                @click="openEditModal(item)"
+             >
+                <div class="task-priority-indicator" :style="{ backgroundColor: getPriorityColorByKey(item.priorityKey) }"></div>
+                
+                <!-- Delete Button (Left side) -->
+                <button class="delete-btn" @click.stop="deleteItem(item)">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+
+                <!-- Custom Checkbox (Moved after delete button but before content) -->
+                 <div 
+                    class="custom-checkbox" 
+                    :class="{ 'checked': item.completed }"
+                    :style="{ borderColor: item.completed ? 'var(--color-primary)' : 'var(--border-color)' }"
+                    @click.stop="toggleCompletion(item)"
+                >
+                    <svg v-if="item.completed" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                
+                <div class="task-content">
+                    <span class="task-text">{{ item.text }}</span>
+                </div>
+
+             </div>
+          </template>
+       </transition-group>
+    </div>
+
+    <!-- Edit/Add Modal -->
+    <BaseModal v-model="showPopup" :title="isNewItem ? 'New Task' : 'Edit Task'">
+        <div class="edit-form">
+            <BaseInput v-model="selectedItem.text" label="Task Description" placeholder="What needs to be done?" />
+             
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Group</label>
+                    <div class="select-wrapper">
+                        <select v-model="selectedItem.groupKey" class="base-select">
+                            <option v-for="g in groupOptions" :key="g.key" :value="g.key">{{ g.name }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <div class="select-wrapper">
+                        <select v-model="selectedItem.priorityKey" class="base-select">
+                            <option v-for="p in priorityOptions" :key="p.key" :value="p.key">{{ p.name }}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+             <!-- Option Management Section (Toggleable) -->
+            <div class="options-toggle" @click="toggleSettingsMode">
+                <span>{{ settingsMode ? 'Hide Options Manager' : 'Manage Groups & Tags' }}</span>
+                <svg :style="{ transform: settingsMode ? 'rotate(180deg)' : '' }" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+
+            <div v-if="settingsMode" class="options-manager">
+                 <!-- Group Manager -->
+                 <div class="option-section">
+                    <h4>Groups</h4>
+                    <div v-for="(g, idx) in groupOptions" :key="g.key" class="option-row">
+                         <input v-model="g.name" class="mini-input" />
+                         <input type="color" v-model="g.color" class="color-picker" />
+                         <button class="icon-btn-danger" @click="removeGroup(idx)">×</button>
+                    </div>
+                    <div class="option-row add-new">
+                        <input v-model="newGroup.name" class="mini-input" placeholder="New Group" />
+                        <input type="color" v-model="newGroup.color" class="color-picker" />
+                        <button class="icon-btn-primary" @click="addGroup">+</button>
+                    </div>
+                 </div>
+                 
+                 <!-- Priority Manager -->
+                 <div class="option-section">
+                    <h4>Priorities</h4>
+                    <div v-for="(p, idx) in priorityOptions" :key="p.key" class="option-row">
+                         <input v-model="p.name" class="mini-input" />
+                         <input type="color" v-model="p.color" class="color-picker" />
+                         <button class="icon-btn-danger" @click="removePriority(idx)">×</button>
+                    </div>
+                    <div class="option-row add-new">
+                        <input v-model="newPriority.name" class="mini-input" placeholder="New Priority" />
+                        <input type="color" v-model="newPriority.color" class="color-picker" />
+                        <button class="icon-btn-primary" @click="addPriority">+</button>
+                    </div>
+                 </div>
+                 
+                 <div class="options-actions">
+                     <BaseButton size="sm" variant="secondary" @click="resetDefaults">Reset Defaults</BaseButton>
+                     <BaseButton size="sm" variant="primary" @click="saveMeta">Save Options</BaseButton>
+                 </div>
+            </div>
+        </div>
+
+        <template #footer>
+            <BaseButton variant="secondary" @click="showPopup = false">Cancel</BaseButton>
+            <BaseButton variant="primary" @click="confirmPopup">Done</BaseButton>
+        </template>
+    </BaseModal>
+  </div>
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { getData, postData } from "@/services/dynamoService.js";
 import { message } from "ant-design-vue";
-import "@/assets/styles/layout.css";
-import "@/assets/styles/todo.css";
+import BaseButton from "@/components/base/BaseButton.vue";
+import BaseInput from "@/components/base/BaseInput.vue";
+import BaseModal from "@/components/base/BaseModal.vue";
 
-// --- Group color helpers for background and text ---
-const GRID_BG_ALPHA = 0.32; // 공통 투명도(가시성 강화)
-const GLOW_BLUR_PX = 3; // 형광 효과 번짐(픽셀)
-const GLOW_ALPHA = 0.28; // 형광 효과 투명도(낮출수록 약해짐)
-const ITEM_ROW_HEIGHT = 50; // px, list item height used for drag bounds
-const HEADER_ROW_HEIGHT = 28; // px, group header height used for drag bounds
-
-
-
-const hexToRgb = (hex) => {
-  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || "");
-  if (!m) return null;
-  return {
-    r: parseInt(m[1], 16),
-    g: parseInt(m[2], 16),
-    b: parseInt(m[3], 16),
-  };
-};
-const hexToRgba = (hex, alpha = 1) => {
-  const rgb = hexToRgb(hex);
-  if (!rgb) return hex || "#121212";
-  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
-};
-
+// State
 const items = ref([]);
-const inputRef = ref(null);
-const selectedItem = ref(null);
-const isNewItem = ref(false);
-
+const quickAddText = ref("");
 const showPopup = ref(false);
-
+const isNewItem = ref(false);
 const settingsMode = ref(false);
 
+// Options
 const groupOptions = ref([]);
 const priorityOptions = ref([]);
-
 const newGroup = ref({ name: "", color: "#666666" });
 const newPriority = ref({ name: "", color: "#ff0000" });
 
-const nextGroupKey = computed(() =>
-  groupOptions.value.length
-    ? Math.max(...groupOptions.value.map((g) => g.key ?? 0)) + 1
-    : 1,
-);
-const nextPriorityKey = computed(() =>
-  priorityOptions.value.length
-    ? Math.max(...priorityOptions.value.map((p) => p.key ?? 0)) + 1
-    : 1,
-);
+// Selected Item for Edit
+const selectedItem = ref({ text: '', groupKey: null, priorityKey: null });
 
+// Helpers
+const nextGroupKey = computed(() => groupOptions.value.length ? Math.max(...groupOptions.value.map(g => g.key ?? 0)) + 1 : 1);
+const nextPriorityKey = computed(() => priorityOptions.value.length ? Math.max(...priorityOptions.value.map(p => p.key ?? 0)) + 1 : 1);
 const priorityOrder = computed(() => {
-  const map = {};
-  priorityOptions.value.forEach((p, idx) => {
-    map[p.key] = idx;
-  });
-  return map;
+    const map = {};
+    priorityOptions.value.forEach((p, idx) => map[p.key] = idx);
+    return map;
 });
 
-const getPriorityColorByKey = (pKey) => {
-  const p = priorityOptions.value.find((x) => x.key === pKey);
-  return p?.color || undefined;
+// Computed Sort
+const sortedItems = computed(() => {
+    return [...items.value].sort((a, b) => {
+        if (a.groupKey !== b.groupKey) {
+            const ai = groupOptions.value.findIndex(g => g.key === a.groupKey);
+            const bi = groupOptions.value.findIndex(g => g.key === b.groupKey);
+            return ai - bi;
+        }
+        return (priorityOrder.value[b.priorityKey] || 0) - (priorityOrder.value[a.priorityKey] || 0);
+    });
+});
+
+// Logic
+const getGroupNameByKey = (key) => groupOptions.value.find(x => x.key === key)?.name || "Other";
+const getGroupColor = (key) => groupOptions.value.find(x => x.key === key)?.color || "#666";
+const getPriorityColorByKey = (key) => priorityOptions.value.find(x => x.key === key)?.color || "#666";
+
+const handleQuickAdd = () => {
+    if(!quickAddText.value.trim()) return;
+    const newItem = {
+        id: Date.now(),
+        text: quickAddText.value,
+        groupKey: groupOptions.value[0]?.key ?? null,
+        priorityKey: priorityOptions.value[0]?.key ?? null,
+        completed: false
+    };
+    items.value.unshift(newItem);
+    quickAddText.value = "";
+    saveTodos(); 
 };
 
-const toggleSettingsMode = () => {
-  settingsMode.value = !settingsMode.value;
+const openEditModal = (item) => {
+    selectedItem.value = item; 
+    ensureValidSelection();
+    isNewItem.value = false;
+    showPopup.value = true;
+};
+
+const openSettings = () => {
+   selectedItem.value = { text: '', groupKey: groupOptions.value[0]?.key, priorityKey: priorityOptions.value[0]?.key };
+   isNewItem.value = true; 
+   settingsMode.value = true;
+   showPopup.value = true;
 };
 
 const confirmPopup = () => {
-  showPopup.value = false;
-  settingsMode.value = false;
-  isNewItem.value = false;
-  selectedItem.value = null;
+    showPopup.value = false;
+    saveTodos();
 };
 
-const cancelPopup = () => {
-  if (isNewItem.value) {
-    items.value.shift();
-  }
-  showPopup.value = false;
-  settingsMode.value = false;
-  isNewItem.value = false;
-  selectedItem.value = null;
+const toggleCompletion = (item) => {
+    item.completed = !item.completed; 
+    saveTodos();
 };
+
+const deleteItem = (item) => {
+    const idx = items.value.findIndex(i => i.id === item.id);
+    if(idx !== -1) {
+        items.value.splice(idx, 1);
+        saveTodos();
+    }
+}
 
 const ensureValidSelection = () => {
   if (!selectedItem.value) return;
   if (!groupOptions.value.some((g) => g.key === selectedItem.value.groupKey)) {
     selectedItem.value.groupKey = groupOptions.value[0]?.key ?? null;
   }
-  if (
-    !priorityOptions.value.some((p) => p.key === selectedItem.value.priorityKey)
-  ) {
+  if (!priorityOptions.value.some((p) => p.key === selectedItem.value.priorityKey)) {
     selectedItem.value.priorityKey = priorityOptions.value[0]?.key ?? null;
   }
 };
 
-// --- Group ops ---
+// Option Management
 const addGroup = () => {
-  if (!newGroup.value.name) return;
-  if (groupOptions.value.some((g) => g.name === newGroup.value.name)) return;
-  groupOptions.value.push({
-    key: nextGroupKey.value,
-    name: newGroup.value.name,
-    color: newGroup.value.color,
-  });
-  newGroup.value = { name: "", color: "#666666" };
+    if(!newGroup.value.name) return;
+    groupOptions.value.push({ key: nextGroupKey.value, name: newGroup.value.name, color: newGroup.value.color });
+    newGroup.value = { name: "", color: "#666666" };
 };
-const removeGroup = (idx) => {
-  groupOptions.value.splice(idx, 1);
-};
-
-// --- Priority ops ---
+const removeGroup = (idx) => groupOptions.value.splice(idx, 1);
 const addPriority = () => {
-  if (!newPriority.value.name) return;
-  if (priorityOptions.value.some((p) => p.name === newPriority.value.name))
-    return;
-  priorityOptions.value.push({
-    key: nextPriorityKey.value,
-    name: newPriority.value.name,
-    color: newPriority.value.color,
-  });
-  newPriority.value = { name: "", color: "#ff0000" };
+    if(!newPriority.value.name) return;
+    priorityOptions.value.push({ key: nextPriorityKey.value, name: newPriority.value.name, color: newPriority.value.color });
+    newPriority.value = { name: "", color: "#ff0000" };
 };
-const removePriority = (idx) => {
-  priorityOptions.value.splice(idx, 1);
-};
+const removePriority = (idx) => priorityOptions.value.splice(idx, 1);
 
-// --- Group color helpers ---
-const getGroupNameByKey = (groupKey) => {
-  const g = groupOptions.value.find((x) => x.key === groupKey);
-  return g?.name || "기타";
-};
-const getGroupBgByKey = (groupKey) => {
-  const g = groupOptions.value.find((x) => x.key === groupKey);
-  return hexToRgba(g?.color || "#121212", GRID_BG_ALPHA);
-};
-const getGroupGlowByKey = (groupKey) => {
-  const g = groupOptions.value.find((x) => x.key === groupKey);
-  return hexToRgba(g?.color || "#00ffcc", GLOW_ALPHA);
-};
-const getPriorityGlowByKey = (pKey) => {
-  const p = priorityOptions.value.find((x) => x.key === pKey);
-  return hexToRgba(p?.color || "#00ffcc", GLOW_ALPHA);
-};
+const toggleSettingsMode = () => settingsMode.value = !settingsMode.value;
 
-// --- Meta persistence with DynamoDB ---
+// Persistence
 const loadMeta = async () => {
   try {
     const raw = await getData("todo", "meta");
-    const meta =
-      typeof raw === "string"
-        ? (() => {
-            try {
-              return JSON.parse(raw);
-            } catch {
-              return null;
-            }
-          })()
-        : raw;
-    const groups = Array.isArray(meta?.groups) ? meta.groups : [];
-    const priorities = Array.isArray(meta?.priorities) ? meta.priorities : [];
-    groupOptions.value = groups.map((g, i) => {
-      if (g && typeof g === "object") {
-        const name = g.name ?? g.label ?? g.value ?? `그룹${i + 1}`;
-        const color = g.color ?? "#666666";
-        const key = typeof g.key === "number" ? g.key : i + 1;
-        return {
-          key,
-          name,
-          color,
-        };
-      }
-      if (typeof g === "string")
-        return {
-          key: i + 1,
-          name: g,
-          color: "#666666",
-        };
-      return {
-        key: i + 1,
-        name: `그룹${i + 1}`,
-        color: "#666666",
-      };
-    });
-    priorityOptions.value = priorities.map((p, i) => {
-      if (p && typeof p === "object") {
-        const name = p.name ?? p.value ?? `중요도${i + 1}`;
-        const color = p.color ?? "#ff0000";
-        const key = typeof p.key === "number" ? p.key : i + 1;
-        return { key, name, color };
-      }
-      if (typeof p === "string")
-        return { key: i + 1, name: p, color: "#ff0000" };
-      return { key: i + 1, name: `중요도${i + 1}`, color: "#ff0000" };
-    });
-    ensureValidSelection();
-  } catch (e) {
-    groupOptions.value = [];
-    priorityOptions.value = [];
-  }
+    const meta = typeof raw === "string" ? JSON.parse(raw) : raw;
+    if(meta?.groups) groupOptions.value = meta.groups;
+    if(meta?.priorities) priorityOptions.value = meta.priorities;
+    if(!groupOptions.value.length) groupOptions.value = [{key: 1, name: 'Default', color: '#42b983'}];
+    if(!priorityOptions.value.length) priorityOptions.value = [{key: 1, name: 'High', color: '#ef4444'}];
+  } catch (e) { console.error(e); }
 };
 
 const saveMeta = async () => {
-  const meta = {
-    groups: groupOptions.value.map((g) => ({
-      key: g.key,
-      name: g.name,
-      color: g.color,
-    })),
-    priorities: priorityOptions.value.map((p) => ({
-      key: p.key,
-      name: p.name,
-      color: p.color,
-    })),
-    updatedAt: Date.now(),
-  };
-  try {
-    await postData("todo", "meta", "meta", JSON.stringify(meta)).then(() => {
-      message.success("옵션 저장 완료");
-    });
-  } catch (e) {
-    message.error("옵션 저장 실패");
-  }
+    const meta = { groups: groupOptions.value, priorities: priorityOptions.value, updatedAt: Date.now() };
+    await postData("todo", "meta", "meta", JSON.stringify(meta));
+    message.success("Options saved");
+};
+
+const loadItems = async () => {
+    try {
+        const raw = await getData("todo", "todo");
+        items.value = raw || [];
+        items.value.forEach(it => {
+            if(!groupOptions.value.some(g => g.key === it.groupKey)) it.groupKey = groupOptions.value[0]?.key;
+            if(!priorityOptions.value.some(p => p.key === it.priorityKey)) it.priorityKey = priorityOptions.value[0]?.key;
+        });
+    } catch(e) { console.error(e); }
+};
+
+const refreshList = async () => {
+    await loadMeta();
+    await loadItems();
+    message.success("Refreshed");
+}
+
+const saveTodos = async () => {
+    await postData("todo", "todo", "todo", JSON.stringify(items.value));
+    // message.success("Saved"); // Reduced noise
 };
 
 const resetDefaults = async () => {
-  await loadMeta();
+    await loadMeta();
+    message.info("Reloaded from server");
 };
 
 onMounted(async () => {
-  await loadMeta();
-  await loadItems();
+    await loadMeta();
+    await loadItems();
 });
-
-watch(showPopup, async (newVal) => {
-  if (newVal) {
-    await nextTick();
-    inputRef.value?.focus();
-  }
-  document.body.classList.toggle("no-scroll", newVal);
-  if (!newVal) settingsMode.value = false;
-});
-
-const loadItems = async () => {
-  try {
-    items.value = await getData("todo", "todo");
-    items.value = (items.value || []).map((it) => {
-      if (it.groupKey == null) {
-        if (it.group != null) {
-          const g = groupOptions.value.find((x) => x.name === it.group);
-          it.groupKey = g?.key ?? groupOptions.value[0]?.key ?? null;
-        } else {
-          it.groupKey = groupOptions.value[0]?.key ?? null;
-        }
-      }
-      if (it.priorityKey == null) {
-        if (it.priority != null) {
-          const p = priorityOptions.value.find(
-            (x) => x.name === it.priority || x.value === it.priority,
-          );
-          it.priorityKey = p?.key ?? priorityOptions.value[0]?.key ?? null;
-        } else {
-          it.priorityKey = priorityOptions.value[0]?.key ?? null;
-        }
-      }
-      return it;
-    });
-  } catch (error) {
-    console.error("데이터 로드 실패:", error);
-    message.warn("데이터를 불러오는데 실패했습니다.");
-  }
-};
-const saveTodos = async () => {
-  try {
-    await postData("todo", "todo", "todo", JSON.stringify(items.value)).then(
-      () => {
-        message.success("저장 완료");
-      },
-    );
-  } catch (error) {
-    console.error("저장 실패:", error);
-    message.error("저장 실패");
-  }
-};
-const refresh = async () => {
-  try {
-    await loadItems().then(() => {
-      message.success("새로고침 완료");
-    });
-  } catch (error) {
-    console.error("refresh error:", error);
-    message.warn("Failed to refresh .").then();
-  }
-};
-const sortedItems = computed(() => {
-  return [...items.value].sort((a, b) => {
-    if (a.groupKey !== b.groupKey) {
-      const ai = groupOptions.value.findIndex((g) => g.key === a.groupKey);
-      const bi = groupOptions.value.findIndex((g) => g.key === b.groupKey);
-      return ai - bi;
-    }
-    return (
-      (priorityOrder.value[b.priorityKey] || 0) -
-      (priorityOrder.value[a.priorityKey] || 0)
-    );
-  });
-});
-const openSettings = (item) => {
-  if (!item) {
-    const newItem = {
-      id: Date.now(),
-      text: "",
-      groupKey: groupOptions.value[0]?.key ?? null,
-      priorityKey: priorityOptions.value[0]?.key ?? null,
-      completed: false,
-    };
-    items.value.unshift(newItem);
-    selectedItem.value = newItem;
-    isNewItem.value = true;
-    ensureValidSelection();
-  } else {
-    selectedItem.value = item;
-    ensureValidSelection();
-  }
-  showPopup.value = true;
-};
-const toggleCompletion = (item) => {
-  if (item.completed) {
-    setTimeout(() => {
-      const index = items.value.findIndex((i) => i.id === item.id);
-      if (index !== -1) {
-        items.value.splice(index, 1);
-      }
-    }, 300);
-  }
-};
-
 </script>
+
+<style scoped>
+.todo-page {
+    padding: var(--space-xl);
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding-bottom: 120px; /* Nav overlap fix */
+}
+
+.todo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: var(--space-xl);
+}
+.page-title {
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    margin: 0;
+}
+.page-subtitle {
+     color: var(--text-muted);
+     margin-top: var(--space-xs);
+}
+.header-actions {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: nowrap;
+}
+
+/* Responsive */
+.mobile-text { display: none; }
+@media (max-width: 640px) {
+    .desktop-text { display: none; }
+    .mobile-text { display: block; }
+    .page-title { font-size: var(--text-2xl); }
+}
+
+/* List */
+.task-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+.group-header {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-xs);
+    padding-left: var(--space-xs);
+}
+
+.task-item {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 60px;
+}
+.task-item:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+.task-priority-indicator {
+    width: 6px;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.task-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.task-text {
+    font-size: var(--text-lg);
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+/* Delete Button */
+.delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    opacity: 0.5;
+    transition: all 0.2s;
+}
+.delete-btn:hover {
+    color: var(--color-danger);
+    opacity: 1;
+}
+
+/* Custom Checkbox */
+.custom-checkbox {
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    background: rgba(0,0,0,0.2);
+    cursor: pointer;
+}
+.custom-checkbox.checked {
+    border-color: var(--color-primary);
+    background: rgba(66, 185, 131, 0.1);
+}
+.custom-checkbox:hover {
+    border-color: var(--color-primary-hover);
+}
+
+.is-completed .task-text {
+    opacity: 0.5;
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+/* Edit Form & Options styles unchanged ... */
+.edit-form { display: flex; flex-direction: column; gap: var(--space-lg); }
+.form-row { display: flex; gap: var(--space-md); }
+.form-group { flex: 1; display: flex; flex-direction: column; gap: var(--space-xs); }
+.form-group label { font-size: var(--text-xs); color: var(--text-muted); }
+.select-wrapper { position: relative; }
+.base-select { width: 100%; height: 48px; padding: 0 var(--space-md); background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-main); appearance: none; outline: none; }
+.base-select:focus { border-color: var(--color-primary); }
+.options-toggle { display: flex; align-items: center; justify-content: space-between; padding: var(--space-sm) 0; cursor: pointer; color: var(--text-muted); font-size: var(--text-sm); border-top: 1px solid var(--border-color); }
+.options-manager { background: rgba(0,0,0,0.2); padding: var(--space-md); border-radius: var(--radius-md); }
+.option-section { margin-bottom: var(--space-md); }
+.option-section h4 { margin: 0 0 var(--space-sm) 0; font-size: var(--text-sm); color: var(--text-muted); }
+.option-row { display: flex; gap: var(--space-sm); margin-bottom: var(--space-xs); }
+.mini-input { flex: 1; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main); padding: 4px 8px; border-radius: var(--radius-sm); }
+.color-picker { width: 32px; height: 32px; padding: 0; border: none; background: none; cursor: pointer; }
+.icon-btn-danger, .icon-btn-primary { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; border-radius: var(--radius-sm); cursor: pointer; }
+.icon-btn-danger { background: rgba(239, 68, 68, 0.2); color: var(--color-danger); }
+.icon-btn-primary { background: rgba(66, 185, 131, 0.2); color: var(--color-primary); }
+.options-actions { display: flex; justify-content: flex-end; gap: var(--space-sm); margin-top: var(--space-md); }
+
+/* Quick Add */
+.quick-add-container { margin-bottom: var(--space-xl); }
+.quick-add-btn { background: none; border: none; color: var(--color-primary); cursor: pointer; display: flex; align-items: center; padding: 0 var(--space-sm); }
+.quick-add-btn:hover { color: var(--color-primary-hover); }
+
+</style>

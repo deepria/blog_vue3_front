@@ -1,38 +1,87 @@
 /* CSS 변수 정의 */
 :root {
-    /* 색상 변수 */
-    --primary-color: #42b983;
-    --background-dark: #141414;
-    --text-color: rgba(255, 255, 255, 0.85);
-    --text-light: #fefefe;
-    --text-dark: #213547;
-    --link-color: #646cff;
-    --link-hover-color: #535bf2;
-    --border-color: #303030;
+    /* --- Colors --- */
+    /* Primary */
+    --color-primary: #42b983;
+    --color-primary-hover: #3aa876;
+    --color-primary-active: #2e8c61;
 
-    /* 폰트 크기 - 모바일 최적화 */
-    --font-size-small: 0.875rem; /* 14px */
-    --font-size-medium: 1rem; /* 16px */
-    --font-size-large: 1.125rem; /* 18px */
-    --font-size-xlarge: 1.25rem; /* 20px */
+    /* Backgrounds */
+    --bg-app: #0a0a0a;
+    /* Deepest black for app background */
+    --bg-surface: #141414;
+    /* Card/Container background */
+    --bg-surface-hover: #1f1f1f;
+    --bg-overlay: rgba(0, 0, 0, 0.7);
 
-    /* 간격 - 모바일 터치 영역 최적화 */
-    --spacing-small: 0.5rem; /* 8px */
-    --spacing-base: 0.6rem;
-    --spacing-medium: 0.75rem; /* 12px */
-    --spacing-large: 1rem; /* 16px */
-    --spacing-xlarge: 1.5rem; /* 24px */
+    /* Text */
+    --text-main: rgba(255, 255, 255, 0.92);
+    --text-muted: rgba(255, 255, 255, 0.6);
+    --text-disabled: rgba(255, 255, 255, 0.38);
+    --text-inverse: #000000;
 
-    /* 네비게이션 높이 - 모바일 최적화 */
-    --bottom-nav-height: 3.5rem; /* 56px */
-    --content-height: calc(100vh - var(--bottom-nav-height));
+    /* Status */
+    --color-success: #42b983;
+    --color-danger: #ef4444;
+    --color-warning: #f59e0b;
+    --color-info: #3b82f6;
 
-    /* 터치 타겟 크기 */
-    --touch-target-size: 2.75rem; /* 44px - Apple 권장 최소 터치 영역 */
+    /* Borders */
+    --border-color: #2a2a2a;
+    --border-hover: #404040;
 
-    /* 반응형 디자인 */
-    --max-width: 1280px;
-    --mobile-width: 420px;
+    /* --- Typography --- */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    --text-xs: 0.75rem;
+    /* 12px */
+    --text-sm: 0.875rem;
+    /* 14px */
+    --text-base: 1rem;
+    /* 16px */
+    --text-lg: 1.125rem;
+    /* 18px */
+    --text-xl: 1.25rem;
+    /* 20px */
+    --text-2xl: 1.5rem;
+    /* 24px */
+    --text-3xl: 1.875rem;
+    /* 30px */
+
+    /* --- Spacing --- */
+    --space-xs: 0.25rem;
+    /* 4px */
+    --space-sm: 0.5rem;
+    /* 8px */
+    --space-md: 1rem;
+    /* 16px */
+    --space-lg: 1.5rem;
+    /* 24px */
+    --space-xl: 2rem;
+    /* 32px */
+    --space-2xl: 3rem;
+    /* 48px */
+
+    /* --- Radius --- */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+
+    /* --- Shadows --- */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+    --shadow-glow: 0 0 15px rgba(66, 185, 131, 0.15);
+
+    /* --- Layout --- */
+    --max-width: 1200px;
+    --header-height: 60px;
+    --nav-width: 240px;
+
+    /* Mobile specific */
+    --mobile-nav-height: 60px;
 }
 
 html,

@@ -59,7 +59,7 @@ const menus = ref([
   {
     name: "Util",
     children: [
-      { name: "Todo", path: "/todo" },
+      { name: "Tasks", path: "/todo" },
       { name: "S3", path: "/s3" },
       { name: "Notes", path: "/notes" },
     ],
