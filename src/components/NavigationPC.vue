@@ -25,6 +25,11 @@
           <CloudServerOutlined />
           <span>Storage</span>
         </router-link>
+
+        <router-link to="/chat" class="nav-item" active-class="active">
+          <MessageOutlined />
+          <span>Chat</span>
+        </router-link>
       </nav>
       
       <div class="footer-area">
@@ -40,7 +45,8 @@ import {
   FileTextOutlined, 
   CheckSquareOutlined, 
   CloudServerOutlined,
-  SettingOutlined
+  SettingOutlined,
+  MessageOutlined
 } from '@ant-design/icons-vue';
 </script>
 
@@ -67,6 +73,7 @@ import {
   font-size: 24px;
   font-weight: 800;
   background: linear-gradient(135deg, #fff 0%, #888 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin: 0;

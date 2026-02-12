@@ -34,7 +34,8 @@ apiClient.interceptors.response.use(
           window.location.href = "/login";
         }, 2500); // 1.5초 후 리디렉트
       } else if (error.response.status === 500) {
-        message.error("Server error! Please try again later.", 1.5).then();
+        const errorMsg = error.response.data || "Server error! Please try again later.";
+        message.error(errorMsg, 3).then();
       } else {
         message
           .error(

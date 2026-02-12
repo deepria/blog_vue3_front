@@ -30,6 +30,11 @@ const routes = [
     component: () => import("@/view/Note/NoteEditor.vue"),
     props: true,
   },
+  {
+    path: "/chat",
+    name: "Chat",
+    component: () => import("@/view/Chat.vue"),
+  },
 ];
 
 // 라우터 생성

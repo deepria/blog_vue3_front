@@ -27,6 +27,13 @@
       </div>
       <span class="label">Storage</span>
     </router-link>
+
+    <router-link to="/chat" class="nav-item" active-class="active">
+      <div class="icon-wrapper">
+        <MessageOutlined />
+      </div>
+      <span class="label">Chat</span>
+    </router-link>
   </nav>
 </template>
 
@@ -35,7 +42,8 @@ import {
   HomeOutlined, 
   FileTextOutlined, 
   CheckSquareOutlined, 
-  CloudServerOutlined 
+  CloudServerOutlined,
+  MessageOutlined 
 } from '@ant-design/icons-vue';
 </script>
 
