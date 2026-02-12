@@ -6,32 +6,45 @@
         <p class="page-subtitle">Manage your priorities</p>
       </div>
       <div class="header-actions">
-         <BaseButton class="action-btn" variant="ghost" @click="refreshList">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-         </BaseButton>
          <BaseButton class="action-btn" variant="secondary" @click="openSettings(null)">
             <span>Options</span> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:6px"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 .51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
          </BaseButton>
-         <BaseButton class="icon-only-mobile" variant="primary" @click="saveTodos">
-            <span class="desktop-text">Save</span>
-            <span class="mobile-text"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg></span>
-         </BaseButton>
+         <div class="primary-actions">
+             <BaseButton class="action-btn" variant="ghost" @click="refreshList">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+             </BaseButton>
+             <BaseButton class="icon-only-mobile" :variant="hasUnsavedChanges ? 'primary' : 'secondary'" :class="{ 'pulse-animation': hasUnsavedChanges }" @click="saveTodos">
+                <span class="desktop-text">{{ hasUnsavedChanges ? 'Save Changes' : 'Saved' }}</span>
+                <span class="mobile-text"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg></span>
+             </BaseButton>
+         </div>
       </div>
     </header>
 
     <!-- Quick Add -->
     <div class="quick-add-container">
-        <BaseInput 
-            v-model="quickAddText" 
-            placeholder="Add new task..." 
-            @keyup.enter="handleQuickAdd"
-        >
-            <template #suffix>
-                 <button class="quick-add-btn" @click="handleQuickAdd">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-                 </button>
-            </template>
-        </BaseInput>
+        <div class="quick-add-wrapper">
+             <select 
+                v-model="quickAddGroupKey" 
+                class="quick-group-select" 
+                :style="{ color: quickAddGroupKey ? getGroupColor(quickAddGroupKey) : 'var(--text-muted)' }"
+             >
+                 <option :value="null">Default</option>
+                 <option v-for="g in groupOptions" :key="g.key" :value="g.key">{{ g.name }}</option>
+            </select>
+            <BaseInput 
+                v-model="quickAddText" 
+                placeholder="Add new task..." 
+                class="quick-input-flex"
+                @keyup.enter="handleQuickAdd"
+            >
+                <template #suffix>
+                     <button class="quick-add-btn" @click="handleQuickAdd">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                     </button>
+                </template>
+            </BaseInput>
+        </div>
     </div>
 
     <div class="task-list-container">
@@ -155,7 +168,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { getData, postData } from "@/services/dynamoService.js";
 import { message } from "ant-design-vue";
 import BaseButton from "@/components/base/BaseButton.vue";
@@ -165,9 +178,11 @@ import BaseModal from "@/components/base/BaseModal.vue";
 // State
 const items = ref([]);
 const quickAddText = ref("");
+const quickAddGroupKey = ref(null);
 const showPopup = ref(false);
 const isNewItem = ref(false);
 const settingsMode = ref(false);
+const hasUnsavedChanges = ref(false);
 
 // Options
 const groupOptions = ref([]);
@@ -200,22 +215,26 @@ const sortedItems = computed(() => {
 });
 
 // Logic
-const getGroupNameByKey = (key) => groupOptions.value.find(x => x.key === key)?.name || "Other";
-const getGroupColor = (key) => groupOptions.value.find(x => x.key === key)?.color || "#666";
+const getGroupNameByKey = (key) => groupOptions.value.find(x => x.key === key)?.name || "Default";
+const getGroupColor = (key) => groupOptions.value.find(x => x.key === key)?.color || "var(--text-muted)";
 const getPriorityColorByKey = (key) => priorityOptions.value.find(x => x.key === key)?.color || "#666";
+
+const markUnsaved = () => {
+    hasUnsavedChanges.value = true;
+};
 
 const handleQuickAdd = () => {
     if(!quickAddText.value.trim()) return;
     const newItem = {
         id: Date.now(),
         text: quickAddText.value,
-        groupKey: groupOptions.value[0]?.key ?? null,
+        groupKey: quickAddGroupKey.value || (groupOptions.value[0]?.key ?? null),
         priorityKey: priorityOptions.value[0]?.key ?? null,
         completed: false
     };
     items.value.unshift(newItem);
     quickAddText.value = "";
-    saveTodos(); 
+    markUnsaved(); 
 };
 
 const openEditModal = (item) => {
@@ -234,19 +253,19 @@ const openSettings = () => {
 
 const confirmPopup = () => {
     showPopup.value = false;
-    saveTodos();
+    markUnsaved();
 };
 
 const toggleCompletion = (item) => {
     item.completed = !item.completed; 
-    saveTodos();
+    markUnsaved();
 };
 
 const deleteItem = (item) => {
     const idx = items.value.findIndex(i => i.id === item.id);
     if(idx !== -1) {
         items.value.splice(idx, 1);
-        saveTodos();
+        markUnsaved();
     }
 }
 
@@ -265,14 +284,22 @@ const addGroup = () => {
     if(!newGroup.value.name) return;
     groupOptions.value.push({ key: nextGroupKey.value, name: newGroup.value.name, color: newGroup.value.color });
     newGroup.value = { name: "", color: "#666666" };
+    markUnsaved();
 };
-const removeGroup = (idx) => groupOptions.value.splice(idx, 1);
+const removeGroup = (idx) => {
+    groupOptions.value.splice(idx, 1);
+    markUnsaved();
+};
 const addPriority = () => {
     if(!newPriority.value.name) return;
     priorityOptions.value.push({ key: nextPriorityKey.value, name: newPriority.value.name, color: newPriority.value.color });
     newPriority.value = { name: "", color: "#ff0000" };
+    markUnsaved();
 };
-const removePriority = (idx) => priorityOptions.value.splice(idx, 1);
+const removePriority = (idx) => {
+    priorityOptions.value.splice(idx, 1);
+    markUnsaved();
+};
 
 const toggleSettingsMode = () => settingsMode.value = !settingsMode.value;
 
@@ -291,7 +318,24 @@ const loadMeta = async () => {
 const saveMeta = async () => {
     const meta = { groups: groupOptions.value, priorities: priorityOptions.value, updatedAt: Date.now() };
     await postData("todo", "meta", "meta", JSON.stringify(meta));
-    message.success("Options saved");
+    // Meta saves are still instant or coupled with Todos? 
+    // Usually meta options are saved instantly or with the whole batch. 
+    // Let's assume options are saved instantly for now to avoid complexity, 
+    // OR coupled. User said "save button ... final reflect". 
+    // Let's keep meta save instant for now as it's separate modal, 
+    // BUT user might expect Save button to do everything.
+    // Changing implementation to MARK UNSAVED for options too, and save everything on SAVE button.
+    
+    // Actually, saveMeta was called in 'Options Manager' explicitly. 
+    // Let's keep explicit save for options inside the modal for now to avoid losing config if they cancel the modal?
+    // Wait, confirmPopup handles 'Done'. 
+    // Let's make 'Save Options' inside modal just close settings mode or mark unsaved.
+    // For now, I will keep saveMeta as is BUT mark unsaved so user knows to sync everything? 
+    // No, let's make saveMeta ALSO just mark unsaved and save on main button for consistency?
+    // User request: "save button to final reflect".
+    // So let's make saveMeta internal-only until Main Save.
+    markUnsaved();
+    message.success("Options updated (Remember to Save)");
 };
 
 const loadItems = async () => {
@@ -302,29 +346,48 @@ const loadItems = async () => {
             if(!groupOptions.value.some(g => g.key === it.groupKey)) it.groupKey = groupOptions.value[0]?.key;
             if(!priorityOptions.value.some(p => p.key === it.priorityKey)) it.priorityKey = priorityOptions.value[0]?.key;
         });
+        hasUnsavedChanges.value = false;
     } catch(e) { console.error(e); }
 };
 
 const refreshList = async () => {
+    if(hasUnsavedChanges.value) {
+        if(!confirm("You have unsaved changes. Discard them?")) return;
+    }
     await loadMeta();
     await loadItems();
+    hasUnsavedChanges.value = false;
     message.success("Refreshed");
 }
 
 const saveTodos = async () => {
-    await postData("todo", "todo", "todo", JSON.stringify(items.value));
-    // message.success("Saved"); // Reduced noise
+    try {
+        // Save Todo List
+        await postData("todo", "todo", "todo", JSON.stringify(items.value));
+        
+        // Save Meta (Groups/Priorities) as well, to ensure consistency
+        const meta = { groups: groupOptions.value, priorities: priorityOptions.value, updatedAt: Date.now() };
+        await postData("todo", "meta", "meta", JSON.stringify(meta));
+
+        hasUnsavedChanges.value = false;
+        message.success("All changes saved");
+    } catch(e) {
+        message.error("Failed to save");
+    }
 };
 
 const resetDefaults = async () => {
     await loadMeta();
-    message.info("Reloaded from server");
+    message.info("Reloaded options");
 };
 
 onMounted(async () => {
     await loadMeta();
     await loadItems();
 });
+
+// Warn before leave if unsaved
+// window.onbeforeunload = () => hasUnsavedChanges.value ? true : null;
 </script>
 
 <style scoped>
@@ -354,6 +417,10 @@ onMounted(async () => {
     display: flex;
     gap: var(--space-sm);
     flex-wrap: nowrap;
+}
+.primary-actions {
+    display: flex;
+    gap: var(--space-sm);
 }
 
 /* Responsive */
@@ -486,4 +553,61 @@ onMounted(async () => {
 .quick-add-btn { background: none; border: none; color: var(--color-primary); cursor: pointer; display: flex; align-items: center; padding: 0 var(--space-sm); }
 .quick-add-btn:hover { color: var(--color-primary-hover); }
 
+
+@keyframes pulse-primary {
+    0% { box-shadow: 0 0 0 0 rgba(66, 185, 131, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(66, 185, 131, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(66, 185, 131, 0); }
+}
+.pulse-animation {
+    animation: pulse-primary 2s infinite;
+}
+.quick-add-wrapper {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.quick-group-select {
+    width: 130px;
+    padding: 0 var(--space-md);
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-main);
+    font-size: var(--text-base);
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.quick-group-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(66, 185, 131, 0.1);
+}
+
+.quick-input-flex {
+    flex: 1;
+}
+
+@media (max-width: 640px) {
+    .header-actions {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+    }
+
+    .primary-actions {
+        display: flex;
+        gap: 8px; /* Gap between refresh and save */
+    }
+    
+    .quick-add-wrapper {
+        flex-direction: column;
+    }
+    
+    .quick-group-select {
+        width: 100%;
+        height: 48px; /* Match input height */
+    }
+}
 </style>
