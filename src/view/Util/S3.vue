@@ -281,6 +281,7 @@ const truncateFileName = (name) => {
   try {
     return decodeAndDecompress(encoded);
   } catch (e) {
+    console.error("Failed to decode file name:", e);
     return encoded;
   }
 };
@@ -290,6 +291,7 @@ const getAuthKey = async (file) => {
     try {
         return decodeAndDecompress(key);
     } catch (e) {
+        console.error("Failed to decode auth key:", e);
         return key;
     }
 };

@@ -75,14 +75,12 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import BaseCard from "@/components/base/BaseCard.vue";
 import BaseInput from "@/components/base/BaseInput.vue";
 import SketchWidget from "@/components/SketchWidget.vue";
 import { postData, getData } from "@/services/dynamoService.js";
 import { message } from "ant-design-vue";
 
-const router = useRouter();
 const quickTask = ref("");
 
 const today = computed(() => {
@@ -112,6 +110,7 @@ const handleQuickTask = async () => {
         message.success("Task added");
         quickTask.value = "";
     } catch(e) {
+        console.error(e);
         // Fallback for demo if backend fails or empty
         message.success("Task added (Local)");
         quickTask.value = "";

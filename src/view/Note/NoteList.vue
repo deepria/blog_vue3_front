@@ -93,7 +93,7 @@
 <script setup>
 import { ref, onMounted, nextTick, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { message, Modal, App } from 'ant-design-vue';
+import { message, App } from 'ant-design-vue';
 import Viewer from '@toast-ui/editor/dist/toastui-editor-viewer';
 import '@toast-ui/editor/dist/toastui-editor-viewer.css';
 import '@toast-ui/editor/dist/theme/toastui-editor-dark.css';
@@ -135,6 +135,7 @@ const loadNotes = async () => {
         notes.value = raw || [];
         message.success("Refreshed");
     } catch (e) {
+        console.error(e);
         message.error("Failed to load notes");
     } finally {
         loading.value = false;
@@ -184,6 +185,7 @@ const togglePreview = async (note) => {
             });
         }
     } catch (e) {
+        console.error(e);
         message.error("Preview failed");
         loadingPreview.value = false;
     }
@@ -204,6 +206,7 @@ const confirmDelete = (note) => {
                  if(expandedId.value === note.id) expandedId.value = null;
                  await loadNotes();
              } catch(e) {
+                 console.error(e);
                  message.error("Delete failed");
              }
         }

@@ -18,6 +18,7 @@ export function decodeAndDecompress(encodedStr) {
     const decompressed = pako.inflate(byteArray);
     return new TextDecoder().decode(decompressed);
   } catch (ignore) {
+    console.error("Failed to decode and decompress:", ignore);
     return encodedStr;
   }
 }

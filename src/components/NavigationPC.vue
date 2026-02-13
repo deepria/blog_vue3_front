@@ -45,7 +45,6 @@ import {
   FileTextOutlined, 
   CheckSquareOutlined, 
   CloudServerOutlined,
-  SettingOutlined,
   MessageOutlined
 } from '@ant-design/icons-vue';
 </script>

@@ -87,6 +87,7 @@ const loadContent = async () => {
         initEditor();
     }
   } catch (error) {
+    console.error(error);
     message.error("Failed to load content");
     initEditor();
   }
@@ -107,7 +108,7 @@ const save = async () => {
         content: content
     };
     
-    const savedId = await saveNote(noteToSave);
+    await saveNote(noteToSave);
     
     if (!props.id) {
        message.success("Note created");
@@ -117,6 +118,7 @@ const save = async () => {
        router.push('/notes');
     }
   } catch (error) {
+    console.error(error);
     message.error("Save failed");
   } finally {
     saving.value = false;

@@ -24,17 +24,17 @@
     <!-- Quick Add -->
     <div class="quick-add-container">
         <div class="quick-add-wrapper">
-             <select 
-                v-model="quickAddGroupKey" 
-                class="quick-group-select" 
+             <select
+                v-model="quickAddGroupKey"
+                class="quick-group-select"
                 :style="{ color: quickAddGroupKey ? getGroupColor(quickAddGroupKey) : 'var(--text-muted)' }"
              >
                  <option :value="null">Default</option>
                  <option v-for="g in groupOptions" :key="g.key" :value="g.key">{{ g.name }}</option>
             </select>
-            <BaseInput 
-                v-model="quickAddText" 
-                placeholder="Add new task..." 
+            <BaseInput
+                v-model="quickAddText"
+                placeholder="Add new task..."
                 class="quick-input-flex"
                 @keyup.enter="handleQuickAdd"
             >
@@ -51,8 +51,8 @@
        <transition-group name="list" tag="div">
           <template v-for="(item, index) in sortedItems" :key="item.id">
              <!-- Group Header -->
-             <div 
-                v-if="index === 0 || sortedItems[index - 1].groupKey !== item.groupKey" 
+             <div
+                v-if="index === 0 || sortedItems[index - 1].groupKey !== item.groupKey"
                 class="group-header"
                 :style="{ color: getGroupColor(item.groupKey) }"
              >
@@ -60,28 +60,28 @@
              </div>
 
              <!-- Task Item -->
-             <div 
+             <div
                 class="task-item"
                 :class="{ 'is-completed': item.completed }"
                 @click="openEditModal(item)"
              >
                 <div class="task-priority-indicator" :style="{ backgroundColor: getPriorityColorByKey(item.priorityKey) }"></div>
-                
+
                 <!-- Delete Button (Left side) -->
                 <button class="delete-btn" @click.stop="deleteItem(item)">
                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
 
                 <!-- Custom Checkbox (Moved after delete button but before content) -->
-                 <div 
-                    class="custom-checkbox" 
+                 <div
+                    class="custom-checkbox"
                     :class="{ 'checked': item.completed }"
                     :style="{ borderColor: item.completed ? 'var(--color-primary)' : 'var(--border-color)' }"
                     @click.stop="toggleCompletion(item)"
                 >
                     <svg v-if="item.completed" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
-                
+
                 <div class="task-content">
                     <span class="task-text">{{ item.text }}</span>
                 </div>
@@ -95,7 +95,7 @@
     <BaseModal v-model="showPopup" :title="isNewItem ? 'New Task' : 'Edit Task'">
         <div class="edit-form">
             <BaseInput v-model="selectedItem.text" label="Task Description" placeholder="What needs to be done?" />
-             
+
             <div class="form-row">
                 <div class="form-group">
                     <label>Group</label>
@@ -114,7 +114,7 @@
                     </div>
                 </div>
             </div>
-            
+
              <!-- Option Management Section (Toggleable) -->
             <div class="options-toggle" @click="toggleSettingsMode">
                 <span>{{ settingsMode ? 'Hide Options Manager' : 'Manage Groups & Tags' }}</span>
@@ -136,7 +136,7 @@
                         <button class="icon-btn-primary" @click="addGroup">+</button>
                     </div>
                  </div>
-                 
+
                  <!-- Priority Manager -->
                  <div class="option-section">
                     <h4>Priorities</h4>
@@ -151,7 +151,7 @@
                         <button class="icon-btn-primary" @click="addPriority">+</button>
                     </div>
                  </div>
-                 
+
                  <div class="options-actions">
                      <BaseButton size="sm" variant="secondary" @click="resetDefaults">Reset Defaults</BaseButton>
                      <BaseButton size="sm" variant="primary" @click="saveMeta">Save Options</BaseButton>
@@ -168,7 +168,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { computed,  onMounted, ref  } from "vue";
 import { getData, postData } from "@/services/dynamoService.js";
 import { message } from "ant-design-vue";
 import BaseButton from "@/components/base/BaseButton.vue";
@@ -234,11 +234,11 @@ const handleQuickAdd = () => {
     };
     items.value.unshift(newItem);
     quickAddText.value = "";
-    markUnsaved(); 
+    markUnsaved();
 };
 
 const openEditModal = (item) => {
-    selectedItem.value = item; 
+    selectedItem.value = item;
     ensureValidSelection();
     isNewItem.value = false;
     showPopup.value = true;
@@ -246,7 +246,7 @@ const openEditModal = (item) => {
 
 const openSettings = () => {
    selectedItem.value = { text: '', groupKey: groupOptions.value[0]?.key, priorityKey: priorityOptions.value[0]?.key };
-   isNewItem.value = true; 
+   isNewItem.value = true;
    settingsMode.value = true;
    showPopup.value = true;
 };
@@ -257,7 +257,7 @@ const confirmPopup = () => {
 };
 
 const toggleCompletion = (item) => {
-    item.completed = !item.completed; 
+    item.completed = !item.completed;
     markUnsaved();
 };
 
@@ -318,19 +318,19 @@ const loadMeta = async () => {
 const saveMeta = async () => {
     const meta = { groups: groupOptions.value, priorities: priorityOptions.value, updatedAt: Date.now() };
     await postData("todo", "meta", "meta", JSON.stringify(meta));
-    // Meta saves are still instant or coupled with Todos? 
-    // Usually meta options are saved instantly or with the whole batch. 
-    // Let's assume options are saved instantly for now to avoid complexity, 
-    // OR coupled. User said "save button ... final reflect". 
-    // Let's keep meta save instant for now as it's separate modal, 
+    // Meta saves are still instant or coupled with Todos?
+    // Usually meta options are saved instantly or with the whole batch.
+    // Let's assume options are saved instantly for now to avoid complexity,
+    // OR coupled. User said "save button ... final reflect".
+    // Let's keep meta save instant for now as it's separate modal,
     // BUT user might expect Save button to do everything.
     // Changing implementation to MARK UNSAVED for options too, and save everything on SAVE button.
-    
-    // Actually, saveMeta was called in 'Options Manager' explicitly. 
+
+    // Actually, saveMeta was called in 'Options Manager' explicitly.
     // Let's keep explicit save for options inside the modal for now to avoid losing config if they cancel the modal?
-    // Wait, confirmPopup handles 'Done'. 
+    // Wait, confirmPopup handles 'Done'.
     // Let's make 'Save Options' inside modal just close settings mode or mark unsaved.
-    // For now, I will keep saveMeta as is BUT mark unsaved so user knows to sync everything? 
+    // For now, I will keep saveMeta as is BUT mark unsaved so user knows to sync everything?
     // No, let's make saveMeta ALSO just mark unsaved and save on main button for consistency?
     // User request: "save button to final reflect".
     // So let's make saveMeta internal-only until Main Save.
@@ -364,7 +364,7 @@ const saveTodos = async () => {
     try {
         // Save Todo List
         await postData("todo", "todo", "todo", JSON.stringify(items.value));
-        
+
         // Save Meta (Groups/Priorities) as well, to ensure consistency
         const meta = { groups: groupOptions.value, priorities: priorityOptions.value, updatedAt: Date.now() };
         await postData("todo", "meta", "meta", JSON.stringify(meta));
@@ -372,6 +372,7 @@ const saveTodos = async () => {
         hasUnsavedChanges.value = false;
         message.success("All changes saved");
     } catch(e) {
+        console.error(e);
         message.error("Failed to save");
     }
 };
@@ -506,7 +507,7 @@ onMounted(async () => {
     width: 28px;
     height: 28px;
     border: 2px solid var(--border-color);
-    border-radius: 8px; 
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -600,11 +601,11 @@ onMounted(async () => {
         display: flex;
         gap: 8px; /* Gap between refresh and save */
     }
-    
+
     .quick-add-wrapper {
         flex-direction: column;
     }
-    
+
     .quick-group-select {
         width: 100%;
         height: 48px; /* Match input height */
