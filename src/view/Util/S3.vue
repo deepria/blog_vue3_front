@@ -125,7 +125,7 @@
     </BaseModal>
 
     <!-- Image Preview Modal -->
-    <BaseModal v-model="visible" title="Preview" class="preview-modal">
+    <BaseModal v-model="visible" title="Preview">
         <div class="preview-container">
             <img v-if="src" :src="src" class="preview-image" />
         </div>
