@@ -1,95 +1,196 @@
 <template>
-  <div class="chat-container">
-    <div class="chat-header">
-      <h2><message-outlined /> AI Assistant</h2>
-      <span class="status-badge">Online</span>
+  <div class="main-layout">
+    <!-- Mobile Sidebar Toggle -->
+    <div class="mobile-header" v-if="isMobile">
+      <a-button type="text" @click="drawerVisible = true">
+        <menu-outlined />
+      </a-button>
+      <span>AI Assistant</span>
     </div>
 
-    <div class="messages-area" ref="messagesContainer">
-      <div v-if="messages.length === 0" class="empty-state">
-        <robot-outlined class="empty-icon" />
-        <p>안녕하세요! 무엇을 도와드릴까요?</p>
-      </div>
-
-      <div
-        v-for="(msg, index) in messages"
-        :key="index"
-        :class="['message-wrapper', msg.role === 'user' ? 'user' : 'assistant']"
-      >
-        <div class="avatar">
-          <user-outlined v-if="msg.role === 'user'" />
-          <robot-outlined v-else />
-        </div>
-        <div class="message-content">
-          <div v-if="msg.role === 'user'" class="text-content">
-            {{ msg.content }}
-          </div>
-          <div v-else class="markdown-content" :ref="el => setViewerRef(el, index)"></div>
-        </div>
-      </div>
-      
-      <div v-if="loading" class="message-wrapper assistant loading">
-        <div class="avatar">
-          <robot-outlined />
-        </div>
-        <div class="message-content">
-          <div class="typing-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="input-area">
-      <div class="input-wrapper">
-        <a-textarea
-          v-model:value="userInput"
-          placeholder="메시지를 입력하세요..."
-          :auto-size="{ minRows: 1, maxRows: 4 }"
-          @pressEnter.prevent="sendMessage"
-        />
-        <a-button 
-          type="primary" 
-          shape="circle" 
-          @click="sendMessage" 
-          :loading="loading"
-          :disabled="!userInput.trim()"
-        >
-          <template #icon><send-outlined /></template>
+    <!-- Sidebar (Desktop) -->
+    <div class="sidebar" v-if="!isMobile">
+      <div class="sidebar-header">
+        <a-button type="primary" block @click="createNewSession">
+          <plus-outlined /> New Chat
         </a-button>
+      </div>
+      <div class="session-list">
+        <div 
+          v-for="session in chatStore.sortedSessions" 
+          :key="session.id"
+          :class="['session-item', { active: chatStore.currentSessionId === session.id }]"
+          @click="switchSession(session.id)"
+        >
+          <div class="session-title">
+            <message-outlined class="session-icon" />
+            <span class="text-truncate">{{ session.title || 'New Chat' }}</span>
+          </div>
+          <a-button 
+            type="text" 
+            size="small" 
+            class="delete-btn"
+            @click.stop="deleteSession(session.id)"
+          >
+            <delete-outlined />
+          </a-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer for Sidebar -->
+    <a-drawer
+      v-model:visible="drawerVisible"
+      placement="left"
+      :closable="false"
+      class="mobile-sidebar-drawer"
+      :bodyStyle="{ padding: 0, background: '#1f1f1f' }"
+    >
+      <div class="sidebar mobile">
+        <div class="sidebar-header">
+          <a-button type="primary" block @click="createNewSession">
+            <plus-outlined /> New Chat
+          </a-button>
+        </div>
+        <div class="session-list">
+          <div 
+            v-for="session in chatStore.sortedSessions" 
+            :key="session.id"
+            :class="['session-item', { active: chatStore.currentSessionId === session.id }]"
+            @click="switchSession(session.id)"
+          >
+            <div class="session-title">
+              <message-outlined class="session-icon" />
+              <span class="text-truncate">{{ session.title || 'New Chat' }}</span>
+            </div>
+            <a-button 
+              type="text" 
+              size="small" 
+              class="delete-btn"
+              @click.stop="deleteSession(session.id)"
+            >
+              <delete-outlined />
+            </a-button>
+          </div>
+        </div>
+      </div>
+    </a-drawer>
+
+    <!-- Chat Area -->
+    <div class="chat-container">
+      <div class="chat-header" v-if="!isMobile">
+        <h2><message-outlined /> {{ currentSessionTitle }}</h2>
+        <span class="status-badge">Online</span>
+      </div>
+
+      <div class="messages-area" ref="messagesContainer">
+        <div v-if="!currentMessages.length" class="empty-state">
+          <robot-outlined class="empty-icon" />
+          <p>안녕하세요! 무엇을 도와드릴까요?</p>
+        </div>
+
+        <div
+          v-for="(msg, index) in currentMessages"
+          :key="index"
+          :class="['message-wrapper', msg.role === 'user' ? 'user' : 'assistant']"
+        >
+          <div class="avatar">
+            <user-outlined v-if="msg.role === 'user'" />
+            <robot-outlined v-else />
+          </div>
+          <div class="message-content">
+            <div v-if="msg.role === 'user'" class="text-content">
+              {{ msg.content }}
+            </div>
+            <div v-else class="markdown-content" :ref="el => setViewerRef(el, msg.content)"></div>
+          </div>
+        </div>
+        
+        <div v-if="chatStore.loading" class="message-wrapper assistant loading">
+          <div class="avatar">
+            <robot-outlined />
+          </div>
+          <div class="message-content">
+            <div class="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="input-wrapper">
+          <a-textarea
+            v-model:value="userInput"
+            placeholder="메시지를 입력하세요..."
+            :auto-size="{ minRows: 1, maxRows: 4 }"
+            @pressEnter.prevent="handleSendMessage"
+          />
+          <a-button 
+            type="primary" 
+            shape="circle" 
+            @click="handleSendMessage" 
+            :loading="chatStore.loading"
+            :disabled="!userInput.trim()"
+          >
+            <template #icon><send-outlined /></template>
+          </a-button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue';
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
+import { useChatStore } from '@/store/chat';
 import { 
   MessageOutlined, 
   SendOutlined, 
   UserOutlined, 
-  RobotOutlined 
+  RobotOutlined,
+  PlusOutlined,
+  MenuOutlined,
+  DeleteOutlined
 } from '@ant-design/icons-vue';
-import apiClient from '@/services/api';
 import Viewer from '@toast-ui/editor/dist/toastui-editor-viewer';
 import '@toast-ui/editor/dist/toastui-editor-viewer.css';
 
-const messages = ref([]);
+const chatStore = useChatStore();
 const userInput = ref('');
-const loading = ref(false);
 const messagesContainer = ref(null);
-const viewers = ref({});
+const isMobile = ref(false);
+const drawerVisible = ref(false);
 
-const setViewerRef = (el, index) => {
-  if (el && !viewers.value[index]) {
-    const viewer = new Viewer({
+// Reactive data from store
+const currentMessages = computed(() => {
+  return chatStore.currentSession?.messages || [];
+});
+
+const currentSessionTitle = computed(() => {
+  return chatStore.currentSession?.title || 'New Chat';
+});
+
+// Responsive check
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
+
+// Viewer handling
+const setViewerRef = (el, content) => {
+  // Use a unique key based on content length or timestamp to avoid collisions
+  // But index is simple if we are careful. Here just re-init if needed.
+  if (el) {
+    // Check if viewer already exists for this element
+    // Ideally we should manage viewers more robustly, but for now:
+    el.innerHTML = ''; // Clear previous
+    new Viewer({
       el: el,
-      initialValue: messages.value[index].content,
+      initialValue: content,
       theme: 'dark'
     });
-    viewers.value[index] = viewer;
   }
 };
 
@@ -100,56 +201,147 @@ const scrollToBottom = async () => {
   }
 };
 
-const sendMessage = async () => {
+const handleSendMessage = async () => {
   const text = userInput.value.trim();
-  if (!text || loading.value) return;
-
-  // Add user message
-  messages.value.push({
-    role: 'user',
-    content: text
-  });
+  if (!text || chatStore.loading) return;
   
   userInput.value = '';
-  loading.value = true;
+  await chatStore.sendMessage(text);
   await scrollToBottom();
-
-  try {
-    const response = await apiClient.post('/api/chat', {
-      message: text
-    });
-
-    // Add assistant message
-    messages.value.push({
-      role: 'assistant',
-      content: response.data.reply
-    });
-  } catch (error) {
-    console.error('Chat error:', error);
-    // Error handling is partly done by interceptor, but we can add UI feedback here if needed
-    // or rely on the interceptor's message.
-    // If we want to show a message in the chat bubble specifically:
-    messages.value.push({
-      role: 'assistant',
-      content: '죄송합니다. 오류가 발생했습니다.'
-    });
-  } finally {
-    loading.value = false;
-    await scrollToBottom();
-  }
 };
+
+const createNewSession = () => {
+  chatStore.createSession();
+  drawerVisible.value = false;
+};
+
+const switchSession = async (id) => {
+  chatStore.selectSession(id);
+  drawerVisible.value = false;
+  await scrollToBottom();
+};
+
+const deleteSession = (id) => {
+  chatStore.deleteSession(id);
+};
+
+onMounted(() => {
+  chatStore.loadSessions();
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+  scrollToBottom();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile);
+});
 </script>
 
 <style scoped>
-.chat-container {
+.main-layout {
   display: flex;
-  flex-direction: column;
   height: 100vh;
   background-color: #121212;
   color: #e0e0e0;
-  max-width: 900px;
-  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 260px;
+  background-color: #1f1f1f;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar.mobile {
+  width: 100%;
+  height: 100%;
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.session-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.session-item {
+  padding: 12px 16px;
+  margin-bottom: 4px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #a0a0a0;
+}
+
+.session-item:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #fff;
+}
+
+.session-item.active {
+  background-color: rgba(23, 125, 220, 0.15);
+  color: #177ddc;
+}
+
+.session-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.delete-btn {
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: #ff7875;
+}
+
+.session-item:hover .delete-btn {
+  opacity: 1;
+}
+
+/* Main Chat Area Styles */
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   position: relative;
+  background-color: #121212;
+  min-width: 0; /* Prevent flex child overflow */
+}
+
+.mobile-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: rgba(31, 31, 31, 0.95);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 100;
+  backdrop-filter: blur(10px);
 }
 
 .chat-header {
@@ -165,7 +357,7 @@ const sendMessage = async () => {
 
 .chat-header h2 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -189,6 +381,13 @@ const sendMessage = async () => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+/* Adjust top padding for mobile to account for header */
+@media (max-width: 768px) {
+  .messages-area {
+    padding-top: 60px;
+  }
 }
 
 .empty-state {
@@ -332,16 +531,11 @@ const sendMessage = async () => {
   background-color: #141414;
   border-radius: 8px;
 }
-/* ... existing styles ... */
 
 @media (max-width: 768px) {
-  .chat-container {
-    padding-bottom: 96px; /* Space for mobile navigation */
-  }
-  
   .input-area {
+    padding: 16px;
     padding-bottom: 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 }
 </style>
