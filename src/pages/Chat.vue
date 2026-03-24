@@ -16,52 +16,15 @@
         </a-button>
       </div>
       <div class="session-list">
-        <div 
-          v-for="session in chatStore.sortedSessions" 
-          :key="session.id"
-          :class="['session-item', { active: chatStore.currentSessionId === session.id }]"
-          @click="switchSession(session.id)"
-        >
-          <div class="session-title">
-            <message-outlined class="session-icon" />
-            <span class="text-truncate">{{ session.title || 'New Chat' }}</span>
-          </div>
-          <a-button 
-            type="text" 
-            size="small" 
-            class="delete-btn"
-            @click.stop="deleteSession(session.id)"
-          >
-            <delete-outlined />
-          </a-button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mobile Drawer for Sidebar -->
-    <a-drawer
-      v-model:visible="drawerVisible"
-      placement="left"
-      :closable="false"
-      class="mobile-sidebar-drawer"
-      :bodyStyle="{ padding: 0, background: '#1f1f1f' }"
-    >
-      <div class="sidebar mobile">
-        <div class="sidebar-header">
-          <a-button type="primary" block @click="createNewSession">
-            <plus-outlined /> New Chat
-          </a-button>
-        </div>
-        <div class="session-list">
+        <template v-for="session in (chatStore.sortedSessions || [])" :key="session?.id || Math.random()">
           <div 
-            v-for="session in chatStore.sortedSessions" 
-            :key="session.id"
-            :class="['session-item', { active: chatStore.currentSessionId === session.id }]"
+            v-if="session && session.id"
+            :class="['session-item', { active: chatStore.currentSessionId === session?.id }]"
             @click="switchSession(session.id)"
           >
             <div class="session-title">
               <message-outlined class="session-icon" />
-              <span class="text-truncate">{{ session.title || 'New Chat' }}</span>
+              <span class="text-truncate">{{ session?.title || 'New Chat' }}</span>
             </div>
             <a-button 
               type="text" 
@@ -72,6 +35,45 @@
               <delete-outlined />
             </a-button>
           </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer for Sidebar -->
+    <a-drawer
+      v-model:visible="drawerVisible"
+      placement="left"
+      :closable="false"
+      class="mobile-sidebar-drawer"
+      :bodyStyle="{ padding: 0, background: 'rgba(3, 5, 4, 0.78)' }"
+    >
+      <div class="sidebar mobile">
+        <div class="sidebar-header">
+          <a-button type="primary" block @click="createNewSession">
+            <plus-outlined /> New Chat
+          </a-button>
+        </div>
+        <div class="session-list">
+          <template v-for="session in (chatStore.sortedSessions || [])" :key="session?.id || 'm-' + Math.random()">
+            <div 
+              v-if="session && session.id"
+              :class="['session-item', { active: chatStore.currentSessionId === session?.id }]"
+              @click="switchSession(session.id)"
+            >
+              <div class="session-title">
+                <message-outlined class="session-icon" />
+                <span class="text-truncate">{{ session?.title || 'New Chat' }}</span>
+              </div>
+              <a-button 
+                type="text" 
+                size="small" 
+                class="delete-btn"
+                @click.stop="deleteSession(session.id)"
+              >
+                <delete-outlined />
+              </a-button>
+            </div>
+          </template>
         </div>
       </div>
     </a-drawer>
@@ -99,10 +101,13 @@
             <robot-outlined v-else />
           </div>
           <div class="message-content">
+            <div class="specular-highlight"></div>
             <div v-if="msg.role === 'user'" class="text-content">
               {{ msg.content }}
             </div>
-            <div v-else class="markdown-content" :ref="el => setViewerRef(el, msg.content)"></div>
+            <div v-else>
+              <MarkdownViewer :content="msg.content" />
+            </div>
           </div>
         </div>
         
@@ -145,20 +150,19 @@
 
 <script setup>
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
-import { useChatStore } from '@/store/chat';
+import { useChat } from '@/features/llm/composables/useChat';
 import { 
   MessageOutlined, 
-  SendOutlined, 
-  UserOutlined, 
+  SendOutlined,
+  UserOutlined,
   RobotOutlined,
   PlusOutlined,
   MenuOutlined,
   DeleteOutlined
 } from '@ant-design/icons-vue';
-import Viewer from '@toast-ui/editor/dist/toastui-editor-viewer';
-import '@toast-ui/editor/dist/toastui-editor-viewer.css';
+import MarkdownViewer from '@/components/ui/MarkdownViewer.vue';
 
-const chatStore = useChatStore();
+const chatStore = useChat();
 const userInput = ref('');
 const messagesContainer = ref(null);
 const isMobile = ref(false);
@@ -178,21 +182,7 @@ const checkMobile = () => {
   isMobile.value = window.innerWidth <= 768;
 };
 
-// Viewer handling
-const setViewerRef = (el, content) => {
-  // Use a unique key based on content length or timestamp to avoid collisions
-  // But index is simple if we are careful. Here just re-init if needed.
-  if (el) {
-    // Check if viewer already exists for this element
-    // Ideally we should manage viewers more robustly, but for now:
-    el.innerHTML = ''; // Clear previous
-    new Viewer({
-      el: el,
-      initialValue: content,
-      theme: 'dark'
-    });
-  }
-};
+// View removed, integrated in MarkdownViewer
 
 const scrollToBottom = async () => {
   await nextTick();
@@ -241,19 +231,24 @@ onUnmounted(() => {
 .main-layout {
   display: flex;
   height: 100vh;
-  background-color: #121212;
-  color: #e0e0e0;
+  background-color: transparent;
+  color: var(--color-text-primary);
   overflow: hidden;
 }
 
 /* Sidebar Styles */
 .sidebar {
-  width: 260px;
-  background-color: #1f1f1f;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  width: 280px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.008)),
+    var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-right: var(--glass-border);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  z-index: 20;
 }
 
 .sidebar.mobile {
@@ -263,7 +258,7 @@ onUnmounted(() => {
 
 .sidebar-header {
   padding: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .session-list {
@@ -281,17 +276,20 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #a0a0a0;
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .session-item:hover {
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: rgba(255, 255, 255, 0.025);
   color: #fff;
+  transform: translateX(4px);
 }
 
 .session-item.active {
-  background-color: rgba(23, 125, 220, 0.15);
-  color: #177ddc;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--color-primary);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 8px 8px 0;
 }
 
 .session-title {
@@ -324,8 +322,9 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   position: relative;
-  background-color: #121212;
+  background: transparent;
   min-width: 0; /* Prevent flex child overflow */
+  min-height: 0;
 }
 
 .mobile-header {
@@ -334,24 +333,26 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   height: 50px;
-  background: rgba(31, 31, 31, 0.95);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.008)),
+    rgba(3, 5, 4, 0.58);
   display: flex;
   align-items: center;
   padding: 0 16px;
   gap: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   z-index: 100;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(18px);
 }
 
 .chat-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 24px var(--space-8);
+  border-bottom: var(--glass-border);
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(18, 18, 18, 0.95);
-  backdrop-filter: blur(10px);
+  justify-content: space-between;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
   z-index: 10;
 }
 
@@ -367,15 +368,16 @@ onUnmounted(() => {
 
 .status-badge {
   font-size: 0.75rem;
-  background: rgba(82, 196, 26, 0.2);
-  color: #52c41a;
+  background: rgba(66, 184, 131, 0.08);
+  color: #d7ffe9;
   padding: 2px 8px;
   border-radius: 10px;
-  border: 1px solid rgba(82, 196, 26, 0.3);
+  border: 1px solid rgba(66, 184, 131, 0.18);
 }
 
 .messages-area {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 24px;
   display: flex;
@@ -385,8 +387,30 @@ onUnmounted(() => {
 
 /* Adjust top padding for mobile to account for header */
 @media (max-width: 768px) {
+  .main-layout {
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .chat-container {
+    min-height: 0;
+  }
+
   .messages-area {
+    min-height: 0;
     padding-top: 60px;
+    padding-bottom: calc(132px + var(--safe-bottom));
+  }
+
+  .input-area {
+    position: sticky;
+    bottom: calc(84px + var(--safe-bottom));
+    z-index: 120;
+    padding: 12px 16px 0;
+    background: transparent;
+    border-top: none;
+    backdrop-filter: none;
   }
 }
 
@@ -396,7 +420,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #666;
+  color: rgba(255, 255, 255, 0.64);
   gap: 16px;
 }
 
@@ -424,61 +448,103 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: #2c2c2c;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .user .avatar {
-  background: #177ddc;
+  background: rgba(66, 184, 131, 0.18);
   color: white;
 }
 
 .assistant .avatar {
-  background: linear-gradient(135deg, #722ed1 0%, #1890ff 100%);
+  background: linear-gradient(135deg, rgba(66, 184, 131, 0.28) 0%, rgba(126, 226, 184, 0.16) 100%);
   color: white;
 }
 
 .message-content {
-  padding: 12px 16px;
-  border-radius: 12px;
-  background: #1f1f1f;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
   font-size: 0.95rem;
   line-height: 1.6;
+  box-shadow: var(--glass-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.specular-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  z-index: 5;
 }
 
 .user .message-content {
-  background: #177ddc;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #1f6b4b 100%);
   color: white;
   border: none;
-  border-bottom-right-radius: 4px;
+  border-top-right-radius: 4px;
+  box-shadow: var(--glass-shadow);
+}
+.user .message-content::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--surface-gloss);
+  opacity: 0.2;
 }
 
 .assistant .message-content {
   border-top-left-radius: 4px;
   min-width: 200px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.008)),
+    var(--glass-bg-elevated);
+}
+.assistant .message-content::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--surface-gloss);
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .input-area {
   padding: 24px;
-  background: rgba(18, 18, 18, 0.95);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.006)),
+    rgba(3, 5, 4, 0.42);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .input-wrapper {
   display: flex;
   gap: 12px;
   align-items: flex-end;
-  background: #2c2c2c;
+  background: rgba(255, 255, 255, 0.025);
   padding: 8px 8px 8px 16px;
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   transition: border-color 0.3s;
+  backdrop-filter: blur(18px);
+}
+
+.input-wrapper :deep(.ant-input-textarea) {
+  flex: 1;
+  min-width: 0;
 }
 
 .input-wrapper:focus-within {
-  border-color: #177ddc;
+  border-color: rgba(66, 184, 131, 0.28);
 }
 
 .input-wrapper :deep(.ant-input) {
@@ -499,7 +565,7 @@ onUnmounted(() => {
 .typing-indicator span {
   width: 8px;
   height: 8px;
-  background: #888;
+  background: rgba(255, 255, 255, 0.58);
   border-radius: 50%;
   animation: bounce 1.4s infinite ease-in-out;
 }
@@ -519,23 +585,16 @@ onUnmounted(() => {
 }
 
 :deep(.toastui-editor-contents p) {
-  color: #e0e0e0;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 :deep(.toastui-editor-contents code) {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #ff7875;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
 }
 
 :deep(.toastui-editor-contents pre) {
-  background-color: #141414;
+  background-color: rgba(255, 255, 255, 0.03);
   border-radius: 8px;
-}
-
-@media (max-width: 768px) {
-  .input-area {
-    padding: 16px;
-    padding-bottom: 24px;
-  }
 }
 </style>

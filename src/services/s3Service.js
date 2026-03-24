@@ -44,39 +44,12 @@ export const uploadToS3 = async (selectedFile) => {
   return uploadProgress || false;
 };
 
+import { useDownload } from '@/shared/composables/useDownload';
+
 // 파일 다운로드
 export const downloadFromS3 = async (filename, originalFileName) => {
-  const { data: downloadUrl } = await apiClient.get("/api/s3/download-url", {
-    params: {
-      filename: filename,
-      originalName: originalFileName
-    },
-  });
-
-  if (navigator.userAgent.includes("Android") && Android.isApp()) {
-    // 1. presigned URL로 파일(blob) 다운로드
-    const response = await apiClient.get(downloadUrl, {
-      responseType: "blob",
-    });
-
-    const blob = new Blob([response.data]);
-    const reader = new FileReader();
-    reader.onload = function () {
-      const base64Data = reader.result.split(",")[1];
-      // Android Interface 로 데이터 전달
-      Android.downloadBlob(base64Data, originalFileName);
-    };
-    reader.readAsDataURL(blob);
-  } else {
-    // Web 브라우저 전용
-    // [Backend Updated] 백엔드에서 Content-Disposition 헤더를 설정하므로 직접 다운로드 링크 사용
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.target = "_blank"; // 새 탭에서 열기 (S3가 설정한 헤더로 인해 파일명 유지되며 다운로드됨)
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
+  const { downloadFile } = useDownload();
+  return await downloadFile(filename, originalFileName);
 };
 
 export const previewFromS3 = async (filename) => {

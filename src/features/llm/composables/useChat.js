@@ -1,24 +1,44 @@
-import { defineStore } from 'pinia';
 import { ref, computed, watch } from 'vue';
-import apiClient from '@/services/api';
+import { chatApi } from '../api/chatApi';
 
-export const useChatStore = defineStore('chat', () => {
-  // State
-  const sessions = ref([]);
-  const currentSessionId = ref(null);
-  const loading = ref(false);
+/**
+ * Global shared state for chat sessions extracted from Pinia
+ * Placed outside the composable so it acts as a singleton for the chat feature
+ */
+const sessions = ref([]);
+const currentSessionId = ref(null);
+const loading = ref(false);
 
-  // Getters
+let initialized = false;
+
+export function useChat() {
   const currentSession = computed(() => {
     return sessions.value.find(s => s.id === currentSessionId.value) || null;
   });
 
   const sortedSessions = computed(() => {
-    return [...sessions.value].sort((a, b) => b.createdAt - a.createdAt);
+    return [...sessions.value]
+      .filter(s => s && s.id)
+      .sort((a, b) => (b.lastModified || 0) - (a.lastModified || 0));
   });
 
-  // Actions
+  const createSession = () => {
+    const newSession = {
+      id: crypto.randomUUID(),
+      title: 'New Chat',
+      messages: [],
+      createdAt: Date.now(),
+      lastModified: Date.now()
+    };
+    
+    sessions.value.unshift(newSession);
+    currentSessionId.value = newSession.id;
+    return newSession.id;
+  };
+
   const loadSessions = () => {
+    if (initialized) return;
+    
     const stored = localStorage.getItem('chat_sessions');
     if (stored) {
       try {
@@ -38,20 +58,7 @@ export const useChatStore = defineStore('chat', () => {
     } else {
       createSession();
     }
-  };
-
-  const createSession = () => {
-    const newSession = {
-      id: crypto.randomUUID(),
-      title: 'New Chat',
-      messages: [],
-      createdAt: Date.now(),
-      lastModified: Date.now()
-    };
-    
-    sessions.value.unshift(newSession);
-    currentSessionId.value = newSession.id;
-    return newSession.id;
+    initialized = true;
   };
 
   const deleteSession = (id) => {
@@ -76,13 +83,6 @@ export const useChatStore = defineStore('chat', () => {
     }
   };
 
-  const updateSessionTitle = (id, title) => {
-    const session = sessions.value.find(s => s.id === id);
-    if (session) {
-      session.title = title;
-    }
-  };
-
   const sendMessage = async (text) => {
     if (!text.trim() || !currentSession.value) return;
 
@@ -98,22 +98,16 @@ export const useChatStore = defineStore('chat', () => {
     
     // Auto-update title if it's the first message and title is default
     if (session.messages.length === 1 && session.title === 'New Chat') {
-      // Simple truncation for title
       session.title = text.length > 30 ? text.substring(0, 30) + '...' : text;
     }
 
     loading.value = true;
 
     try {
-      const response = await apiClient.post('/api/chat', {
-        message: text,
-        // Optional: send history if API supports context
-        // history: session.messages
-      });
-
+      const reply = await chatApi.sendMessage(text);
       const assistantMsg = {
         role: 'assistant',
-        content: response.data.reply,
+        content: reply,
         timestamp: Date.now()
       };
 
@@ -133,21 +127,22 @@ export const useChatStore = defineStore('chat', () => {
     }
   };
 
-  // Persist to localStorage whenever sessions change
-  watch(
-    sessions,
-    (newSessions) => {
-      localStorage.setItem('chat_sessions', JSON.stringify(newSessions));
-    },
-    { deep: true }
-  );
+  // Setup persistence watchers only once
+  if (!initialized) {
+    watch(
+      sessions,
+      (newSessions) => {
+        localStorage.setItem('chat_sessions', JSON.stringify(newSessions));
+      },
+      { deep: true }
+    );
 
-  // Persist current session ID
-  watch(currentSessionId, (newId) => {
-    if (newId) {
-      localStorage.setItem('last_chat_session_id', newId);
-    }
-  });
+    watch(currentSessionId, (newId) => {
+      if (newId) {
+        localStorage.setItem('last_chat_session_id', newId);
+      }
+    });
+  }
 
   return {
     sessions,
@@ -159,7 +154,6 @@ export const useChatStore = defineStore('chat', () => {
     createSession,
     deleteSession,
     selectSession,
-    updateSessionTitle,
     sendMessage
   };
-});
+}

@@ -1,4 +1,4 @@
-import { getData, postData, deleteData } from "./dynamoService";
+import { getData, postData, deleteData } from "@/services/dynamoService";
 
 const PARTITION_KEY = "NOTE";
 const INDEX_PARTITION = "NOTE_LIST";

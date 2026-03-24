@@ -11,9 +11,9 @@
           <span>Home</span>
         </router-link>
         
-        <router-link to="/notes" class="nav-item" active-class="active">
+        <router-link to="/memo" class="nav-item" active-class="active">
           <FileTextOutlined />
-          <span>Notes</span>
+          <span>Memos</span>
         </router-link>
         
         <router-link to="/todo" class="nav-item" active-class="active">
@@ -56,9 +56,10 @@ import {
   left: 0;
   height: 100vh;
   width: 240px;
-  background: rgba(18, 18, 18, 0.95);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-right: var(--glass-border);
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -103,11 +104,14 @@ import {
 .nav-item:hover {
   background: rgba(255, 255, 255, 0.04);
   color: #fff;
+  transform: translateX(4px);
 }
 
 .nav-item.active {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: rgba(66, 184, 131, 0.12);
+  color: var(--color-primary);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 8px 8px 0;
 }
 
 .nav-item :deep(.anticon) {

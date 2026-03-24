@@ -22,13 +22,14 @@ import "@/assets/styles/layout.css";
 <style scoped>
 .app-layout {
   min-height: 100vh;
-  background: #000;
+  background: transparent;
 }
 
 .content-area {
   padding-left: 240px; /* PC Sidebar width */
   min-height: 100vh;
   transition: padding-left 0.3s ease;
+  padding-right: 20px;
 }
 
 .nav-mobile {
@@ -43,7 +44,8 @@ import "@/assets/styles/layout.css";
 @media (max-width: 1024px) {
   .content-area {
     padding-left: 0;
-    padding-bottom: 100px; /* Space for mobile nav */
+    padding-right: 0;
+    padding-bottom: calc(92px + var(--safe-bottom)); /* Space for mobile nav */
   }
   
   .nav-pc {

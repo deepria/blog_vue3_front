@@ -1,46 +1,46 @@
-import { createRouter, createWebHistory } from "vue-router";
+import {createRouter, createWebHistory} from "vue-router";
 
 // vue 컴포넌트 import
 
 // 라우트 정의
 const routes = [
-  {
-    path: "/",
-    name: "index",
-    component: () => import("@/view/Index.vue"),
-  },
-  {
-    path: "/todo",
-    name: "Todo",
-    component: () => import("@/view/Util/Todo.vue"),
-  },
-  {
-    path: "/s3",
-    name: "S3",
-    component: () => import("@/view/Util/S3.vue"),
-  },
-  {
-    path: "/notes",
-    name: "NoteList",
-    component: () => import("@/view/Note/NoteList.vue"),
-  },
-  {
-    path: "/notes/edit/:id?",
-    name: "NoteEditor",
-    component: () => import("@/view/Note/NoteEditor.vue"),
-    props: true,
-  },
-  {
-    path: "/chat",
-    name: "Chat",
-    component: () => import("@/view/Chat.vue"),
-  },
+    {
+        path: "/",
+        name: "index",
+        component: () => import("@/pages/Index.vue"),
+    },
+    {
+        path: "/todo",
+        name: "Todo",
+        component: () => import("@/pages/Util/Todo.vue"),
+    },
+    {
+        path: "/s3",
+        name: "S3",
+        component: () => import("@/pages/Util/S3.vue"),
+    },
+    {
+        path: "/memo",
+        name: "MemoList",
+        component: () => import("@/pages/Memo/MemoList.vue"),
+    },
+    {
+        path: "/memo/edit/:id?",
+        name: "MemoEditor",
+        component: () => import("@/pages/Memo/MemoEditor.vue"),
+        props: true,
+    },
+    {
+        path: "/chat",
+        name: "Chat",
+        component: () => import("@/pages/Chat.vue"),
+    },
 ];
 
 // 라우터 생성
 const router = createRouter({
-  history: createWebHistory(), // HTML5 모드 (브라우저 히스토리)
-  routes,
+    history: createWebHistory(), // HTML5 모드 (브라우저 히스토리)
+    routes,
 });
 
 export default router;

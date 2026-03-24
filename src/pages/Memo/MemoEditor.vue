@@ -7,14 +7,14 @@
         </BaseButton>
         <input
           v-model="title"
-          placeholder="Untitled Note"
+          placeholder="Untitled Memo"
           class="title-input-naked"
         />
       </div>
       <div class="right-section">
         <span v-if="saving" class="save-indicator">Saving...</span>
         <BaseButton variant="primary" :loading="saving" @click="save">
-           Save Note
+           Save
         </BaseButton>
       </div>
     </header>
@@ -26,26 +26,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, defineProps } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { message } from 'ant-design-vue';
 import Editor from '@toast-ui/editor';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import '@toast-ui/editor/dist/theme/toastui-editor-dark.css';
-import { loadNote, saveNote } from '@/services/noteService';
-import BaseButton from "@/components/base/BaseButton.vue";
+
+import BaseButton from "@/components/ui/BaseButton.vue";
+import { useMemo } from "@/features/memo/composables/useMemo";
 
 const props = defineProps({
   id: String,
 });
 
 const router = useRouter();
+const { getNote, saveNote } = useMemo();
+
 const editorRef = ref(null);
 const editorInstance = ref(null);
 const title = ref('');
 const saving = ref(false);
 
-const goBack = () => router.push('/notes');
+const goBack = () => router.push('/memo');
 
 const initEditor = (initialValue = '') => {
   if (editorInstance.value) {
@@ -78,16 +81,15 @@ const loadContent = async () => {
   }
 
   try {
-    const note = await loadNote(props.id);
+    const note = await getNote(props.id);
     if (note) {
         title.value = note.title || '';
         initEditor(note.content || '');
     } else {
-        message.warn("Note not found");
+        message.warn("Memo not found");
         initEditor();
     }
   } catch (error) {
-    console.error(error);
     message.error("Failed to load content");
     initEditor();
   }
@@ -111,14 +113,12 @@ const save = async () => {
     await saveNote(noteToSave);
     
     if (!props.id) {
-       message.success("Note created");
-       router.push('/notes');
+       message.success("Memo created");
     } else {
        message.success("Saved");
-       router.push('/notes');
     }
+    router.push('/memo');
   } catch (error) {
-    console.error(error);
     message.error("Save failed");
   } finally {
     saving.value = false;
@@ -141,56 +141,57 @@ onBeforeUnmount(() => {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--bg-app);
+  background-color: transparent;
 }
 
 .editor-header {
-  height: var(--header-height);
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--space-lg);
-  background-color: var(--bg-surface);
-  border-bottom: 1px solid var(--border-color);
+  padding: 0 var(--space-6);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: var(--glass-border);
   z-index: 10;
 }
 
 .left-section {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-3);
   flex: 1;
 }
 
 .title-input-naked {
   background: transparent;
   border: none;
-  font-size: var(--text-lg);
+  font-size: var(--font-size-title);
   font-weight: 600;
-  color: var(--text-main);
+  color: var(--color-text-primary);
   width: 100%;
   outline: none;
-  font-family: var(--font-sans);
+  font-family: inherit;
 }
 .title-input-naked::placeholder {
-  color: var(--text-disabled);
+  color: var(--color-text-muted);
 }
 
 .right-section {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-3);
 }
 
 .save-indicator {
-  font-size: var(--text-sm);
-  color: var(--text-muted);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
 }
 
 .editor-container {
   flex: 1;
   overflow: hidden;
-  background-color: var(--bg-app); /* Match global bg */
+  background-color: var(--color-bg-base);
 }
 
 .editor-wrapper {
@@ -203,10 +204,10 @@ onBeforeUnmount(() => {
     background-color: transparent !important;
 }
 :deep(.toastui-editor-toolbar) {
-    background-color: var(--bg-surface) !important;
-    border-bottom: 1px solid var(--border-color) !important;
+    background-color: var(--color-bg-surface) !important;
+    border-bottom: 1px solid var(--color-border) !important;
 }
 :deep(.toastui-editor-md-container), :deep(.toastui-editor-ww-container) {
-    background-color: var(--bg-app) !important;
+    background-color: var(--color-bg-base) !important;
 }
 </style>

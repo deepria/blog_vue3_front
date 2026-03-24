@@ -2,33 +2,33 @@
 :root {
     /* --- Colors --- */
     /* Primary */
-    --color-primary: #42b983;
-    --color-primary-hover: #3aa876;
-    --color-primary-active: #2e8c61;
+    --color-primary: #42b883;
+    --color-primary-hover: #53c794;
+    --color-primary-active: #2f8f64;
 
     /* Backgrounds */
-    --bg-app: #0a0a0a;
+    --bg-app: #030504;
     /* Deepest black for app background */
-    --bg-surface: #141414;
+    --bg-surface: #0b100d;
     /* Card/Container background */
-    --bg-surface-hover: #1f1f1f;
+    --bg-surface-hover: #121814;
     --bg-overlay: rgba(0, 0, 0, 0.7);
 
     /* Text */
-    --text-main: rgba(255, 255, 255, 0.92);
-    --text-muted: rgba(255, 255, 255, 0.6);
+    --text-main: rgba(255, 255, 255, 0.96);
+    --text-muted: rgba(255, 255, 255, 0.74);
     --text-disabled: rgba(255, 255, 255, 0.38);
     --text-inverse: #000000;
 
     /* Status */
-    --color-success: #42b983;
+    --color-success: #42b883;
     --color-danger: #ef4444;
     --color-warning: #f59e0b;
-    --color-info: #3b82f6;
+    --color-info: #42b883;
 
     /* Borders */
-    --border-color: #2a2a2a;
-    --border-hover: #404040;
+    --border-color: rgba(100, 255, 182, 0.12);
+    --border-hover: rgba(100, 255, 182, 0.24);
 
     /* --- Typography --- */
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -73,7 +73,7 @@
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
-    --shadow-glow: 0 0 15px rgba(66, 185, 131, 0.15);
+    --shadow-glow: 0 0 15px rgba(66, 184, 131, 0.2);
 
     /* --- Layout --- */
     --max-width: 1200px;
@@ -89,7 +89,7 @@ body {
     margin: 0;
     padding: 0;
     background: #000000;
-    color: var(--text-color, rgba(255, 255, 255, 0.85));
+    color: var(--text-color, rgba(255, 255, 255, 0.96));
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
