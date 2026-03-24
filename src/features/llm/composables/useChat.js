@@ -8,8 +8,15 @@ import { chatApi } from '../api/chatApi';
 const sessions = ref([]);
 const currentSessionId = ref(null);
 const loading = ref(false);
+const loadingSince = ref(0);
+const LOADING_STALE_MS = 35000;
 
 let initialized = false;
+
+const clearLoading = () => {
+  loading.value = false;
+  loadingSince.value = 0;
+};
 
 export function useChat() {
   const currentSession = computed(() => {
@@ -37,6 +44,10 @@ export function useChat() {
   };
 
   const loadSessions = () => {
+    if (loading.value && loadingSince.value && Date.now() - loadingSince.value > LOADING_STALE_MS) {
+      clearLoading();
+    }
+
     if (initialized) return;
     
     const stored = localStorage.getItem('chat_sessions');
@@ -86,6 +97,10 @@ export function useChat() {
   const sendMessage = async (text) => {
     if (!text.trim() || !currentSession.value) return;
 
+    if (loading.value && loadingSince.value && Date.now() - loadingSince.value > LOADING_STALE_MS) {
+      clearLoading();
+    }
+
     const session = currentSession.value;
     const userMsg = {
       role: 'user',
@@ -102,6 +117,7 @@ export function useChat() {
     }
 
     loading.value = true;
+    loadingSince.value = Date.now();
 
     try {
       const reply = await chatApi.sendMessage(text);
@@ -117,13 +133,15 @@ export function useChat() {
       console.error('Chat error:', error);
       const errorMsg = {
         role: 'assistant',
-        content: '죄송합니다. 오류가 발생했습니다.',
+        content: error?.code === 'ECONNABORTED'
+          ? '응답 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.'
+          : '죄송합니다. 오류가 발생했습니다.',
         isError: true,
         timestamp: Date.now()
       };
       session.messages.push(errorMsg);
     } finally {
-      loading.value = false;
+      clearLoading();
     }
   };
 
@@ -150,10 +168,12 @@ export function useChat() {
     currentSessionId,
     currentSession,
     loading,
+    loadingSince,
     loadSessions,
     createSession,
     deleteSession,
     selectSession,
-    sendMessage
+    sendMessage,
+    clearLoading
   };
 }

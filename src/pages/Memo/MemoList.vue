@@ -14,35 +14,37 @@
       </div>
     </header>
 
-    <!-- Search & Filter -->
-    <div class="search-bar">
-        <BaseInput 
-            v-model="searchQuery" 
-            placeholder="Search memos..." 
-            class="search-input"
-        >
-            <template #suffix>
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </template>
-        </BaseInput>
-    </div>
+    <transition name="page-section" appear>
+      <div v-if="contentVisible" class="page-content">
+        <!-- Search & Filter -->
+        <div class="search-bar">
+            <BaseInput 
+                v-model="searchQuery" 
+                placeholder="Search memos..." 
+                class="search-input"
+            >
+                <template #suffix>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </template>
+            </BaseInput>
+        </div>
 
-    <!-- Empty State -->
-    <div v-if="!loading && filteredNotes.length === 0" class="empty-state">
-      <div class="empty-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-      </div>
-      <p>No memos found</p>
-      <BaseButton v-if="searchQuery" variant="ghost" size="sm" @click="searchQuery = ''">Clear Search</BaseButton>
-    </div>
+        <!-- Empty State -->
+        <div v-if="!loading && filteredNotes.length === 0" class="empty-state">
+          <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
+          <p>No memos found</p>
+          <BaseButton v-if="searchQuery" variant="ghost" size="sm" @click="searchQuery = ''">Clear Search</BaseButton>
+        </div>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="memo-grid">
-        <BaseSkeleton v-for="i in 6" :key="i" height="100px" shape="rect" />
-    </div>
+        <!-- Loading State -->
+        <div v-if="loading" class="memo-grid">
+            <BaseSkeleton v-for="i in 6" :key="i" height="100px" shape="rect" />
+        </div>
 
-    <!-- Memo Grid -->
-    <div v-else class="memo-grid">
+        <!-- Memo Grid -->
+        <div v-else class="memo-grid">
       <div v-for="note in filteredNotes" :key="note.id" class="memo-wrapper">
         <BaseCard 
             class="memo-card" 
@@ -85,7 +87,9 @@
             </div>
         </transition>
       </div>
-    </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -116,6 +120,7 @@ const {
 
 const expandedId = ref(null);
 const previewContent = ref("");
+const contentVisible = ref(false);
 
 const handleRefresh = async () => {
     await loadNotes();
@@ -165,8 +170,11 @@ const confirmDelete = (note) => {
     });
 };
 
-onMounted(() => {
-    loadNotes();
+onMounted(async () => {
+    await loadNotes();
+    requestAnimationFrame(() => {
+        contentVisible.value = true;
+    });
 });
 </script>
 
@@ -202,6 +210,10 @@ onMounted(() => {
 .search-bar {
     margin-bottom: var(--space-8);
     max-width: 600px;
+}
+
+.page-content {
+    will-change: transform, opacity;
 }
 
 .memo-grid {
@@ -392,6 +404,17 @@ onMounted(() => {
   opacity: 0;
   padding-top: 0;
   padding-bottom: 0;
+}
+
+.page-section-enter-active,
+.page-section-appear-active {
+    transition: opacity 0.42s ease, transform 0.42s ease;
+}
+
+.page-section-enter-from,
+.page-section-appear-from {
+    opacity: 0;
+    transform: translateY(18px);
 }
 
 @media (max-width: 768px) {

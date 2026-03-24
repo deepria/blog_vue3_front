@@ -11,7 +11,8 @@
       </div>
     </header>
 
-    <div class="s3-grid">
+    <transition name="page-section" appear>
+      <div v-if="contentVisible" class="s3-grid page-content">
       <BaseCard class="upload-panel" hoverable>
         <template #header>
           <div class="panel-header">
@@ -111,7 +112,8 @@
           </BaseCard>
         </div>
       </BaseCard>
-    </div>
+      </div>
+    </transition>
 
     <!-- Upload Settings Modal -->
     <BaseModal v-model="showPopup" title="Upload Settings">
@@ -194,6 +196,7 @@ const src = ref("");
 const customFileName = ref("");
 const authKey = ref("");
 const authKeyInput = ref("");
+const contentVisible = ref(false);
 
 let resolveAuthPromise = null;
 
@@ -397,7 +400,12 @@ const remove = async (file) => {
     await loadDirectory();
 };
 
-onMounted(loadDirectory);
+onMounted(async () => {
+    await loadDirectory();
+    requestAnimationFrame(() => {
+        contentVisible.value = true;
+    });
+});
 </script>
 
 <style scoped>
@@ -447,6 +455,10 @@ onMounted(loadDirectory);
 .s3-grid {
     display: grid;
     gap: clamp(10px, 2vw, var(--space-6));
+}
+
+.page-content {
+    will-change: transform, opacity;
 }
 
 .panel-header {
@@ -668,6 +680,17 @@ onMounted(loadDirectory);
 .preview-container {
     display: flex;
     justify-content: center;
+}
+
+.page-section-enter-active,
+.page-section-appear-active {
+    transition: opacity 0.42s ease, transform 0.42s ease;
+}
+
+.page-section-enter-from,
+.page-section-appear-from {
+    opacity: 0;
+    transform: translateY(18px);
 }
 
 /* Mobile */

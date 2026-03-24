@@ -10,7 +10,7 @@ export const chatApi = {
    * @returns {Promise<string>} - Assistant reply content
    */
   async sendMessage(message) {
-    const response = await apiClient.post('/api/chat', { message });
+    const response = await apiClient.post('/api/chat', { message }, { timeout: 30000 });
     return response.data?.reply || '';
   }
 };

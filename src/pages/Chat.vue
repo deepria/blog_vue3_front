@@ -16,10 +16,10 @@
         </a-button>
       </div>
       <div class="session-list">
-        <template v-for="session in (chatStore.sortedSessions || [])" :key="session?.id || Math.random()">
+        <template v-for="session in (sortedSessions || [])" :key="session?.id || Math.random()">
           <div 
             v-if="session && session.id"
-            :class="['session-item', { active: chatStore.currentSessionId === session?.id }]"
+            :class="['session-item', { active: currentSessionId === session?.id }]"
             @click="switchSession(session.id)"
           >
             <div class="session-title">
@@ -41,7 +41,7 @@
 
     <!-- Mobile Drawer for Sidebar -->
     <a-drawer
-      v-model:visible="drawerVisible"
+      v-model:open="drawerVisible"
       placement="left"
       :closable="false"
       class="mobile-sidebar-drawer"
@@ -54,10 +54,10 @@
           </a-button>
         </div>
         <div class="session-list">
-          <template v-for="session in (chatStore.sortedSessions || [])" :key="session?.id || 'm-' + Math.random()">
+          <template v-for="session in (sortedSessions || [])" :key="session?.id || 'm-' + Math.random()">
             <div 
               v-if="session && session.id"
-              :class="['session-item', { active: chatStore.currentSessionId === session?.id }]"
+              :class="['session-item', { active: currentSessionId === session?.id }]"
               @click="switchSession(session.id)"
             >
               <div class="session-title">
@@ -86,7 +86,7 @@
       </div>
 
       <div class="messages-area" ref="messagesContainer">
-        <div v-if="!currentMessages.length" class="empty-state">
+        <div v-if="!currentMessages.length && !loading" class="empty-state">
           <robot-outlined class="empty-icon" />
           <p>안녕하세요! 무엇을 도와드릴까요?</p>
         </div>
@@ -111,7 +111,7 @@
           </div>
         </div>
         
-        <div v-if="chatStore.loading" class="message-wrapper assistant loading">
+        <div v-if="loading && currentMessages.length" class="message-wrapper assistant loading">
           <div class="avatar">
             <robot-outlined />
           </div>
@@ -137,7 +137,7 @@
             type="primary" 
             shape="circle" 
             @click="handleSendMessage" 
-            :loading="chatStore.loading"
+            :loading="loading"
             :disabled="!userInput.trim()"
           >
             <template #icon><send-outlined /></template>
@@ -162,7 +162,19 @@ import {
 } from '@ant-design/icons-vue';
 import MarkdownViewer from '@/components/ui/MarkdownViewer.vue';
 
-const chatStore = useChat();
+const {
+  sortedSessions,
+  currentSessionId,
+  currentSession,
+  loading,
+  loadingSince,
+  loadSessions,
+  createSession,
+  deleteSession: removeSession,
+  selectSession,
+  sendMessage,
+  clearLoading
+} = useChat();
 const userInput = ref('');
 const messagesContainer = ref(null);
 const isMobile = ref(false);
@@ -170,11 +182,11 @@ const drawerVisible = ref(false);
 
 // Reactive data from store
 const currentMessages = computed(() => {
-  return chatStore.currentSession?.messages || [];
+  return currentSession.value?.messages || [];
 });
 
 const currentSessionTitle = computed(() => {
-  return chatStore.currentSession?.title || 'New Chat';
+  return currentSession.value?.title || 'New Chat';
 });
 
 // Responsive check
@@ -193,30 +205,33 @@ const scrollToBottom = async () => {
 
 const handleSendMessage = async () => {
   const text = userInput.value.trim();
-  if (!text || chatStore.loading) return;
+  if (!text || loading.value) return;
   
   userInput.value = '';
-  await chatStore.sendMessage(text);
+  await sendMessage(text);
   await scrollToBottom();
 };
 
 const createNewSession = () => {
-  chatStore.createSession();
+  createSession();
   drawerVisible.value = false;
 };
 
 const switchSession = async (id) => {
-  chatStore.selectSession(id);
+  selectSession(id);
   drawerVisible.value = false;
   await scrollToBottom();
 };
 
 const deleteSession = (id) => {
-  chatStore.deleteSession(id);
+  removeSession(id);
 };
 
 onMounted(() => {
-  chatStore.loadSessions();
+  loadSessions();
+  if (loading.value && loadingSince.value && Date.now() - loadingSince.value > 35000) {
+    clearLoading();
+  }
   checkMobile();
   window.addEventListener('resize', checkMobile);
   scrollToBottom();
@@ -240,15 +255,16 @@ onUnmounted(() => {
 .sidebar {
   width: 280px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.008)),
-    var(--glass-bg);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.006)),
+    rgba(255, 255, 255, 0.02);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border-right: var(--glass-border);
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   z-index: 20;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.03);
 }
 
 .sidebar.mobile {
@@ -258,38 +274,51 @@ onUnmounted(() => {
 
 .sidebar-header {
   padding: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .session-list {
   flex: 1;
   overflow-y: auto;
-  padding: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .session-item {
-  padding: 12px 16px;
-  margin-bottom: 4px;
-  border-radius: 8px;
+  padding: 12px 14px;
+  min-height: 52px;
+  border-radius: 18px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.22s ease, background-color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, color 0.22s ease;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.78);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.022), rgba(255, 255, 255, 0.008)),
+    rgba(255, 255, 255, 0.014);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 .session-item:hover {
-  background-color: rgba(255, 255, 255, 0.025);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012)),
+    rgba(255, 255, 255, 0.022);
   color: #fff;
-  transform: translateX(4px);
+  border-color: rgba(255, 255, 255, 0.11);
+  transform: translateX(2px);
 }
 
 .session-item.active {
-  background: rgba(255, 255, 255, 0.035);
-  color: var(--color-primary);
-  border-left: 3px solid var(--color-primary);
-  border-radius: 0 8px 8px 0;
+  background:
+    linear-gradient(180deg, rgba(66, 184, 131, 0.16), rgba(66, 184, 131, 0.06)),
+    rgba(255, 255, 255, 0.026);
+  color: #f5fff9;
+  border-color: rgba(66, 184, 131, 0.24);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .session-title {
@@ -300,20 +329,32 @@ onUnmounted(() => {
   flex: 1;
 }
 
+.session-icon {
+  color: rgba(66, 184, 131, 0.88);
+  font-size: 15px;
+}
+
 .text-truncate {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 600;
 }
 
 .delete-btn {
-  opacity: 0;
+  opacity: 0.72;
   transition: opacity 0.2s;
-  color: #ff7875;
+  color: rgba(255, 255, 255, 0.48);
+  border-radius: 12px;
 }
 
 .session-item:hover .delete-btn {
   opacity: 1;
+}
+
+.delete-btn:hover {
+  color: #ff8f8d;
+  background: rgba(255, 255, 255, 0.035);
 }
 
 /* Main Chat Area Styles */
@@ -388,8 +429,8 @@ onUnmounted(() => {
 /* Adjust top padding for mobile to account for header */
 @media (max-width: 768px) {
   .main-layout {
-    height: 100dvh;
-    max-height: 100dvh;
+    height: calc(100dvh - 92px - var(--safe-bottom));
+    max-height: calc(100dvh - 92px - var(--safe-bottom));
     overflow: hidden;
   }
 
@@ -400,12 +441,12 @@ onUnmounted(() => {
   .messages-area {
     min-height: 0;
     padding-top: 60px;
-    padding-bottom: calc(132px + var(--safe-bottom));
+    padding-bottom: 104px;
   }
 
   .input-area {
     position: sticky;
-    bottom: calc(84px + var(--safe-bottom));
+    bottom: 0;
     z-index: 120;
     padding: 12px 16px 0;
     background: transparent;
