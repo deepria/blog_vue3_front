@@ -96,10 +96,6 @@
           :key="index"
           :class="['message-wrapper', msg.role === 'user' ? 'user' : 'assistant']"
         >
-          <div class="avatar">
-            <user-outlined v-if="msg.role === 'user'" />
-            <robot-outlined v-else />
-          </div>
           <div class="message-content">
             <div class="specular-highlight"></div>
             <div v-if="msg.role === 'user'" class="text-content">
@@ -112,9 +108,6 @@
         </div>
         
         <div v-if="loading && currentMessages.length" class="message-wrapper assistant loading">
-          <div class="avatar">
-            <robot-outlined />
-          </div>
           <div class="message-content">
             <div class="typing-indicator">
               <span></span>
@@ -154,7 +147,6 @@ import { useChat } from '@/features/llm/composables/useChat';
 import { 
   MessageOutlined, 
   SendOutlined,
-  UserOutlined,
   RobotOutlined,
   PlusOutlined,
   MenuOutlined,
@@ -453,6 +445,25 @@ onUnmounted(() => {
     border-top: none;
     backdrop-filter: none;
   }
+
+  .messages-area {
+    gap: 18px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .message-wrapper {
+    max-width: 96%;
+  }
+
+  .message-content {
+    width: 100%;
+    padding: 12px 14px;
+  }
+
+  .assistant .message-content {
+    min-width: 0;
+  }
 }
 
 .empty-state {
@@ -472,35 +483,11 @@ onUnmounted(() => {
 
 .message-wrapper {
   display: flex;
-  gap: 16px;
-  max-width: 85%;
+  max-width: 88%;
 }
 
 .message-wrapper.user {
   align-self: flex-end;
-  flex-direction: row-reverse;
-}
-
-.avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.user .avatar {
-  background: rgba(66, 184, 131, 0.18);
-  color: white;
-}
-
-.assistant .avatar {
-  background: linear-gradient(135deg, rgba(66, 184, 131, 0.28) 0%, rgba(126, 226, 184, 0.16) 100%);
-  color: white;
 }
 
 .message-content {
