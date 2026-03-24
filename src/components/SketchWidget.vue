@@ -134,7 +134,7 @@ class AreaPolygon {
         if (this.count <= this.growSpeed) {
             let ratio = this.count / this.growSpeed;
             this.currentHi = this.hi * ratio;
-            this.currentCol = [p.color(100, 50 * ratio), p.color(100, 30 * ratio)];
+            this.currentCol = [p.color(0, 0, 72, 110 * ratio), p.color(0, 0, 0, 210 * ratio)];
         }
         p.push();
         p.stroke(this.currentCol[0]);
@@ -152,7 +152,7 @@ class AreaPolygon {
           if (this.count > (i+1)*this.growSpeed && this.count <= (i+2)*this.growSpeed) {
              let ratio = (this.count - (i+1)*this.growSpeed) / this.growSpeed;
              this.aryCurrentHi[i] = this.hiStep * ratio;
-             this.aryCurrentCol[i] = [p.color(100, 50*ratio), p.color(100, 30*ratio)];
+             this.aryCurrentCol[i] = [p.color(0, 0, 68, 100 * ratio), p.color(0, 0, 0, 220 * ratio)];
           }
            if (this.aryCurrentHi[i] > 0) {
               p.push();
