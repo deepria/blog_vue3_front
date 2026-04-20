@@ -22,7 +22,7 @@
     "@toast-ui/editor": "^3.1.0",
     "animejs": "^4.0.2",
     "ant-design-vue": "^4.2.6",
-    "axios": "^1.13.5",
+    "axios": "^1.15.0",
     "p5": "^2.1.2",
     "pako": "^2.1.0",
     "pinia": "^2.3.0",
