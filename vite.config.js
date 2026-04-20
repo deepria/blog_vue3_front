@@ -13,6 +13,7 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     Components({
+      dirs: [],
       resolvers: [
         AntDesignVueResolver({
           importStyle: false, // css is handled globally or manually to avoid less setup issues for now
@@ -32,6 +33,8 @@ export default defineConfig({
           vue: ["vue", "vue-router"],
           state: ["pinia"],
           http: ["axios"],
+          editor: ["@toast-ui/editor"],
+          antd: ["ant-design-vue", "@ant-design/icons-vue"],
         },
       },
     },

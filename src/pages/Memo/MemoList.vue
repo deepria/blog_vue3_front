@@ -59,7 +59,7 @@
                 </div>
                 <div class="memo-info">
                     <span class="memo-title">{{ note.title || 'Untitled Memo' }}</span>
-                    <span class="memo-date">{{ formatDate(note.updatedAt || Date.now()) }}</span>
+                    <span class="memo-date">{{ formatDate(note.updatedAt || note.updated_at || Date.now()) }}</span>
                 </div>
                 <div class="memo-actions">
                      <button class="icon-btn-danger" @click.stop="confirmDelete(note)">
@@ -98,10 +98,10 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { message, App } from 'ant-design-vue';
 import { useMemo } from '@/features/memo/composables/useMemo';
-import BaseButton from "@/components/ui/BaseButton.vue";
-import BaseInput from "@/components/ui/BaseInput.vue";
-import BaseCard from "@/components/layout/BaseCard.vue";
-import BaseSkeleton from "@/components/base/BaseSkeleton.vue";
+import BaseButton from "@/shared/ui/BaseButton.vue";
+import BaseInput from "@/shared/ui/BaseInput.vue";
+import BaseCard from "@/shared/ui/BaseCard.vue";
+import BaseSkeleton from "@/shared/ui/BaseSkeleton.vue";
 import MarkdownViewer from "@/components/ui/MarkdownViewer.vue";
 
 const router = useRouter();
@@ -135,7 +135,9 @@ const editMemo = (id) => {
 const createMemo = () => router.push('/memo/edit');
 
 const formatDate = (ts) => {
-    const date = new Date(ts);
+    const date = /^\d+$/.test(String(ts))
+      ? new Date(Number(ts) * 1000)
+      : new Date(ts);
     return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
 };
 
@@ -163,7 +165,7 @@ const confirmDelete = (note) => {
                 await deleteNote(note.id);
                 message.success("Deleted");
                 if (expandedId.value === note.id) expandedId.value = null;
-            } catch(e) {
+            } catch {
                 message.error("Delete failed");
             }
         }

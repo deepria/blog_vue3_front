@@ -32,7 +32,7 @@
 <script setup>
 import { computed } from 'vue';
 
-const props = defineProps({
+defineProps({
   modelValue: {
     type: [String, Number],
     default: ''
@@ -99,21 +99,21 @@ const onInput = (event) => {
 .base-input {
   width: 100%;
   font-family: inherit;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  background: rgba(255, 255, 255, 0.022);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   color: var(--color-text-primary);
-  border: var(--glass-border);
-  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
   outline: none;
   transition: all 0.3s ease;
   box-sizing: border-box;
 }
 
 .base-input:focus {
-  border-color: var(--color-primary);
-  background: var(--glass-bg-hover);
-  box-shadow: 0 0 0 4px var(--color-primary-glow);
+  border-color: rgba(182, 255, 227, 0.28);
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: 0 0 0 4px rgba(103, 232, 180, 0.12);
 }
 
 .base-input:disabled {

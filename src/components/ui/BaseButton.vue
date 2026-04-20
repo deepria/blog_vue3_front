@@ -52,16 +52,16 @@ defineEmits(['click']);
   align-items: center;
   justify-content: center;
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   font-family: inherit;
   font-weight: 600;
   letter-spacing: -0.01em;
-  border-radius: 14px;
+  border-radius: 16px;
   cursor: pointer;
   transition: transform 0.22s ease, background-color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, color 0.22s ease, filter 0.22s ease;
   user-select: none;
   overflow: hidden;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .button-highlight {
@@ -109,10 +109,10 @@ defineEmits(['click']);
 
 /* --- Variants --- */
 .variant-primary {
-  background: linear-gradient(135deg, rgba(66, 184, 131, 0.96) 0%, rgba(31, 107, 75, 0.96) 100%);
-  color: #fff;
-  border-color: rgba(66, 184, 131, 0.4);
-  box-shadow: 0 14px 28px rgba(66, 184, 131, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  background: linear-gradient(135deg, rgba(103, 232, 180, 0.96) 0%, rgba(27, 120, 86, 0.96) 100%);
+  color: #03110b;
+  border-color: rgba(182, 255, 227, 0.3);
+  box-shadow: 0 14px 30px rgba(103, 232, 180, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 .variant-primary::after {
   content: '';
@@ -128,9 +128,9 @@ defineEmits(['click']);
 }
 
 .variant-secondary {
-  background: rgba(255, 255, 255, 0.032);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  background: rgba(255, 255, 255, 0.025);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   color: var(--color-text-primary);
   border-color: rgba(255, 255, 255, 0.1);
 }
@@ -141,16 +141,16 @@ defineEmits(['click']);
 }
 
 .variant-ghost {
-  background: rgba(255, 255, 255, 0.018);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.014);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: rgba(234, 255, 246, 0.86);
   border-color: rgba(255, 255, 255, 0.08);
 }
 .variant-ghost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.045);
+  background: rgba(255, 255, 255, 0.028);
   color: var(--color-text-primary);
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.1);
   transform: translateY(-1px);
 }
 

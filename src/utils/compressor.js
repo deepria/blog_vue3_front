@@ -17,7 +17,7 @@ export function decodeAndDecompress(encodedStr) {
     const byteArray = new Uint8Array([...binary].map((c) => c.charCodeAt(0)));
     const decompressed = pako.inflate(byteArray);
     return new TextDecoder().decode(decompressed);
-  } catch (ignore) {
+  } catch {
     // Legacy/plain filenames can reach here; return original value silently.
     return encodedStr;
   }

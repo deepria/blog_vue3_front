@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { renderMarkdown } from '@/shared/utils/markdownParser';
 
 const props = defineProps({
@@ -18,10 +18,16 @@ const props = defineProps({
 });
 
 const viewerRef = ref(null);
+let viewerInstance = null;
 
 const updateViewer = () => {
   if (viewerRef.value) {
-    renderMarkdown(viewerRef.value, props.content);
+    if (viewerInstance?.setMarkdown) {
+      viewerInstance.setMarkdown(props.content);
+      return;
+    }
+    viewerInstance?.destroy?.();
+    viewerInstance = renderMarkdown(viewerRef.value, props.content);
   }
 };
 
@@ -31,6 +37,11 @@ onMounted(() => {
 
 watch(() => props.content, () => {
   updateViewer();
+});
+
+onBeforeUnmount(() => {
+  viewerInstance?.destroy?.();
+  viewerInstance = null;
 });
 </script>
 

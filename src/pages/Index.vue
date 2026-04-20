@@ -2,7 +2,7 @@
   <div class="dashboard-container">
     <div class="dashboard-grid">
       <section class="hero-cluster">
-        <BaseCard class="hero-card" hoverable>
+        <BaseCard class="hero-card dashboard-card dashboard-glass dashboard-card--elevated" glass hoverable>
           <div class="hero-copy">
             <p class="eyebrow">Today Brief</p>
             <h1 class="header-title">Welcome Back, deepria</h1>
@@ -14,7 +14,7 @@
           </div>
         </BaseCard>
 
-        <BaseCard class="quick-task-card" hoverable>
+        <BaseCard class="quick-task-card dashboard-card dashboard-glass dashboard-card--elevated" glass hoverable>
           <div class="quick-task-head">
             <div>
               <p class="eyebrow">Quick Capture</p>
@@ -23,23 +23,23 @@
             <BaseButton size="sm" variant="ghost" @click="refreshDashboard">Refresh</BaseButton>
           </div>
           <BaseInput
-            v-model="quickTask"
-            placeholder="Add new task..."
-            class="header-input"
-            @keyup.enter="handleQuickTask"
+              v-model="quickTask"
+              placeholder="Add new task..."
+              class="header-input"
+              @keyup.enter="handleQuickTask"
           >
             <template #suffix>
               <button class="icon-btn" @click="handleQuickTask" aria-label="Add task">
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
                 >
                   <line x1="12" y1="5" x2="12" y2="19"></line>
                   <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -51,16 +51,18 @@
       </section>
 
       <section class="kpi-row">
-        <BaseCard class="stat-card" hoverable interactive @click="$router.push('/memo')">
+        <BaseCard class="stat-card dashboard-card dashboard-glass" glass hoverable interactive
+                  @click="$router.push('/memo')">
           <div class="stat-topline">
             <span class="stat-tag">Memo</span>
             <div class="stat-icon-wrapper blue-glow">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+                   stroke="currentColor">
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
             </div>
@@ -71,16 +73,18 @@
           </div>
         </BaseCard>
 
-        <BaseCard class="stat-card" hoverable interactive @click="$router.push('/todo')">
+        <BaseCard class="stat-card dashboard-card dashboard-glass" glass hoverable interactive
+                  @click="$router.push('/todo')">
           <div class="stat-topline">
             <span class="stat-tag">Todo</span>
             <div class="stat-icon-wrapper purple-glow">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+                   stroke="currentColor">
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
                 />
               </svg>
             </div>
@@ -91,18 +95,20 @@
           </div>
         </BaseCard>
 
-        <BaseCard class="stat-card" hoverable interactive @click="$router.push('/todo')">
+        <BaseCard class="stat-card dashboard-card dashboard-glass" glass hoverable interactive
+                  @click="$router.push('/todo')">
           <div class="stat-topline">
             <span class="stat-tag">Flow</span>
             <div class="stat-icon-wrapper cyan-glow">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+                   stroke="currentColor">
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M11 17a1 1 0 001.447.894l7-3.5A1 1 0 0020 13.5v-3a1 1 0 00-.553-.894l-7-3.5A1 1 0 0011 7v10z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11 17a1 1 0 001.447.894l7-3.5A1 1 0 0020 13.5v-3a1 1 0 00-.553-.894l-7-3.5A1 1 0 0011 7v10z"
                 />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h1v12H4z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h1v12H4z"/>
               </svg>
             </div>
           </div>
@@ -112,16 +118,18 @@
           </div>
         </BaseCard>
 
-        <BaseCard class="stat-card" hoverable interactive @click="$router.push('/s3')">
+        <BaseCard class="stat-card dashboard-card dashboard-glass" glass hoverable interactive
+                  @click="$router.push('/s3')">
           <div class="stat-topline">
             <span class="stat-tag">Storage</span>
             <div class="stat-icon-wrapper amber-glow">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+                   stroke="currentColor">
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
                 />
               </svg>
             </div>
@@ -133,43 +141,55 @@
         </BaseCard>
       </section>
 
-      <BaseCard class="activity-card">
+      <BaseCard class="activity-card dashboard-card dashboard-glass dashboard-card--elevated" glass>
         <template #header>
           <div class="activity-header">
             <h3 class="card-title">Recent Activity</h3>
             <span class="activity-pill">{{ recentActivities.length }} items</span>
           </div>
         </template>
-        <ul class="activity-list">
-          <li v-if="dashboardLoading" class="activity-item">
-            <div class="dot"></div>
-            <div class="activity-text">Loading updates...</div>
-          </li>
-          <li v-else-if="recentActivities.length === 0" class="activity-item">
-            <div class="dot"></div>
-            <div class="activity-text">No recent updates yet.</div>
-          </li>
-          <li v-for="activity in recentActivities" :key="activity.id" class="activity-item">
-            <div class="dot"></div>
-            <div class="activity-text">
-              <span class="activity-time">{{ formatRelativeTime(activity.timestamp) }}</span>
-              {{ activity.text }}
+        <div class="activity-list">
+          <BaseCard v-if="dashboardLoading" class="activity-entry dashboard-card dashboard-glass" glass>
+            <div class="activity-item">
+              <div class="dot"></div>
+              <div class="activity-text">Loading updates...</div>
             </div>
-          </li>
-        </ul>
+          </BaseCard>
+          <BaseCard v-else-if="recentActivities.length === 0" class="activity-entry dashboard-card dashboard-glass"
+                    glass>
+            <div class="activity-item">
+              <div class="dot"></div>
+              <div class="activity-text">No recent updates yet.</div>
+            </div>
+          </BaseCard>
+          <BaseCard
+              v-for="activity in recentActivities"
+              :key="activity.id"
+              class="activity-entry dashboard-card dashboard-glass"
+              glass
+          >
+            <div class="activity-item">
+              <div class="dot"></div>
+              <div class="activity-text">
+                <span class="activity-time">{{ formatRelativeTime(activity.timestamp) }}</span>
+                {{ activity.text }}
+              </div>
+            </div>
+          </BaseCard>
+        </div>
       </BaseCard>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
-import { message } from "ant-design-vue";
-import BaseCard from "@/components/layout/BaseCard.vue";
-import BaseInput from "@/components/ui/BaseInput.vue";
-import BaseButton from "@/components/ui/BaseButton.vue";
-import { postData, getData } from "@/services/dynamoService.js";
-import { useDashboard } from "@/features/dashboard/composables/useDashboard";
+import {computed, onMounted, ref} from "vue";
+import {message} from "ant-design-vue";
+import BaseCard from "@/shared/ui/BaseCard.vue";
+import BaseInput from "@/shared/ui/BaseInput.vue";
+import BaseButton from "@/shared/ui/BaseButton.vue";
+import { todoApi } from "@/features/todo/api/todoApi";
+import {useDashboard} from "@/features/dashboard/composables/useDashboard";
 
 const quickTask = ref("");
 const {
@@ -177,7 +197,6 @@ const {
   metrics,
   recentActivities,
   refreshDashboard,
-  normalizeArray,
   formatRelativeTime
 } = useDashboard();
 
@@ -194,8 +213,7 @@ const today = computed(() => {
 const handleQuickTask = async () => {
   if (!quickTask.value.trim()) return;
   try {
-    const raw = await getData("todo", "todo");
-    const items = normalizeArray(raw);
+    const items = await todoApi.fetchTodos();
     const newItem = {
       id: Date.now(),
       text: quickTask.value,
@@ -204,7 +222,7 @@ const handleQuickTask = async () => {
       completed: false
     };
     items.unshift(newItem);
-    await postData("todo", "todo", "todo", JSON.stringify(items));
+    await todoApi.saveTodos(items);
     message.success("Task added");
     quickTask.value = "";
     await refreshDashboard();
@@ -239,12 +257,40 @@ onMounted(() => {
   align-items: stretch;
 }
 
-.hero-card :deep(.base-card-body),
-.quick-task-card :deep(.base-card-body) {
-  height: 100%;
+:deep(.dashboard-card) {
+  --card-bg-color: rgba(255, 255, 255, 0.01);
+  --card-bg-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.002));
+  --card-border: 1px solid rgba(255, 255, 255, 0.08);
+  --card-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.hero-card :deep(.base-card-body) {
+:deep(.dashboard-card--elevated) {
+  --card-bg-color: rgba(255, 255, 255, 0.014);
+  --card-bg-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.003));
+  --card-border: 1px solid rgba(255, 255, 255, 0.09);
+  --card-shadow:
+    0 24px 54px rgba(0, 0, 0, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:deep(.dashboard-glass) {
+  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
+}
+
+
+
+:deep(.activity-card .base-card-header) {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.014), rgba(255, 255, 255, 0.002)),
+  rgba(255, 255, 255, 0.005);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+:deep(.hero-card .base-card-body) {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -292,14 +338,17 @@ onMounted(() => {
   min-height: 32px;
   padding: 0 12px;
   border-radius: var(--radius-full);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.018);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   color: rgba(255, 255, 255, 0.92);
   font-size: 0.78rem;
   font-weight: 600;
 }
 
-.quick-task-card :deep(.base-card-body) {
+:deep(.quick-task-card .base-card-body) {
   display: grid;
   gap: 14px;
 }
@@ -318,15 +367,19 @@ onMounted(() => {
 }
 
 .header-input :deep(.base-input) {
-  background: rgba(255, 255, 255, 0.024);
+  background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .icon-btn {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.022);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   color: var(--color-text-primary);
   padding: 0;
 }
@@ -337,11 +390,11 @@ onMounted(() => {
   gap: clamp(10px, 1.8vw, var(--space-6));
 }
 
-.stat-card {
+:deep(.stat-card) {
   min-height: 168px;
 }
 
-.stat-card :deep(.base-card-body) {
+:deep(.stat-card .base-card-body) {
   display: grid;
   align-content: space-between;
   gap: 22px;
@@ -370,29 +423,32 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.022);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   flex-shrink: 0;
 }
 
 .blue-glow {
   color: #42b883;
-  box-shadow: 0 0 20px rgba(66, 184, 131, 0.2);
+  box-shadow: 0 0 14px rgba(66, 184, 131, 0.12);
 }
 
 .purple-glow {
   color: #64d8a0;
-  box-shadow: 0 0 20px rgba(100, 216, 160, 0.18);
+  box-shadow: 0 0 14px rgba(100, 216, 160, 0.11);
 }
 
 .cyan-glow {
   color: #7ee2b8;
-  box-shadow: 0 0 20px rgba(126, 226, 184, 0.18);
+  box-shadow: 0 0 14px rgba(126, 226, 184, 0.11);
 }
 
 .amber-glow {
   color: #b4f5d3;
-  box-shadow: 0 0 20px rgba(180, 245, 211, 0.18);
+  box-shadow: 0 0 14px rgba(180, 245, 211, 0.11);
 }
 
 .stat-content {
@@ -416,7 +472,7 @@ onMounted(() => {
   letter-spacing: 1px;
 }
 
-.activity-card {
+:deep(.activity-card) {
   min-height: 320px;
 }
 
@@ -434,17 +490,26 @@ onMounted(() => {
 }
 
 .activity-list {
-  list-style: none;
-  padding: 0;
   display: grid;
-  gap: 6px;
+  gap: 10px;
+}
+
+:deep(.activity-entry) {
+  --card-bg-color: rgba(255, 255, 255, 0.008);
+  --card-bg-image: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.002));
+  --card-border: 1px solid rgba(255, 255, 255, 0.075);
+  --card-shadow: 0 10px 24px rgba(0, 0, 0, 0.06),
+  inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+:deep(.activity-entry .base-card-body) {
+  padding: 14px 16px;
 }
 
 .activity-item {
   display: flex;
   gap: 14px;
-  padding: 14px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  align-items: flex-start;
 }
 
 .dot {
@@ -532,7 +597,10 @@ onMounted(() => {
 
   .activity-item {
     gap: 12px;
-    padding: 12px 0;
+  }
+
+  .activity-entry :deep(.base-card-body) {
+    padding: 12px 14px;
   }
 }
 </style>

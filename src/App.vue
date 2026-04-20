@@ -6,13 +6,14 @@
       :theme="{ 
         algorithm: theme.darkAlgorithm,
         token: {
-          colorPrimary: '#42b883',
-          borderRadius: 12,
-          colorBgContainer: 'rgba(8, 12, 10, 0.72)',
-          colorBgElevated: 'rgba(12, 18, 15, 0.88)',
-          colorBorder: 'rgba(100, 255, 182, 0.18)',
+          colorPrimary: '#67e8b4',
+          borderRadius: 16,
+          colorBgContainer: 'rgba(255, 255, 255, 0.02)',
+          colorBgElevated: 'rgba(255, 255, 255, 0.035)',
+          colorBorder: 'rgba(255, 255, 255, 0.08)',
           colorText: '#ffffff',
-          colorTextBase: '#ffffff'
+          colorTextBase: '#ffffff',
+          boxShadowSecondary: '0 24px 60px rgba(0, 0, 0, 0.28)'
         }
       }"
     >
@@ -33,7 +34,10 @@ import '@/assets/styles/global.css';
 <style>
 .app {
   min-height: 100vh;
-  background: var(--color-bg-base);
+  background:
+    radial-gradient(circle at top left, rgba(103, 232, 180, 0.03), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(182, 255, 227, 0.025), transparent 20%),
+    transparent;
   color: var(--color-text-primary);
   font-family: var(--font-family);
   position: relative;

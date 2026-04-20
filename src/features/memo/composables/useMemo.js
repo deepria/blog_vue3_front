@@ -1,5 +1,10 @@
-import { ref, computed } from 'vue';
-import { fetchNotes, loadNote, saveNote as apiSaveNote, deleteNote as apiDeleteNote } from '../api/memoApi';
+import { ref, computed } from "vue";
+import {
+  fetchNotes,
+  loadNote,
+  saveNote as apiSaveNote,
+  deleteNote as apiDeleteNote,
+} from "../api/memoApi";
 
 export function useMemo() {
   const notes = ref([]);
@@ -7,12 +12,10 @@ export function useMemo() {
   const loadingPreview = ref(false);
   const searchQuery = ref("");
 
-  // Fetches the list of notes (metadata only typically, based on API)
   const loadNotes = async () => {
     loading.value = true;
     try {
-      const raw = await fetchNotes();
-      notes.value = raw || [];
+      notes.value = await fetchNotes();
     } catch (e) {
       console.error("Failed to load notes", e);
       throw e;
@@ -21,16 +24,12 @@ export function useMemo() {
     }
   };
 
-  // Filter notes based on the search query
   const filteredNotes = computed(() => {
     if (!searchQuery.value.trim()) return notes.value;
     const query = searchQuery.value.toLowerCase();
-    return notes.value.filter(note => 
-      (note.title && note.title.toLowerCase().includes(query))
-    );
+    return notes.value.filter((note) => note.title && note.title.toLowerCase().includes(query));
   });
 
-  // Get a single full note for preview or editing
   const getNote = async (id) => {
     loadingPreview.value = true;
     try {
@@ -44,22 +43,18 @@ export function useMemo() {
     }
   };
 
-  // Save changes to a note (create or update)
   const saveNote = async (noteData) => {
     try {
-      const id = await apiSaveNote(noteData);
-      return id;
+      return await apiSaveNote(noteData);
     } catch (e) {
       console.error("Failed to save note", e);
       throw e;
     }
   };
 
-  // Delete a note
   const deleteNote = async (id) => {
     try {
       await apiDeleteNote(id);
-      // Remove from local state to avoid refetching if desired
       notes.value = notes.value.filter(n => n.id !== id);
     } catch (e) {
       console.error("Failed to delete note", e);

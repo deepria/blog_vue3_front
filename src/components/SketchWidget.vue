@@ -11,7 +11,6 @@ let _p5 = null;
 
 // --- p5.js Logic (Copied from original Index.vue and optimized) ---
 let _minW;
-let _maxW;
 let _aryRegionRect = [];
 
 /* [Inner Classes RegionRect, AreaPolygon, etc. omitted for brevity, logic preserved] */
@@ -66,7 +65,7 @@ class RegionRect {
       if (countTrial > this.maxTrial) return;
     }
 
-    let aryTemp = growPolygon(p, numCorner, this.aryAryCornerXy, areaXy, rotateAng, this.maxPolygonR, this.stepR, this.minRegionX, this.maxRegionX * 2, this.minRegionY, this.maxRegionY);
+    let aryTemp = growPolygon(p, numCorner, areaXy, rotateAng, this.maxPolygonR);
     let aryCornerXy = aryTemp[0];
     let areaR = aryTemp[1];
 
@@ -112,7 +111,7 @@ class AreaPolygon {
     this.aryCurrentCol = [];
   }
 
-  setInner(p) {
+  setInner() {
     let stepR = (this.r / ((this.numInner + 1) * 2 - 1)) * 2;
     for (let i = 0; i < this.numInner; i++) {
         this.aryInnerR[i] = this.r - stepR * (i + 1);
@@ -124,7 +123,7 @@ class AreaPolygon {
   draw(p) {
     if (!this.stepAng) this.stepAng = (2 * p.PI) / this.numCorner;
     if (!this.growSpeed) this.growSpeed = p.random(10, 20);
-    if (this.aryInnerR.length === 0) this.setInner(p);
+    if (this.aryInnerR.length === 0) this.setInner();
     
     this.areaXy.x += this.speedX;
     if (this.areaXy.x > this.triggerX) return;
@@ -134,7 +133,10 @@ class AreaPolygon {
         if (this.count <= this.growSpeed) {
             let ratio = this.count / this.growSpeed;
             this.currentHi = this.hi * ratio;
-            this.currentCol = [p.color(0, 0, 72, 110 * ratio), p.color(0, 0, 0, 210 * ratio)];
+            this.currentCol = [
+              p.color(158, 36, 100, 120 * ratio),
+              p.color(168, 40, 42, 72 * ratio)
+            ];
         }
         p.push();
         p.stroke(this.currentCol[0]);
@@ -152,7 +154,10 @@ class AreaPolygon {
           if (this.count > (i+1)*this.growSpeed && this.count <= (i+2)*this.growSpeed) {
              let ratio = (this.count - (i+1)*this.growSpeed) / this.growSpeed;
              this.aryCurrentHi[i] = this.hiStep * ratio;
-             this.aryCurrentCol[i] = [p.color(0, 0, 68, 100 * ratio), p.color(0, 0, 0, 220 * ratio)];
+             this.aryCurrentCol[i] = [
+               p.color(182, 28, 96, 92 * ratio),
+               p.color(165, 30, 28, 54 * ratio)
+             ];
           }
            if (this.aryCurrentHi[i] > 0) {
               p.push();
@@ -168,7 +173,6 @@ class AreaPolygon {
 
 function setObject(p) {
   _minW = p.min(p.width, p.height);
-  _maxW = p.max(p.width, p.height);
   p.ellipseMode(p.RADIUS);
   p.rectMode(p.CENTER);
   p.stroke(0);
@@ -181,12 +185,12 @@ function setAreaXy(p, minX, maxX, minY, maxY) {
   return p.createVector(p.random(minX, maxX), p.random()*(maxY-minY)+minY);
 }
 
-function checkInside(p, aryAryXy, areaXy) {
+function checkInside() {
   // Simplified check for brevity - full logic in original
   return false; 
 }
 
-function growPolygon(p, numCorner, aryAryXy, areaXy, rotateAng, maxR, stepR, minX, maxX, minY, maxY) {
+function growPolygon(p, numCorner, areaXy, rotateAng, maxR) {
     // Simplified grow logic
     let areaR = p.random(maxR/4, maxR);
     let stepAng = (2*p.PI)/numCorner;
@@ -254,5 +258,7 @@ onBeforeUnmount(() => {
   height: 100vh;
   z-index: 0;
   pointer-events: none; /* Let clicks pass through */
+  opacity: 0.94;
+  filter: saturate(1.24) brightness(1.16);
 }
 </style>

@@ -47,8 +47,7 @@ export function useTodos() {
 
   const loadItems = async () => {
     try {
-      const raw = await todoApi.fetchTodos();
-      items.value = raw || [];
+      items.value = await todoApi.fetchTodos();
       // Ensure validity on load
       items.value.forEach(it => {
         if(!groupOptions.value.some(g => g.key === it.groupKey)) it.groupKey = groupOptions.value[0]?.key;
@@ -67,9 +66,11 @@ export function useTodos() {
 
   const saveAll = async () => {
     try {
-      await todoApi.saveTodos(items.value);
+      items.value = await todoApi.saveTodos(items.value);
       const meta = { groups: groupOptions.value, priorities: priorityOptions.value };
-      await todoApi.saveMeta(meta);
+      const savedMeta = await todoApi.saveMeta(meta);
+      groupOptions.value = savedMeta.groups || groupOptions.value;
+      priorityOptions.value = savedMeta.priorities || priorityOptions.value;
       hasUnsavedChanges.value = false;
       return true;
     } catch(e) {

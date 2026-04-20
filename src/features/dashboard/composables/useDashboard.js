@@ -1,7 +1,8 @@
 import { ref } from 'vue';
-import { getData } from '@/services/dynamoService.js';
 import { fetchNotes } from '@/features/memo/api/memoApi';
-import { load as loadS3Directory } from '@/services/s3Service.js';
+import { todoApi } from '@/features/todo/api/todoApi';
+import { storageApi } from '@/features/storage/api/storageApi';
+import { buildRecentActivities } from '@/features/dashboard/lib/activity';
 
 export function useDashboard() {
   const dashboardLoading = ref(true);
@@ -12,22 +13,6 @@ export function useDashboard() {
     filesTotal: 0,
   });
   const recentActivities = ref([]);
-
-  const normalizeArray = (raw) => {
-    if (!raw) return [];
-    if (Array.isArray(raw)) return raw;
-    if (typeof raw === "string") {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return parsed;
-        if (Array.isArray(parsed?.data)) return parsed.data;
-      } catch (e) {
-        return [];
-      }
-    }
-    if (Array.isArray(raw?.data)) return raw.data;
-    return [];
-  };
 
   const formatRelativeTime = (timestamp) => {
     if (!timestamp) return "Unknown time";
@@ -41,43 +26,18 @@ export function useDashboard() {
     return `${diffDay}d ago`;
   };
 
-  const buildRecentActivities = (notes, tasks) => {
-    const noteActivities = notes
-      .filter((note) => note?.updatedAt)
-      .map((note) => ({
-        id: `note-${note.id}`,
-        timestamp: new Date(note.updatedAt).getTime(),
-        text: `Updated note "${note.title || "Untitled Note"}"`,
-      }));
-
-    const taskActivities = tasks
-      .filter((task) => Number.isFinite(Number(task?.id)))
-      .map((task) => ({
-        id: `task-${task.id}`,
-        timestamp: Number(task.id),
-        text: `${task.completed ? "Completed" : "Added"} task "${task.text || "Untitled Task"}"`,
-      }));
-
-    return [...noteActivities, ...taskActivities]
-      .filter((a) => Number.isFinite(a.timestamp))
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, 8);
-  };
-
   const refreshDashboard = async () => {
     dashboardLoading.value = true;
     try {
       const [rawTasks, notesRaw, s3Response] = await Promise.all([
-        getData("todo", "todo"),
+        todoApi.fetchTodos(),
         fetchNotes(),
-        loadS3Directory(),
+        storageApi.listFiles(),
       ]);
 
-      const tasks = normalizeArray(rawTasks);
-      const notes = normalizeArray(notesRaw);
-      const s3Files = normalizeArray(s3Response?.data?.files).map((f) =>
-        String(f).replace("upload/", "")
-      );
+      const tasks = rawTasks || [];
+      const notes = notesRaw || [];
+      const s3Files = s3Response || [];
 
       const completedTasks = tasks.filter((task) => task?.completed).length;
       const totalTasks = tasks.length;
@@ -105,7 +65,6 @@ export function useDashboard() {
     metrics,
     recentActivities,
     refreshDashboard,
-    normalizeArray,
     formatRelativeTime
   };
 }

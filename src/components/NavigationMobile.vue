@@ -1,50 +1,22 @@
 <template>
   <nav class="navigation-mobile">
-    <router-link to="/" class="nav-item" active-class="active">
+    <router-link
+      v-for="item in navigationItems"
+      :key="item.to"
+      :to="item.to"
+      class="nav-item"
+      active-class="active"
+    >
       <div class="icon-wrapper">
-        <HomeOutlined />
+        <component :is="item.icon" />
       </div>
-      <span class="label">Home</span>
-    </router-link>
-    
-    <router-link to="/memo" class="nav-item" active-class="active">
-      <div class="icon-wrapper">
-        <FileTextOutlined />
-      </div>
-      <span class="label">Memos</span>
-    </router-link>
-    
-    <router-link to="/todo" class="nav-item" active-class="active">
-      <div class="icon-wrapper">
-        <CheckSquareOutlined />
-      </div>
-      <span class="label">Tasks</span>
-    </router-link>
-    
-    <router-link to="/s3" class="nav-item" active-class="active">
-      <div class="icon-wrapper">
-        <CloudServerOutlined />
-      </div>
-      <span class="label">Storage</span>
-    </router-link>
-
-    <router-link to="/chat" class="nav-item" active-class="active">
-      <div class="icon-wrapper">
-        <MessageOutlined />
-      </div>
-      <span class="label">Chat</span>
+      <span class="label">{{ item.label }}</span>
     </router-link>
   </nav>
 </template>
 
 <script setup>
-import { 
-  HomeOutlined, 
-  FileTextOutlined, 
-  CheckSquareOutlined, 
-  CloudServerOutlined,
-  MessageOutlined 
-} from '@ant-design/icons-vue';
+import { navigationItems } from "@/shared/navigation/items";
 </script>
 
 <style scoped>
@@ -55,11 +27,11 @@ import {
   right: var(--mobile-shell-gutter);
   height: 72px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.008)),
-    var(--glass-bg-elevated);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-border-light);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.012)),
+    rgba(8, 14, 12, 0.24);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 26px;
   display: flex;
   justify-content: space-between;
@@ -106,8 +78,8 @@ import {
 
 .nav-item.active {
   color: #fff;
-  background: rgba(255, 255, 255, 0.035);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .nav-item.active .icon-wrapper {

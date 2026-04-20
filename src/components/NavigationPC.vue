@@ -6,29 +6,15 @@
       </div>
       
       <nav class="nav-menu">
-        <router-link to="/" class="nav-item" active-class="active">
-          <HomeOutlined />
-          <span>Home</span>
-        </router-link>
-        
-        <router-link to="/memo" class="nav-item" active-class="active">
-          <FileTextOutlined />
-          <span>Memos</span>
-        </router-link>
-        
-        <router-link to="/todo" class="nav-item" active-class="active">
-          <CheckSquareOutlined />
-          <span>Tasks</span>
-        </router-link>
-        
-        <router-link to="/s3" class="nav-item" active-class="active">
-          <CloudServerOutlined />
-          <span>Storage</span>
-        </router-link>
-
-        <router-link to="/chat" class="nav-item" active-class="active">
-          <MessageOutlined />
-          <span>Chat</span>
+        <router-link
+          v-for="item in navigationItems"
+          :key="item.to"
+          :to="item.to"
+          class="nav-item"
+          active-class="active"
+        >
+          <component :is="item.icon" />
+          <span>{{ item.label }}</span>
         </router-link>
       </nav>
       
@@ -40,13 +26,7 @@
 </template>
 
 <script setup>
-import { 
-  HomeOutlined, 
-  FileTextOutlined, 
-  CheckSquareOutlined, 
-  CloudServerOutlined,
-  MessageOutlined
-} from '@ant-design/icons-vue';
+import { navigationItems } from "@/shared/navigation/items";
 </script>
 
 <style scoped>
@@ -56,10 +36,12 @@ import {
   left: 0;
   height: 100vh;
   width: 240px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-right: var(--glass-border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)),
+    rgba(8, 14, 12, 0.22);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -72,7 +54,7 @@ import {
 .logo-area h1 {
   font-size: 24px;
   font-weight: 800;
-  background: linear-gradient(135deg, #fff 0%, #888 100%);
+  background: linear-gradient(135deg, #f8fffc 0%, #8ff2c6 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -94,7 +76,7 @@ import {
   gap: 12px;
   padding: 12px 16px;
   border-radius: 8px;
-  color: #888;
+  color: var(--color-text-muted);
   text-decoration: none;
   transition: all 0.2s ease;
   font-weight: 500;
@@ -108,10 +90,10 @@ import {
 }
 
 .nav-item.active {
-  background: rgba(66, 184, 131, 0.12);
+  background: rgba(103, 232, 180, 0.14);
   color: var(--color-primary);
   border-left: 3px solid var(--color-primary);
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 12px 12px 0;
 }
 
 .nav-item :deep(.anticon) {

@@ -33,7 +33,7 @@ import Editor from '@toast-ui/editor';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import '@toast-ui/editor/dist/theme/toastui-editor-dark.css';
 
-import BaseButton from "@/components/ui/BaseButton.vue";
+import BaseButton from "@/shared/ui/BaseButton.vue";
 import { useMemo } from "@/features/memo/composables/useMemo";
 
 const props = defineProps({
@@ -89,7 +89,7 @@ const loadContent = async () => {
         message.warn("Memo not found");
         initEditor();
     }
-  } catch (error) {
+  } catch {
     message.error("Failed to load content");
     initEditor();
   }
@@ -104,21 +104,19 @@ const save = async () => {
   saving.value = true;
   try {
     const content = editorInstance.value.getMarkdown();
-    const noteToSave = {
-        id: props.id,
-        title: title.value,
-        content: content
-    };
-    
-    await saveNote(noteToSave);
-    
-    if (!props.id) {
+    const savedMemo = await saveNote({
+      id: props.id,
+      title: title.value,
+      content,
+    });
+
+    if (!props.id && savedMemo?.id) {
        message.success("Memo created");
     } else {
        message.success("Saved");
     }
     router.push('/memo');
-  } catch (error) {
+  } catch {
     message.error("Save failed");
   } finally {
     saving.value = false;

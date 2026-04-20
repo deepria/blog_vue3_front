@@ -1,17 +1,21 @@
 import { createApp } from "vue";
 
-window.onerror = function(msg, url, line, col, error) {
-  const div = document.createElement('div');
-  div.style = "position:fixed; top:0; left:0; width:100%; z-index:999999; background:red; color:white; padding:10px; font-size:12px; font-family:monospace;";
-  div.innerHTML = `<strong>Error:</strong> ${msg}<br/>${url}:${line}:${col}<br/><pre>${error?.stack}</pre>`;
-  document.body.appendChild(div);
-};
-window.addEventListener('unhandledrejection', function(event) {
-  const div = document.createElement('div');
-  div.style = "position:fixed; top:0; left:0; width:100%; z-index:999999; background:orange; color:black; padding:10px; font-size:12px; font-family:monospace;";
-  div.innerHTML = `<strong>Unhandled Rejection:</strong> ${event.reason?.message || event.reason}<br/><pre>${event.reason?.stack}</pre>`;
-  document.body.appendChild(div);
-});
+if (import.meta.env.DEV) {
+  window.onerror = function (msg, url, line, col, error) {
+    const div = document.createElement("div");
+    div.style =
+      "position:fixed; top:0; left:0; width:100%; z-index:999999; background:red; color:white; padding:10px; font-size:12px; font-family:monospace;";
+    div.innerHTML = `<strong>Error:</strong> ${msg}<br/>${url}:${line}:${col}<br/><pre>${error?.stack}</pre>`;
+    document.body.appendChild(div);
+  };
+  window.addEventListener("unhandledrejection", function (event) {
+    const div = document.createElement("div");
+    div.style =
+      "position:fixed; top:0; left:0; width:100%; z-index:999999; background:orange; color:black; padding:10px; font-size:12px; font-family:monospace;";
+    div.innerHTML = `<strong>Unhandled Rejection:</strong> ${event.reason?.message || event.reason}<br/><pre>${event.reason?.stack}</pre>`;
+    document.body.appendChild(div);
+  });
+}
 
 import { createPinia } from "pinia";
 import App from "./App.vue";
