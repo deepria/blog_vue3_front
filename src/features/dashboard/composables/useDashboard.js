@@ -72,6 +72,7 @@ export function useDashboard() {
     clipboardText,
     clipboardLoading,
     clipboardSaving,
-    saveClipboard
+    saveClipboard,
+    fetchClipboard
   };
 }

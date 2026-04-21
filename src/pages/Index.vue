@@ -16,22 +16,37 @@
 
         <BaseCard class="quick-task-card dashboard-card dashboard-glass dashboard-card--elevated" glass hoverable>
           <div class="quick-task-head">
-            <div>
-              <p class="eyebrow">Quick Clipboard</p>
-              <p class="quick-task-title">Sync text instantly across devices</p>
-            </div>
-            <div class="clipboard-actions">
-               <span v-if="clipboardSaving" class="status-msg">Saving...</span>
-               <button class="icon-btn-secondary" @click="handleCopyClipboard" title="Copy to Clipboard">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-               </button>
+            <p class="eyebrow">Quick Clipboard</p>
+            <div class="clipboard-actions flex items-center">
+              <BaseButton size="sm" variant="ghost" :loading="clipboardSaving" :disabled="!clipboardText" @click="handleSaveClipboard" title="Save Clipboard">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                  <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+              </BaseButton>
+              <BaseButton size="sm" variant="ghost" :loading="clipboardLoading" @click="fetchClipboard" title="Refresh Clipboard">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <polyline points="1 20 1 14 7 14"></polyline>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+              </BaseButton>
+              <BaseButton size="sm" variant="ghost" :disabled="!clipboardText" @click="handleClearClipboard" title="Clear Clipboard">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </BaseButton>
+              <BaseButton size="sm" variant="ghost" @click="handleCopyClipboard" title="Copy to Clipboard">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </BaseButton>
             </div>
           </div>
           <textarea
               v-model="clipboardText"
               placeholder="Paste or type text here..."
               class="clipboard-textarea"
-              @blur="handleSaveClipboard"
           ></textarea>
         </BaseCard>
       </section>
@@ -172,6 +187,8 @@
 import { computed, onMounted } from "vue";
 import { message } from "ant-design-vue";
 import BaseCard from "@/shared/ui/BaseCard.vue";
+import BaseInput from "@/shared/ui/BaseInput.vue";
+import BaseButton from "@/shared/ui/BaseButton.vue";
 import { useDashboard } from "@/features/dashboard/composables/useDashboard";
 
 const {
@@ -181,8 +198,10 @@ const {
   refreshDashboard,
   formatRelativeTime,
   clipboardText,
+  clipboardLoading,
   clipboardSaving,
-  saveClipboard
+  saveClipboard,
+  fetchClipboard
 } = useDashboard();
 
 const today = computed(() => {
@@ -198,8 +217,18 @@ const today = computed(() => {
 const handleSaveClipboard = async () => {
   try {
     await saveClipboard(clipboardText.value);
+    message.success("Clipboard saved");
   } catch {
     message.error("Failed to save clipboard");
+  }
+};
+
+const handleClearClipboard = async () => {
+  try {
+    await saveClipboard('');
+    message.success("Clipboard cleared");
+  } catch {
+    message.error("Failed to clear clipboard");
   }
 };
 
@@ -475,6 +504,35 @@ onMounted(() => {
   margin-bottom: var(--space-1);
 }
 
+.quick-task-head {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.clipboard-textarea {
+  width: 100%;
+  min-height: 120px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  padding: var(--space-3);
+  font-family: inherit;
+  font-size: var(--font-size-body);
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.clipboard-textarea:focus {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-primary);
+}
+
 @media (max-width: 1024px) {
   .hero-cluster {
     grid-template-columns: 1fr;
@@ -487,6 +545,10 @@ onMounted(() => {
 @media (max-width: 640px) {
   .dashboard-container {
     padding: var(--space-4);
+  }
+  .quick-task-head {
+    flex-direction: row !important;
+    align-items: center !important;
   }
   .kpi-row {
     grid-template-columns: repeat(2, 1fr);
