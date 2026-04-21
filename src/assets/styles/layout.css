@@ -1,28 +1,18 @@
-/* 기본 스타일 리셋 및 웹뷰 최적화 */
+/* Modern Layout Basics */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
 }
 
-/* 폼 컨트롤에는 선택/콜아웃 허용 (오버라이드) */
 input,
 select,
 textarea,
 button,
-label,
 [role="button"] {
-    -webkit-user-select: auto !important;
-    user-select: auto !important;
-    -webkit-touch-callout: default !important;
-}
-
-/* iOS에서 네이티브 select 피커 사용 */
-select.styled-input {
-    -webkit-appearance: menulist;
-    appearance: auto;
+    -webkit-user-select: auto;
+    user-select: auto;
 }
 
 html {
@@ -30,234 +20,64 @@ html {
     -webkit-text-size-adjust: 100%;
 }
 
-/* 모달 오픈 시에만 스크롤 락 */
 body.no-scroll {
     overflow: hidden;
 }
 
-/* 링크 스타일 */
 a {
     text-decoration: none;
-    color: var(--link-color);
-    transition: color 0.3s ease;
+    color: var(--color-primary);
+    transition: color 0.15s ease;
 }
 
 a:hover {
-    color: var(--link-hover-color);
+    color: var(--color-primary-strong);
 }
 
+/* App Shell */
 .app {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    /* overflow: hidden; removed */
 }
 
 .content {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: var(--spacing-medium);
 }
 
 .container {
     width: 100%;
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: var(--spacing-base);
+    padding: var(--space-4);
 }
 
-
-/* 스크롤바 스타일 */
+/* Base Scrollbars */
 ::-webkit-scrollbar {
-    width: 0;
+    width: 8px;
+    height: 8px;
     background: transparent;
 }
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-disabled);
+}
 
-/* 포커스 표시 */
+/* Focus States */
 :focus-visible {
-    outline: 2px solid var(--link-color);
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
 }
 
-
-/* 버튼 및 클릭 가능한 요소 기본 스타일 */
-button:not(.toastui-editor-defaultUI button),
-[role="button"]:not(.toastui-editor-defaultUI [role="button"]),
-.clickable {
-    min-height: var(--touch-target-size);
-    min-width: var(--touch-target-size);
-    padding: var(--spacing-medium);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-/* 공통 버튼 스타일 */
-.button-primary {
-    background-color: #000000;
-    color: #FFFFFF;
-    border: none;
-    padding: var(--spacing-small);
-    border-radius: 8px;
-    height: var(--touch-target-size);
-    min-width: var(--touch-target-size);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    -webkit-tap-highlight-color: transparent;
-    transition: opacity 0.2s ease;
-}
-
-.button-primary svg {
-    width: 24px;
-    height: 24px;
-    stroke: #FFFFFF;
-    stroke-width: 2.5;
-}
-
-.button-primary:active {
-    opacity: 0.8;
-}
-
-.button-secondary {
-    background-color: #666;
-    color: var(--text-color);
-    border: none;
-    padding: var(--spacing-small);
-    border-radius: 4px;
-    height: var(--touch-target-size);
-    min-width: var(--touch-target-size);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.button-secondary:active {
-    opacity: 0.8;
-}
-
-/* 공통 버튼 그룹 스타일 */
-.button-group {
-    display: flex;
-    gap: var(--spacing-small);
-}
-
-/* 공통 팝업 스타일 */
-.popup {
-    position: fixed;
-    /*top: 0;*/
-    /*left: 0;*/
-    width: 100%;
-    height: 100%;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    /*overflow: hidden;*/
-}
-
-.popup-content {
-    background: var(--background-dark);
-    padding: var(--spacing-medium);
-    border-radius: 12px;
-    width: 90%;
-    max-width: 400px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    position: relative;
-    /*top: 50%;*/
-    /*left: 50%;*/
-    /*position: fixed;*/
-    /*transform: translate(-50%, -50%);*/
-}
-
-.popup-content>div {
-    margin-bottom: var(--spacing-medium);
-}
-
-.grid-input {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-small);
-}
-
-/* 공통 입력 필드 스타일 */
-.styled-input {
-    width: 100%;
-    height: 100%;
-    padding: 12px;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-color);
-    margin-bottom: var(--spacing-medium);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative;
-    z-index: 1;
-}
-
-.styled-textarea {
-    width: 100%;
-    min-height: 20vh;
-    padding: 12px;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-color);
-    margin-bottom: var(--spacing-medium);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative;
-    z-index: 1;
-    resize: vertical;
-    /* 세로만 크기 조절 가능 (none, horizontal, both 가능) */
-    outline: none;
-    /* 포커스 시 아웃라인 제거 */
-    font-family: inherit;
-    /* 폰트 상속 */
-    font-size: 1rem;
-
-}
-
-.styled-textarea:focus {
-    border-color: #4f46e5;
-    /* 진한 파란색 포커스 */
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
-}
-
-textarea::-webkit-scrollbar {
-    width: 8px;
-}
-
-textarea::-webkit-scrollbar-thumb {
-    background: #9ca3af;
-    border-radius: 4px;
-}
-
-/* 공통 팝업 버튼 스타일 */
-.popup-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-}
-
-.popup-buttons button {
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: var(--font-size-medium);
-    font-weight: 500;
-    min-width: 80px;
-    transition: opacity 0.2s ease;
-}
-
-.popup-buttons button:active {
-    opacity: 0.8;
-}
-
-/* 접근성 */
+/* Utilities */
 .sr-only {
     position: absolute;
     width: 1px;
@@ -270,107 +90,27 @@ textarea::-webkit-scrollbar-thumb {
     border: 0;
 }
 
-
-/* 반응형 레이아웃 */
-@media (min-width: 1024px) {
-    .container {
-        padding: var(--spacing-large);
-    }
-
-    .grid-layout {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--spacing-large);
-    }
-}
-
-
-/* 모바일 터치 피드백 */
-@media (hover: none) {
-    .clickable:active {
-        opacity: 0.7;
-    }
-}
-
-/* 사파리 노치 영역 대응 */
+/* Safari Notch */
 @supports (padding-top: env(safe-area-inset-top)) {
     .content {
-        padding-top: calc(env(safe-area-inset-top) + var(--spacing-medium));
-        padding-bottom: calc(env(safe-area-inset-bottom) + var(--spacing-medium));
+        padding-top: calc(env(safe-area-inset-top));
+        padding-bottom: calc(env(safe-area-inset-bottom));
     }
 }
 
-
-/* 공통 애니메이션 */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+/* Transitions */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s ease;
 }
 
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 
-/* 반응형 디자인 */
-@media (hover: hover) {
-    a:hover {
-        background-color: hsla(160, 100%, 37%, 0.2);
-    }
-}
-
-@media (min-width: 1024px) {
-    .container {
-        max-width: 1280px;
-        padding: 2rem;
-    }
-
-    /* 마우스 hover 인터랙션 강화 */
-    .button-primary:hover {
-        background-color: var(--link-hover-color);
-        opacity: 0.9;
-    }
-
-    a:hover {
-        text-decoration: underline;
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-}
-
-/* Ant Design Modal 모바일 최적화 */
-.ant-modal-confirm .ant-modal-confirm-btns {
-    display: flex !important;
-    justify-content: center !important;
-    gap: 12px !important;
-    width: 100% !important;
-    margin-top: 24px !important;
-    float: none !important;
-}
-
-.ant-modal-confirm .ant-modal-confirm-btns button {
-    flex: 1 !important;
-    margin: 0 !important;
-    height: 48px !important;
-    /* 모달 버튼 크기 확대 */
-    border-radius: 8px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --text-light: #ffffff;
-        --background-dark: #242424;
-    }
+/* Select element overrides */
+select {
+    -webkit-appearance: none;
+    appearance: none;
 }

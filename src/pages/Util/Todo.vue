@@ -5,16 +5,21 @@
         <h1 class="page-title">Tasks</h1>
       </div>
       <div class="header-actions">
-        <BaseButton class="action-btn" variant="secondary" @click="openSettings">Options</BaseButton>
         <div class="primary-actions">
-          <BaseButton class="action-btn" variant="ghost" @click="handleRefresh">Refresh</BaseButton>
-          <BaseButton
-            :variant="hasUnsavedChanges ? 'primary' : 'secondary'"
+          <button class="icon-btn-secondary" @click="handleRefresh" title="Refresh">
+             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </button>
+          <button class="icon-btn-secondary" @click="openSettings" title="Options">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          </button>
+          <button
+            class="icon-btn-primary"
             :class="{ 'pulse-animation': hasUnsavedChanges }"
             @click="handleSave"
+            title="Save"
           >
-            {{ hasUnsavedChanges ? "Save Changes" : "Saved" }}
-          </BaseButton>
+             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          </button>
         </div>
       </div>
     </header>
@@ -202,62 +207,177 @@ onMounted(() => {
 <style scoped>
 .todo-page {
   padding: var(--space-6);
-  max-width: 1200px;
+  max-width: var(--max-width);
   margin: 0 auto;
 }
 
-.todo-header,
-.header-actions,
-.primary-actions,
-.form-row,
-.option-row {
-  display: flex;
-  gap: 12px;
-}
-
 .todo-header {
+  display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
+}
+
+.page-title {
+  font-size: var(--font-size-hero);
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: var(--tracking-tight);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.primary-actions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
 }
 
 .quick-add-container {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
 .edit-form {
-  display: grid;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
-.form-group,
-.option-section {
+.form-row {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.form-group {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.form-group label {
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.select-wrapper {
+  position: relative;
 }
 
 .base-select,
 .mini-input {
   width: 100%;
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  transition: all 0.2s ease;
 }
 
-.base-select,
-.mini-input {
-  background: #000000;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  min-height: 40px;
-  padding: 0 12px;
+.base-select:focus,
+.mini-input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--color-primary);
 }
 
 .mini-input::placeholder {
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--color-text-disabled);
+}
+
+.options-toggle {
+  display: flex;
+  justify-content: flex-end;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  cursor: pointer;
+  margin-top: var(--space-2);
+}
+
+.options-toggle:hover {
+  color: var(--color-primary);
+}
+
+.options-manager {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-4);
+  background-color: var(--color-bg-base);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+.option-section h4 {
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-3) 0;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 .color-picker {
-  background: #000000;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  min-height: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: transparent;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.icon-btn-danger,
+.icon-btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+}
+
+.icon-btn-danger {
+  background-color: var(--color-danger);
+}
+
+.icon-btn-primary {
+  background-color: var(--color-primary);
+  color: var(--text-inverse);
+}
+
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--color-primary), 0.4); }
+  70% { transform: scale(1.02); box-shadow: 0 0 0 6px rgba(var(--color-primary), 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--color-primary), 0); }
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    flex-direction: column;
+  }
 }
 </style>

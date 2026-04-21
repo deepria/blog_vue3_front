@@ -17,36 +17,22 @@
         <BaseCard class="quick-task-card dashboard-card dashboard-glass dashboard-card--elevated" glass hoverable>
           <div class="quick-task-head">
             <div>
-              <p class="eyebrow">Quick Capture</p>
-              <p class="quick-task-title">Add a task without leaving this view</p>
+              <p class="eyebrow">Quick Clipboard</p>
+              <p class="quick-task-title">Sync text instantly across devices</p>
             </div>
-            <BaseButton size="sm" variant="ghost" @click="refreshDashboard">Refresh</BaseButton>
+            <div class="clipboard-actions">
+               <span v-if="clipboardSaving" class="status-msg">Saving...</span>
+               <button class="icon-btn-secondary" @click="handleCopyClipboard" title="Copy to Clipboard">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+               </button>
+            </div>
           </div>
-          <BaseInput
-              v-model="quickTask"
-              placeholder="Add new task..."
-              class="header-input"
-              @keyup.enter="handleQuickTask"
-          >
-            <template #suffix>
-              <button class="icon-btn" @click="handleQuickTask" aria-label="Add task">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-              </button>
-            </template>
-          </BaseInput>
+          <textarea
+              v-model="clipboardText"
+              placeholder="Paste or type text here..."
+              class="clipboard-textarea"
+              @blur="handleSaveClipboard"
+          ></textarea>
         </BaseCard>
       </section>
 
@@ -183,21 +169,20 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from "vue";
-import {message} from "ant-design-vue";
+import { computed, onMounted } from "vue";
+import { message } from "ant-design-vue";
 import BaseCard from "@/shared/ui/BaseCard.vue";
-import BaseInput from "@/shared/ui/BaseInput.vue";
-import BaseButton from "@/shared/ui/BaseButton.vue";
-import { todoApi } from "@/features/todo/api/todoApi";
-import {useDashboard} from "@/features/dashboard/composables/useDashboard";
+import { useDashboard } from "@/features/dashboard/composables/useDashboard";
 
-const quickTask = ref("");
 const {
   dashboardLoading,
   metrics,
   recentActivities,
   refreshDashboard,
-  formatRelativeTime
+  formatRelativeTime,
+  clipboardText,
+  clipboardSaving,
+  saveClipboard
 } = useDashboard();
 
 const today = computed(() => {
@@ -210,25 +195,32 @@ const today = computed(() => {
   return `${yyyy}.${mm}.${dd}(${day})`;
 });
 
-const handleQuickTask = async () => {
-  if (!quickTask.value.trim()) return;
+const handleSaveClipboard = async () => {
   try {
-    const items = await todoApi.fetchTodos();
-    const newItem = {
-      id: Date.now(),
-      text: quickTask.value,
-      groupKey: 1,
-      priorityKey: 1,
-      completed: false
-    };
-    items.unshift(newItem);
-    await todoApi.saveTodos(items);
-    message.success("Task added");
-    quickTask.value = "";
-    await refreshDashboard();
-  } catch (e) {
-    console.error("Failed to add task", e);
-    message.error("Failed to add task");
+    await saveClipboard(clipboardText.value);
+  } catch {
+    message.error("Failed to save clipboard");
+  }
+};
+
+const handleCopyClipboard = async () => {
+  if (!clipboardText.value) return;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(clipboardText.value);
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = clipboardText.value;
+      textArea.style.position = "fixed";  // Avoid scrolling to bottom
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+    }
+    message.success("Copied to clipboard!");
+  } catch {
+    message.error("Failed to copy");
   }
 };
 
@@ -237,370 +229,292 @@ onMounted(() => {
 });
 </script>
 
+/* ... replacing everything under style ... */
 <style scoped>
 .dashboard-container {
-  padding: clamp(14px, 3vw, var(--space-8));
-  max-width: 1200px;
+  padding: var(--space-4);
+  max-width: var(--max-width);
   margin: 0 auto;
-  min-height: 100vh;
 }
 
 .dashboard-grid {
   display: grid;
-  gap: clamp(10px, 2vw, var(--space-8));
+  gap: var(--space-6);
 }
 
 .hero-cluster {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
-  gap: clamp(10px, 2vw, var(--space-6));
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: var(--space-6);
   align-items: stretch;
 }
 
-:deep(.dashboard-card) {
-  --card-bg-color: rgba(255, 255, 255, 0.01);
-  --card-bg-image:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.002));
-  --card-border: 1px solid rgba(255, 255, 255, 0.08);
-  --card-shadow:
-    0 18px 40px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-:deep(.dashboard-card--elevated) {
-  --card-bg-color: rgba(255, 255, 255, 0.014);
-  --card-bg-image:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.003));
-  --card-border: 1px solid rgba(255, 255, 255, 0.09);
-  --card-shadow:
-    0 24px 54px rgba(0, 0, 0, 0.09),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-:deep(.dashboard-glass) {
-  backdrop-filter: blur(26px);
-  -webkit-backdrop-filter: blur(26px);
-}
-
-
-
-:deep(.activity-card .base-card-header) {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.014), rgba(255, 255, 255, 0.002)),
-  rgba(255, 255, 255, 0.005);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-:deep(.hero-card .base-card-body) {
+.hero-copy {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: var(--space-6);
-}
-
-.hero-copy {
-  display: grid;
-  gap: 6px;
+  gap: var(--space-1);
 }
 
 .eyebrow {
-  margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--font-size-caption);
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: rgba(255, 255, 255, 0.72);
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  margin: 0;
 }
 
 .header-title {
-  font-size: clamp(2rem, 5vw, 3.2rem);
-  font-weight: 900;
+  font-size: var(--font-size-hero);
+  font-weight: 800;
+  color: var(--color-text-primary);
   margin: 0;
-  background: linear-gradient(135deg, #fff 0%, #888 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: var(--tracking-tight);
 }
 
 .header-subtitle {
-  color: var(--color-text-muted);
-  margin: 0;
-  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+  margin: 0 0 var(--space-4) 0;
 }
 
 .hero-meta {
   display: flex;
-  gap: var(--space-2);
-  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: auto;
 }
 
 .meta-chip,
 .activity-pill {
   display: inline-flex;
   align-items: center;
-  min-height: 32px;
-  padding: 0 12px;
+  padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 0.78rem;
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-caption);
   font-weight: 600;
-}
-
-:deep(.quick-task-card .base-card-body) {
-  display: grid;
-  gap: 14px;
 }
 
 .quick-task-head {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
 }
 
+.clipboard-textarea {
+  width: 100%;
+  height: 80px;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  resize: none;
+  transition: all 0.2s ease;
+}
+
+.clipboard-textarea:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.clipboard-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.status-msg {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
 .quick-task-title {
-  margin: 4px 0 0;
   color: var(--color-text-secondary);
-  line-height: 1.5;
-}
-
-.header-input :deep(.base-input) {
-  background: rgba(255, 255, 255, 0.035);
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  font-size: var(--font-size-body);
+  margin: var(--space-1) 0 0;
 }
 
 .icon-btn {
-  width: 34px;
-  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.045);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  border: none;
+  background-color: var(--color-primary);
+  color: var(--text-inverse);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.icon-btn:hover {
+  transform: scale(1.05);
+}
+
+.icon-btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-base);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.icon-btn-secondary:hover {
+  background-color: var(--color-bg-elevated);
   color: var(--color-text-primary);
-  padding: 0;
+  border-color: var(--color-border-bright);
 }
 
 .kpi-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(10px, 1.8vw, var(--space-6));
-}
-
-:deep(.stat-card) {
-  min-height: 168px;
-}
-
-:deep(.stat-card .base-card-body) {
-  display: grid;
-  align-content: space-between;
-  gap: 22px;
-  padding: 18px !important;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
 }
 
 .stat-topline {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  align-items: flex-start;
 }
 
 .stat-tag {
-  font-size: 0.72rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
-  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-muted);
 }
 
 .stat-icon-wrapper {
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-bright);
 }
 
-.blue-glow {
-  color: #42b883;
-  box-shadow: 0 0 14px rgba(66, 184, 131, 0.12);
-}
-
-.purple-glow {
-  color: #64d8a0;
-  box-shadow: 0 0 14px rgba(100, 216, 160, 0.11);
-}
-
-.cyan-glow {
-  color: #7ee2b8;
-  box-shadow: 0 0 14px rgba(126, 226, 184, 0.11);
-}
-
-.amber-glow {
-  color: #b4f5d3;
-  box-shadow: 0 0 14px rgba(180, 245, 211, 0.11);
-}
+.blue-glow { color: #3b82f6; }
+.purple-glow { color: #a855f7; }
+.cyan-glow { color: #06b6d4; }
+.amber-glow { color: #f59e0b; }
 
 .stat-content {
+  margin-top: var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-1);
 }
 
 .stat-value {
-  font-size: clamp(1.8rem, 4vw, 2.3rem);
-  font-weight: 800;
+  font-size: 28px;
+  font-weight: 700;
   color: var(--color-text-primary);
-  line-height: 1;
 }
 
 .stat-label {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-:deep(.activity-card) {
-  min-height: 320px;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
 }
 
 .activity-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
 }
 
 .card-title {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: var(--font-size-title);
+  font-weight: 600;
   margin: 0;
 }
 
 .activity-list {
-  display: grid;
-  gap: 10px;
-}
-
-:deep(.activity-entry) {
-  --card-bg-color: rgba(255, 255, 255, 0.008);
-  --card-bg-image: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.002));
-  --card-border: 1px solid rgba(255, 255, 255, 0.075);
-  --card-shadow: 0 10px 24px rgba(0, 0, 0, 0.06),
-  inset 0 1px 0 rgba(255, 255, 255, 0.035);
-}
-
-:deep(.activity-entry .base-card-body) {
-  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .activity-item {
   display: flex;
-  gap: 14px;
+  gap: var(--space-3);
   align-items: flex-start;
 }
 
 .dot {
   width: 8px;
   height: 8px;
-  background: var(--color-primary);
   border-radius: 50%;
+  background-color: var(--color-primary);
   margin-top: 6px;
-  box-shadow: 0 0 8px var(--color-primary-glow);
 }
 
 .activity-text {
-  font-size: 0.95rem;
-  color: #ffffff;
-  line-height: 1.5;
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
 }
 
 .activity-time {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--font-size-caption);
   color: var(--color-text-muted);
-  margin-bottom: 2px;
+  margin-bottom: var(--space-1);
 }
 
 @media (max-width: 1024px) {
   .hero-cluster {
     grid-template-columns: 1fr;
   }
-
   .kpi-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 640px) {
   .dashboard-container {
-    padding: var(--mobile-shell-gutter);
+    padding: var(--space-4);
   }
-
-  .dashboard-grid {
-    gap: var(--mobile-panel-gap);
-  }
-
-  .hero-card :deep(.base-card-body),
-  .quick-task-card :deep(.base-card-body) {
-    gap: 14px;
-  }
-
-  .quick-task-head {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .kpi-row {
-    gap: var(--mobile-panel-gap);
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
   }
-
   .stat-card {
-    min-height: 146px;
+    min-height: 120px;
   }
-
-  .stat-card :deep(.base-card-body) {
-    padding: 14px !important;
-    gap: 16px;
+  .stat-content {
+    margin-top: var(--space-3);
   }
-
+  .stat-value {
+    font-size: 20px;
+  }
   .stat-icon-wrapper {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
+    width: 32px;
+    height: 32px;
   }
-
+  .stat-icon-wrapper svg {
+    width: 16px;
+    height: 16px;
+  }
   .stat-label {
-    letter-spacing: 0.08em;
-    font-size: 0.72rem;
+    font-size: 10px;
+    letter-spacing: 0;
   }
-
-  .activity-card {
-    min-height: 0;
-  }
-
-  .card-title {
-    font-size: 1.05rem;
-  }
-
-  .activity-item {
-    gap: 12px;
-  }
-
-  .activity-entry :deep(.base-card-body) {
-    padding: 12px 14px;
+  .header-title {
+    font-size: var(--font-size-title);
   }
 }
 </style>

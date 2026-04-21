@@ -39,71 +39,52 @@ defineProps({
 
 <style scoped>
 .base-card {
-  --card-bg-color: rgba(255, 255, 255, 0.008);
-  --card-bg-image:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.002));
-  --card-border: 1px solid rgba(255, 255, 255, 0.08);
-  --card-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  background-color: var(--card-bg-color);
-  background-image: var(--card-bg-image);
-  border-radius: var(--radius-md);
+  --card-bg: var(--color-bg-elevated);
+  --card-border: 1px solid var(--color-border);
+  --card-shadow: var(--shadow-sm);
+  
+  background-color: var(--card-bg);
+  border-radius: var(--radius-xl);
   border: var(--card-border);
   box-shadow: var(--card-shadow);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  overflow: hidden;
 }
 
 .base-card.glass {
-  background-color: var(--card-bg-color);
-  background-image: var(--card-bg-image);
-  backdrop-filter: blur(34px) saturate(155%);
-  -webkit-backdrop-filter: blur(34px) saturate(155%);
-  border: var(--card-border);
+  --card-bg: var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
 }
 
-.base-card.glass::before,
-.base-card.glass::after {
+.base-card.glass::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-}
-
-.base-card.glass::before {
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.008) 36%, rgba(255, 255, 255, 0) 72%),
-    radial-gradient(circle at top left, rgba(182, 255, 227, 0.035), transparent 44%);
-  opacity: 0.18;
+  background: var(--surface-gloss);
+  opacity: 0.8;
   z-index: 0;
 }
 
-.base-card.glass::after {
-  inset: 1px 1px auto 1px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
-  opacity: 0.45;
-  z-index: 5;
+.base-card.hoverable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-strong);
 }
 
-.base-card.hoverable:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--glass-shadow-deep);
+.base-card.glass.hoverable:hover {
+  --card-bg: var(--glass-bg-hover);
+  box-shadow: var(--glass-shadow);
 }
 
 .base-card.hoverable:hover::before {
   background: var(--surface-shine);
-  opacity: 0.95;
-  transition: opacity 0.5s ease, background 0.5s ease;
-}
-
-.base-card.glass.hoverable:hover {
-  --card-bg-color: rgba(255, 255, 255, 0.014);
-  border-color: rgba(255, 255, 255, 0.12);
+  opacity: 1;
 }
 
 .base-card.interactive {
@@ -111,11 +92,13 @@ defineProps({
 }
 
 .base-card.interactive:active {
-  transform: scale(0.985);
+  transform: scale(0.98);
 }
 
 .base-card-header {
-  padding: var(--space-4) var(--space-4) 0 var(--space-4);
+  padding: var(--space-4) var(--space-4) 0;
+  position: relative;
+  z-index: 1;
 }
 
 .base-card-title {
@@ -123,42 +106,28 @@ defineProps({
   font-size: var(--font-size-title);
   font-weight: 600;
   color: var(--color-text-primary);
+  letter-spacing: var(--tracking-tight);
 }
 
 .base-card-body {
   padding: var(--space-4);
   flex: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .base-card-footer {
-  padding: 0 var(--space-4) var(--space-4) var(--space-4);
+  padding: 0 var(--space-4) var(--space-4);
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-}
-
-.base-card-header,
-.base-card-body,
-.base-card-footer {
+  gap: var(--space-3);
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
 @media (max-width: 768px) {
   .base-card {
-    border-radius: 18px;
-  }
-
-  .base-card-header {
-    padding: 14px 14px 0 14px;
-  }
-
-  .base-card-body {
-    padding: 14px;
-  }
-
-  .base-card-footer {
-    padding: 0 14px 14px 14px;
+    border-radius: var(--radius-lg);
   }
 }
 </style>

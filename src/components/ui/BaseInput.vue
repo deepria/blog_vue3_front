@@ -65,8 +65,6 @@ defineProps({
 });
 
 const emit = defineEmits(['update:modelValue', 'focus', 'blur', 'enter']);
-
-// Simple random ID generator for accessibility mapping
 const inputId = computed(() => `input-${Math.random().toString(36).substring(2, 9)}`);
 
 const onInput = (event) => {
@@ -83,10 +81,9 @@ const onInput = (event) => {
 }
 
 .base-input-label {
-  font-size: var(--font-size-caption);
-  color: var(--color-text-muted);
+  font-size: var(--font-size-body);
+  color: var(--color-text-secondary);
   font-weight: 500;
-  margin-left: var(--space-1);
 }
 
 .input-container {
@@ -99,61 +96,62 @@ const onInput = (event) => {
 .base-input {
   width: 100%;
   font-family: inherit;
-  background: rgba(255, 255, 255, 0.022);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background-color: var(--color-bg-base);
   color: var(--color-text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
   outline: none;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.base-input::placeholder {
+  color: var(--color-text-disabled);
+}
+
+.base-input:hover:not(:disabled) {
+  border-color: var(--color-border-bright);
 }
 
 .base-input:focus {
-  border-color: rgba(182, 255, 227, 0.28);
-  background: rgba(255, 255, 255, 0.035);
-  box-shadow: 0 0 0 4px rgba(103, 232, 180, 0.12);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary), var(--shadow-sm);
 }
 
 .base-input:disabled {
-  background-color: var(--color-bg-base);
+  background-color: var(--color-bg-panel);
   color: var(--color-text-muted);
   cursor: not-allowed;
-  opacity: 0.8;
 }
 
 .base-input.is-error {
-  border-color: var(--color-danger, #ef4444);
+  border-color: var(--color-danger);
 }
 .base-input.is-error:focus {
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 0 1px var(--color-danger);
 }
 
-/* Base Input Sizes */
+/* Sizes */
 .size-sm {
   height: 32px;
-  padding: var(--space-1) var(--space-3);
+  padding: 0 var(--space-3);
   font-size: var(--font-size-caption);
+  border-radius: var(--radius-sm);
 }
 .size-md {
   height: 40px;
-  padding: var(--space-2) var(--space-3);
+  padding: 0 var(--space-3);
   font-size: var(--font-size-body);
 }
 .size-lg {
   height: 48px;
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--font-size-title);
+  padding: 0 var(--space-4);
+  font-size: var(--font-size-body);
 }
 
-/* Prefix / Suffix Spacing Adjustments */
-.has-prefix {
-  padding-left: 36px;
-}
-.has-suffix {
-  padding-right: 36px;
-}
+/* Slots */
+.has-prefix { padding-left: 36px; }
+.has-suffix { padding-right: 36px; }
 
 .prefix-slot, .suffix-slot {
   position: absolute;
@@ -163,20 +161,13 @@ const onInput = (event) => {
   align-items: center;
   justify-content: center;
   color: var(--color-text-muted);
-  pointer-events: none; /* Let clicks pass through to input */
+  z-index: 2;
 }
-
-.prefix-slot {
-  left: var(--space-3);
-}
-
-.suffix-slot {
-  right: var(--space-3);
-}
+.prefix-slot { left: var(--space-3); }
+.suffix-slot { right: var(--space-3); }
 
 .error-message {
-  font-size: 12px;
-  color: var(--color-danger, #ef4444);
-  margin-left: var(--space-1);
+  font-size: var(--font-size-caption);
+  color: var(--color-danger);
 }
 </style>

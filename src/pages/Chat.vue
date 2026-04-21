@@ -110,18 +110,25 @@ onUnmounted(() => {
 });
 </script>
 
+/* ... replacing styles ... */
 <style scoped>
 .main-layout {
   display: flex;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
-  color: #ffffff;
+  background-color: transparent;
+}
+
+@media (max-width: 1024px) {
+  .main-layout {
+    height: calc(100dvh - 92px - env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .sidebar {
   width: 280px;
-  background: rgba(255, 255, 255, 0.02);
-  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  background-color: var(--color-bg-elevated);
+  border-right: 1px solid var(--color-border);
 }
 
 .chat-container {
@@ -129,15 +136,37 @@ onUnmounted(() => {
   flex: 1;
   flex-direction: column;
   min-width: 0;
+  position: relative;
 }
 
 .chat-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  color: #ffffff;
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  z-index: 10;
+}
+
+.chat-header h2 {
+  font-size: var(--font-size-title);
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.status-badge {
+  font-size: var(--font-size-caption);
+  color: var(--color-primary);
+  background-color: var(--color-primary-glow);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-weight: 600;
 }
 
 .mobile-header {
@@ -148,13 +177,13 @@ onUnmounted(() => {
   z-index: 25;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: rgba(6, 10, 8, 0.85);
-}
-
-.status-badge {
-  color: #ffffff;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--color-border);
+  height: var(--header-height);
+  font-weight: 600;
 }
 
 :deep(.ant-input),
@@ -162,12 +191,12 @@ onUnmounted(() => {
 :deep(.ant-drawer),
 :deep(.ant-drawer-body),
 :deep(.ant-btn) {
-  color: #ffffff;
+  color: var(--color-text-primary);
 }
 
 @media (max-width: 768px) {
   .chat-container {
-    padding-top: 52px;
+    padding-top: var(--header-height);
   }
 }
 </style>

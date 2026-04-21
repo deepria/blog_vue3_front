@@ -2,7 +2,7 @@
   <div class="navigation-pc">
     <div class="sidebar">
       <div class="logo-area">
-        <h1>Space</h1>
+        <h1>Workspace</h1>
       </div>
       
       <nav class="nav-menu">
@@ -13,8 +13,8 @@
           class="nav-item"
           active-class="active"
         >
-          <component :is="item.icon" />
-          <span>{{ item.label }}</span>
+          <component :is="item.icon" class="nav-icon" />
+          <span class="nav-label">{{ item.label }}</span>
         </router-link>
       </nav>
       
@@ -35,73 +35,78 @@ import { navigationItems } from "@/shared/navigation/items";
   top: 0;
   left: 0;
   height: 100vh;
-  width: 240px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)),
-    rgba(8, 14, 12, 0.22);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  z-index: 1000;
+  width: var(--nav-width);
+  background-color: var(--color-bg-base);
+  border-right: 1px solid var(--color-border);
+  z-index: 100;
   display: flex;
   flex-direction: column;
 }
 
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .logo-area {
-  padding: 32px 24px;
+  padding: var(--space-6) var(--space-6) var(--space-6);
+  display: flex;
+  align-items: center;
 }
 
 .logo-area h1 {
-  font-size: 24px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #f8fffc 0%, #8ff2c6 100%);
+  font-size: var(--font-size-title);
+  font-weight: 700;
+  background: linear-gradient(135deg, #FAFAFA 0%, #A1A1AA 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin: 0;
-  letter-spacing: -0.5px;
+  letter-spacing: var(--tracking-tight);
 }
 
 .nav-menu {
   flex: 1;
-  padding: 0 12px;
+  padding: 0 var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  color: var(--color-text-muted);
+  gap: var(--space-3);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   font-weight: 500;
-  font-size: 15px;
+  font-size: var(--font-size-body);
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: #fff;
-  transform: translateX(4px);
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
 }
 
 .nav-item.active {
-  background: rgba(103, 232, 180, 0.14);
-  color: var(--color-primary);
-  border-left: 3px solid var(--color-primary);
-  border-radius: 0 12px 12px 0;
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
 }
 
-.nav-item :deep(.anticon) {
-  font-size: 18px;
+.nav-item.active .nav-icon {
+  color: var(--color-primary);
+}
+
+.nav-icon {
+  font-size: 16px;
+  transition: color 0.15s ease;
 }
 
 .footer-area {
-  padding: 24px 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: var(--space-4);
 }
 </style>

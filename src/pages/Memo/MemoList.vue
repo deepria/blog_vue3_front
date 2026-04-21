@@ -5,12 +5,12 @@
         <h1 class="page-title">Memos</h1>
       </div>
       <div class="header-actions">
-         <BaseButton variant="ghost" @click="handleRefresh">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-         </BaseButton>
-         <BaseButton variant="secondary" @click="createMemo">
-            + New Memo
-         </BaseButton>
+         <button class="icon-btn-secondary" @click="handleRefresh" title="Refresh">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+         </button>
+         <button class="icon-btn-primary" @click="createMemo" title="New Memo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+         </button>
       </div>
     </header>
 
@@ -183,34 +183,38 @@ onMounted(async () => {
 <style scoped>
 .memo-list-page {
     padding: var(--space-6);
-    max-width: 1200px;
+    max-width: var(--max-width);
     margin: 0 auto;
 }
 
 .memo-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
-    gap: 12px;
+    align-items: center;
+    gap: var(--space-4);
     margin-bottom: var(--space-8);
 }
 
 .header-copy {
-    flex: 1;
-    min-width: 0;
     display: flex;
     align-items: flex-end;
 }
+
 .page-title {
-    font-size: 2.5rem;
-    font-weight: 900;
+    font-size: var(--font-size-hero);
+    font-weight: 800;
+    color: var(--color-text-primary);
     margin: 0;
-    background: linear-gradient(135deg, #fff 0%, #888 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    letter-spacing: var(--tracking-tight);
 }
+
+.header-actions {
+    display: flex;
+    gap: var(--space-2);
+}
+
 .search-bar {
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-6);
     max-width: 600px;
 }
 
@@ -221,7 +225,7 @@ onMounted(async () => {
 .memo-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 14px;
+    gap: var(--space-4);
 }
 
 .memo-wrapper {
@@ -233,15 +237,11 @@ onMounted(async () => {
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.memo-card :deep(.base-card-body) {
-    padding: 12px 14px !important;
-}
-
 .memo-main {
     display: grid;
     grid-template-columns: 40px minmax(0, 1fr) auto;
     align-items: center;
-    gap: 10px;
+    gap: var(--space-3);
     min-height: 44px;
 }
 
@@ -249,13 +249,12 @@ onMounted(async () => {
     width: 40px;
     height: 40px;
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.08);
-    border: var(--glass-border);
+    background-color: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--color-primary);
-    box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
 }
 
 .memo-icon svg {
@@ -277,20 +276,21 @@ onMounted(async () => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 0.95rem;
+    font-size: var(--font-size-body);
     line-height: 1.25;
 }
 
 .memo-date {
-    font-size: 0.75rem;
+    font-size: var(--font-size-caption);
     color: var(--color-text-muted);
     line-height: 1.2;
 }
 
 .memo-actions {
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s ease;
 }
+
 .memo-card:hover .memo-actions {
     opacity: 1;
 }
@@ -301,41 +301,33 @@ onMounted(async () => {
     color: var(--color-text-muted);
     cursor: pointer;
     padding: 6px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
 }
+
 .icon-btn-danger:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--color-danger, #ef4444);
+    background-color: var(--color-danger);
+    color: white;
 }
 
 /* Preview Panel */
 .preview-panel {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: var(--glass-border-light);
+    background-color: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
     border-top: none;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
     padding: var(--space-6);
     margin-top: -2px;
     position: relative;
     z-index: 1;
-    box-shadow: var(--glass-shadow-deep);
+    box-shadow: var(--shadow-lg);
 }
 
 .preview-body {
     color: var(--color-text-primary);
-}
-
-.preview-body :deep(*) {
-    color: inherit;
-}
-
-.preview-body :deep(p),
-.preview-body :deep(li),
-.preview-body :deep(blockquote) {
-    color: var(--color-text-secondary) !important;
+    font-size: var(--font-size-body);
+    line-height: 1.6;
 }
 
 .preview-body :deep(h1),
@@ -344,37 +336,23 @@ onMounted(async () => {
 .preview-body :deep(h4),
 .preview-body :deep(h5),
 .preview-body :deep(h6),
+.preview-body :deep(p),
+.preview-body :deep(span),
+.preview-body :deep(div),
+.preview-body :deep(li),
 .preview-body :deep(strong),
-.preview-body :deep(code) {
+.preview-body :deep(em) {
     color: var(--color-text-primary) !important;
 }
 
 .preview-body :deep(a) {
-    color: #93c5fd !important;
+    color: var(--color-primary) !important;
 }
 
+.preview-body :deep(code),
 .preview-body :deep(pre) {
-    background: rgba(255, 255, 255, 0.08) !important;
-    color: var(--color-text-primary) !important;
-    border-radius: 12px;
-}
-
-.preview-body :deep(code) {
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 6px;
-    padding: 0.1em 0.35em;
-}
-
-.preview-loading {
-    padding: var(--space-3);
-}
-
-.preview-footer {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: var(--space-3);
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--color-border);
+    color: var(--color-primary-strong) !important;
+    background-color: var(--color-bg-base) !important;
 }
 
 /* Empty State */
@@ -385,9 +363,10 @@ onMounted(async () => {
     justify-content: center;
     padding: var(--space-8) 0;
     color: var(--color-text-muted);
+    gap: var(--space-3);
 }
+
 .empty-icon {
-    margin-bottom: var(--space-3);
     opacity: 0.5;
 }
 
@@ -410,7 +389,7 @@ onMounted(async () => {
 
 .page-section-enter-active,
 .page-section-appear-active {
-    transition: opacity 0.42s ease, transform 0.42s ease;
+    transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 .page-section-enter-from,
@@ -420,56 +399,12 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
-    .memo-list-page {
-        padding: var(--mobile-shell-gutter);
-    }
-
     .memo-header {
         align-items: center;
-        gap: 10px;
-        margin-bottom: 14px;
+        margin-bottom: var(--space-4);
     }
-
-    .header-actions {
-        margin-left: auto;
-        flex-shrink: 0;
-    }
-
-    .search-bar {
-        margin-bottom: 14px;
-    }
-
     .memo-grid {
         grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .memo-card :deep(.base-card-body) {
-        padding: 10px 12px !important;
-    }
-
-    .memo-main {
-        grid-template-columns: 36px minmax(0, 1fr) auto;
-        gap: 8px;
-        min-height: 38px;
-    }
-
-    .memo-icon {
-        width: 36px;
-        height: 36px;
-    }
-
-    .memo-icon svg {
-        width: 18px;
-        height: 18px;
-    }
-
-    .memo-title {
-        font-size: 0.9rem;
-    }
-
-    .preview-panel {
-        padding: 14px;
     }
 }
 </style>

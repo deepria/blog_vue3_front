@@ -1,23 +1,22 @@
 <template>
   <div class="app">
-    <SketchWidget />
+    <SketchWidget /> <!-- Background animated layer -->
 
     <a-config-provider 
       :theme="{ 
         algorithm: theme.darkAlgorithm,
         token: {
-          colorPrimary: '#67e8b4',
-          borderRadius: 16,
-          colorBgContainer: 'rgba(255, 255, 255, 0.02)',
-          colorBgElevated: 'rgba(255, 255, 255, 0.035)',
+          colorPrimary: '#5EEAD4',
+          borderRadius: 8,
+          colorBgContainer: '#18181B',
+          colorBgElevated: '#27272A',
           colorBorder: 'rgba(255, 255, 255, 0.08)',
-          colorText: '#ffffff',
-          colorTextBase: '#ffffff',
-          boxShadowSecondary: '0 24px 60px rgba(0, 0, 0, 0.28)'
+          colorTextBase: '#FAFAFA',
+          fontFamily: '\'Inter\', sans-serif'
         }
       }"
     >
-      <a-app>
+      <a-app class="ant-app-container">
         <navigation />
       </a-app>
     </a-config-provider>
@@ -34,20 +33,14 @@ import '@/assets/styles/global.css';
 <style>
 .app {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(103, 232, 180, 0.03), transparent 24%),
-    radial-gradient(circle at bottom right, rgba(182, 255, 227, 0.025), transparent 20%),
-    transparent;
-  color: var(--color-text-primary);
-  font-family: var(--font-family);
   position: relative;
   overflow-x: hidden;
+  background-color: var(--color-bg-base);
 }
 
-/* Ensure content sits above blobs */
-.ant-app {
+.ant-app-container {
   position: relative;
-  z-index: 1;
+  z-index: 10;
   background: transparent !important;
 }
 </style>

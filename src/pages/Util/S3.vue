@@ -5,7 +5,9 @@
         <h1 class="page-title">File Storage</h1>
       </div>
       <div class="header-actions">
-        <BaseButton class="header-icon-btn" variant="ghost" @click="refreshDirectory">Refresh</BaseButton>
+        <button class="icon-btn-secondary" @click="refreshDirectory" title="Refresh">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        </button>
       </div>
     </header>
 
@@ -214,8 +216,8 @@ onMounted(() => {
 
 <style scoped>
 .s3-container {
-  padding: clamp(14px, 3vw, var(--space-8));
-  max-width: 1200px;
+  padding: var(--space-6);
+  max-width: var(--max-width);
   margin: 0 auto;
   padding-bottom: 120px;
 }
@@ -223,18 +225,61 @@ onMounted(() => {
 .section-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: var(--space-8);
-  gap: var(--space-4);
+  align-items: center;
+  margin-bottom: var(--space-6);
+}
+
+.page-title {
+  font-size: var(--font-size-hero);
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: var(--tracking-tight);
 }
 
 .s3-grid {
   display: grid;
-  gap: 18px;
+  gap: var(--space-6);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.selected-file-preview {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  padding: var(--space-3);
+  background-color: var(--color-bg-panel);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.auth-desc {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-secondary);
+}
+
+.preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  background-color: var(--color-bg-panel);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
 }
 
 .preview-image {
-  width: 100%;
-  border-radius: 12px;
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+}
+
+@media (max-width: 640px) {
+  /* removed .section-header flex-direction column override */
 }
 </style>

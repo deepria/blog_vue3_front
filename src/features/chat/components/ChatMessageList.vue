@@ -65,17 +65,37 @@ watch(
 );
 </script>
 
+/* ... replacing css ... */
 <style scoped>
 .messages-area {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
-  color: #ffffff;
+  padding: var(--space-6) var(--space-4);
+  background-color: var(--color-bg-base);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  scroll-behavior: smooth;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-muted);
+  gap: var(--space-4);
+}
+
+.empty-icon {
+  font-size: 48px;
+  opacity: 0.5;
 }
 
 .message-wrapper {
   display: flex;
-  margin-bottom: 14px;
+  width: 100%;
 }
 
 .message-wrapper.user {
@@ -87,70 +107,93 @@ watch(
 }
 
 .message-content {
-  max-width: min(760px, 100%);
-  padding: 14px 16px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.03);
-  color: #ffffff;
+  max-width: min(800px, 90%);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-body);
+  line-height: 1.6;
+  position: relative;
+  overflow: hidden;
 }
 
 .message-wrapper.user .message-content {
-  background: rgba(66, 184, 131, 0.18);
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-bottom-right-radius: 4px;
 }
 
-.text-content,
-.empty-state,
+.message-wrapper.assistant .message-content {
+  background-color: transparent;
+  color: var(--color-text-primary);
+  padding: var(--space-2) 0;
+}
+
 .typing-indicator {
-  color: #ffffff;
-}
-
-.message-content :deep(*),
-.message-content :deep(p),
-.message-content :deep(span),
-.message-content :deep(li),
-.message-content :deep(code),
-.message-content :deep(pre),
-.message-content :deep(h1),
-.message-content :deep(h2),
-.message-content :deep(h3),
-.message-content :deep(h4),
-.message-content :deep(h5),
-.message-content :deep(h6),
-.message-content :deep(blockquote),
-.message-content :deep(strong),
-.message-content :deep(em),
-.message-content :deep(a) {
-  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
 }
 
 .typing-indicator span {
   display: inline-block;
   width: 6px;
   height: 6px;
-  margin-right: 6px;
   border-radius: 50%;
-  background: currentColor;
-  animation: bounce 1s infinite ease-in-out;
+  background-color: var(--color-text-muted);
+  animation: bounce 1.4s infinite ease-in-out both;
 }
 
-.typing-indicator span:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.typing-indicator span:nth-child(3) {
-  animation-delay: 0.3s;
-}
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
 
 @keyframes bounce {
-  0%,
-  80%,
-  100% {
-    transform: scale(0.8);
-    opacity: 0.5;
-  }
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+:deep(pre) {
+  background-color: #000 !important;
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--color-border) !important;
+  margin: var(--space-3) 0 !important;
+}
+
+:deep(code) {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9em;
+}
+
+:deep(h1),
+:deep(h2),
+:deep(h3),
+:deep(h4),
+:deep(h5),
+:deep(h6),
+:deep(p),
+:deep(span),
+:deep(div),
+:deep(li),
+:deep(strong),
+:deep(em) {
+    color: var(--color-text-primary) !important;
+}
+
+:deep(a) {
+    color: var(--color-primary) !important;
+}
+
+:deep(code),
+:deep(pre) {
+    color: var(--color-primary-strong) !important;
+}
+
+:deep(p) {
+  margin: 0 0 var(--space-2) 0;
+}
+
+:deep(p:last-child) {
+  margin-bottom: 0;
 }
 </style>

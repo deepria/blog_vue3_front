@@ -1,10 +1,5 @@
 import { ref, computed } from "vue";
-import {
-  fetchNotes,
-  loadNote,
-  saveNote as apiSaveNote,
-  deleteNote as apiDeleteNote,
-} from "../api/memoApi";
+import { memoApi } from "../api/memoApi";
 
 export function useMemo() {
   const notes = ref([]);
@@ -15,7 +10,7 @@ export function useMemo() {
   const loadNotes = async () => {
     loading.value = true;
     try {
-      notes.value = await fetchNotes();
+      notes.value = await memoApi.fetchNotes();
     } catch (e) {
       console.error("Failed to load notes", e);
       throw e;
@@ -33,7 +28,7 @@ export function useMemo() {
   const getNote = async (id) => {
     loadingPreview.value = true;
     try {
-      const data = await loadNote(id);
+      const data = await memoApi.loadNote(id);
       return data;
     } catch (e) {
       console.error("Failed to load note detail", e);
@@ -45,7 +40,7 @@ export function useMemo() {
 
   const saveNote = async (noteData) => {
     try {
-      return await apiSaveNote(noteData);
+      return await memoApi.saveNote(noteData);
     } catch (e) {
       console.error("Failed to save note", e);
       throw e;
@@ -54,7 +49,7 @@ export function useMemo() {
 
   const deleteNote = async (id) => {
     try {
-      await apiDeleteNote(id);
+      await memoApi.deleteNote(id);
       notes.value = notes.value.filter(n => n.id !== id);
     } catch (e) {
       console.error("Failed to delete note", e);

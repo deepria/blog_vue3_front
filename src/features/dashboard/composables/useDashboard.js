@@ -1,8 +1,9 @@
 import { ref } from 'vue';
-import { fetchNotes } from '@/features/memo/api/memoApi';
+import { memoApi } from '@/features/memo/api/memoApi';
 import { todoApi } from '@/features/todo/api/todoApi';
 import { storageApi } from '@/features/storage/api/storageApi';
 import { buildRecentActivities } from '@/features/dashboard/lib/activity';
+import { useClipboard } from '@/features/dashboard/composables/useClipboard';
 
 export function useDashboard() {
   const dashboardLoading = ref(true);
@@ -26,13 +27,16 @@ export function useDashboard() {
     return `${diffDay}d ago`;
   };
 
+  const { clipboardText, clipboardLoading, clipboardSaving, fetchClipboard, saveClipboard } = useClipboard();
+
   const refreshDashboard = async () => {
     dashboardLoading.value = true;
     try {
       const [rawTasks, notesRaw, s3Response] = await Promise.all([
         todoApi.fetchTodos(),
-        fetchNotes(),
+        memoApi.fetchNotes(),
         storageApi.listFiles(),
+        fetchClipboard()
       ]);
 
       const tasks = rawTasks || [];
@@ -54,7 +58,6 @@ export function useDashboard() {
       recentActivities.value = buildRecentActivities(notes, tasks);
     } catch (e) {
       console.error("Failed to load dashboard data", e);
-      throw e;
     } finally {
       dashboardLoading.value = false;
     }
@@ -65,6 +68,10 @@ export function useDashboard() {
     metrics,
     recentActivities,
     refreshDashboard,
-    formatRelativeTime
+    formatRelativeTime,
+    clipboardText,
+    clipboardLoading,
+    clipboardSaving,
+    saveClipboard
   };
 }

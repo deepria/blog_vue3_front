@@ -10,7 +10,7 @@
     </template>
 
     <div v-if="loading" class="grid-skeleton">
-      <BaseSkeleton v-for="i in 6" :key="i" height="86px" shape="rect" />
+      <BaseSkeleton v-for="i in 6" :key="i" height="64px" shape="rect" />
     </div>
 
     <div v-else-if="files.length === 0" class="empty-state">
@@ -21,20 +21,28 @@
       <BaseCard v-for="file in files" :key="file.key" class="file-card" hoverable>
         <div class="file-item-row">
           <div class="file-details">
-            <div class="file-name">
-              {{ file.display_name }}
-              <span v-if="file.has_password" class="lock-indicator">Protected</span>
+            <div class="file-name" :title="file.display_name">
+              <span class="name-text">{{ getFileName(file.display_name) }}</span>
+              <span class="name-ext">{{ getFileExt(file.display_name) }}</span>
+              <span v-if="file.has_password" class="lock-indicator" title="Protected">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </span>
             </div>
             <div class="file-actions">
               <button
                 v-if="file.isPreviewable"
-                class="icon-text-btn"
+                class="icon-btn-secondary mini-btn"
                 @click.stop="$emit('preview', file)"
+                title="Preview"
               >
-                Preview
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               </button>
-              <button class="icon-text-btn" @click.stop="$emit('download', file)">Download</button>
-              <button class="icon-text-btn danger" @click.stop="$emit('delete', file)">Delete</button>
+              <button class="icon-btn-secondary mini-btn" @click.stop="$emit('download', file)" title="Download">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              </button>
+              <button class="icon-btn-secondary mini-btn delete-btn" @click.stop="$emit('delete', file)" title="Delete">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+              </button>
             </div>
           </div>
         </div>
@@ -59,21 +67,38 @@ defineProps({
 });
 
 defineEmits(["preview", "download", "delete"]);
+
+const getFileName = (name) => {
+  const lastDot = name.lastIndexOf('.');
+  return lastDot === -1 ? name : name.slice(0, lastDot);
+};
+
+const getFileExt = (name) => {
+  const lastDot = name.lastIndexOf('.');
+  return lastDot === -1 ? '' : name.slice(lastDot);
+};
 </script>
 
 <style scoped>
 .panel-title {
   margin: 0;
+  font-size: var(--font-size-title);
+  color: var(--color-text-primary);
 }
 
 .panel-subtitle {
-  margin: 4px 0 0;
+  margin: var(--space-1) 0 0;
   color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
 }
 
 .file-grid {
   display: grid;
-  gap: 12px;
+  gap: var(--space-2);
+}
+
+.file-card :deep(.base-card-body) {
+  padding: var(--space-3) var(--space-4) !important;
 }
 
 .file-item-row {
@@ -81,32 +106,64 @@ defineEmits(["preview", "download", "delete"]);
   align-items: center;
 }
 
+.file-details {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 0;
+}
+
 .file-name {
   display: flex;
   align-items: center;
-  gap: 10px;
   font-weight: 600;
+  color: var(--color-text-primary);
+  padding-right: var(--space-3);
+  min-width: 0;
+  flex: 1;
+}
+
+.name-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.name-ext {
+  white-space: nowrap;
 }
 
 .lock-indicator {
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--color-primary);
+  margin-left: var(--space-2);
+  flex-shrink: 0;
 }
 
 .file-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 8px;
+  gap: var(--space-2);
+  flex-shrink: 0;
 }
 
-.icon-text-btn {
-  border: none;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
+.mini-btn {
+  width: 32px;
+  height: 32px;
 }
 
-.danger {
-  color: #ef4444;
+/* User wants cyan (테마에 어울리는 청록색) for delete */
+.delete-btn:hover {
+  background-color: var(--color-bg-elevated);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--color-text-muted);
 }
 </style>

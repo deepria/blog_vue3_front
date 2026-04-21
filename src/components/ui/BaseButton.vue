@@ -9,9 +9,12 @@
     :disabled="disabled || loading"
     @click="$emit('click', $event)"
   >
-    <div class="button-highlight"></div>
-    <div v-if="loading" class="spinner"></div>
-    <span :class="{ 'opacity-0': loading }">
+    <span v-if="loading" class="spinner-wrapper">
+      <svg class="spinner" viewBox="0 0 24 24">
+        <circle class="path" cx="12" cy="12" r="10" fill="none" stroke-width="3"></circle>
+      </svg>
+    </span>
+    <span class="button-content" :class="{ 'opacity-0': loading }">
       <slot></slot>
     </span>
   </button>
@@ -52,36 +55,27 @@ defineEmits(['click']);
   align-items: center;
   justify-content: center;
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  font-family: inherit;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  border-radius: 16px;
+  font-family: var(--font-family);
+  font-weight: 500;
+  letter-spacing: var(--tracking-tight);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: transform 0.22s ease, background-color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, color 0.22s ease, filter 0.22s ease;
+  transition: all 0.15s ease-in-out;
   user-select: none;
-  overflow: hidden;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  outline: none;
+  border: 1px solid transparent;
 }
 
-.button-highlight {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  opacity: 0.5;
-  z-index: 1;
+.base-button:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-bg-base), 0 0 0 4px var(--color-primary);
 }
 
-/* Base states */
 .base-button:active:not(:disabled) {
-  transform: translateY(1px) scale(0.985);
+  transform: scale(0.97);
 }
 
 .base-button.disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -90,103 +84,104 @@ defineEmits(['click']);
   width: 100%;
 }
 
+.button-content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: opacity 0.2s;
+}
+
 /* --- Sizes --- */
 .size-sm {
-  padding: var(--space-1) var(--space-3);
+  padding: 0 var(--space-3);
   font-size: var(--font-size-caption);
-  height: 32px;
+  height: 28px;
+  border-radius: var(--radius-sm);
 }
 .size-md {
-  padding: 0 16px;
+  padding: 0 var(--space-4);
   font-size: var(--font-size-body);
-  height: 42px;
+  height: 36px;
 }
 .size-lg {
-  padding: var(--space-3) var(--space-6);
+  padding: 0 var(--space-6);
   font-size: var(--font-size-title);
-  height: 48px;
+  height: 44px;
 }
 
 /* --- Variants --- */
 .variant-primary {
-  background: linear-gradient(135deg, rgba(103, 232, 180, 0.96) 0%, rgba(27, 120, 86, 0.96) 100%);
-  color: #03110b;
-  border-color: rgba(182, 255, 227, 0.3);
-  box-shadow: 0 14px 30px rgba(103, 232, 180, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.22);
-}
-.variant-primary::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: var(--surface-gloss);
-  opacity: 0.18;
+  background-color: var(--color-text-primary);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-sm);
 }
 .variant-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 16px 30px rgba(66, 184, 131, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.16);
-  filter: brightness(1.06);
+  background-color: #E4E4E7; /* Zinc 200 */
 }
 
 .variant-secondary {
-  background: rgba(255, 255, 255, 0.025);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background-color: var(--color-bg-elevated);
+  border-color: var(--color-border);
   color: var(--color-text-primary);
-  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 .variant-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.054);
-  transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.16);
+  background-color: #3F3F46; /* Zinc 700 */
+  border-color: var(--color-border-strong);
 }
 
 .variant-ghost {
-  background: rgba(255, 255, 255, 0.014);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  color: rgba(234, 255, 246, 0.86);
-  border-color: rgba(255, 255, 255, 0.08);
+  background-color: transparent;
+  color: var(--color-text-secondary);
 }
 .variant-ghost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.028);
+  background-color: var(--color-bg-panel);
   color: var(--color-text-primary);
-  border-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-1px);
 }
 
 .variant-danger {
-  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  background-color: var(--color-danger);
   color: #fff;
-  border-color: rgba(239, 68, 68, 0.36);
+  box-shadow: var(--shadow-sm);
 }
 .variant-danger:hover:not(:disabled) {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
+  filter: brightness(1.1);
 }
 
 /* --- Loading Spinner --- */
-.spinner {
+.spinner-wrapper {
   position: absolute;
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-radius: 50%;
-  border-top-color: inherit; /* Inherit color from text */
-  animation: spin 0.8s linear infinite;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.variant-primary .spinner, .variant-danger .spinner {
-  border-top-color: #fff;
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  animation: rotate 2s linear infinite;
 }
-.variant-secondary .spinner, .variant-ghost .spinner {
-  border-top-color: var(--color-primary);
-  border-color: rgba(0,0,0,0.1);
+
+.spinner .path {
+  stroke: currentColor;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
 }
 
 .opacity-0 {
   opacity: 0;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+@keyframes rotate {
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes dash {
+  0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; }
+  50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; }
+  100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
 }
 </style>

@@ -2,9 +2,9 @@
   <div class="editor-page">
     <header class="editor-header">
       <div class="left-section">
-        <BaseButton variant="ghost" @click="goBack">
-           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        </BaseButton>
+        <button class="icon-btn-secondary" @click="goBack" title="Back">
+           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </button>
         <input
           v-model="title"
           placeholder="Untitled Memo"
@@ -13,9 +13,10 @@
       </div>
       <div class="right-section">
         <span v-if="saving" class="save-indicator">Saving...</span>
-        <BaseButton variant="primary" :loading="saving" @click="save">
-           Save
-        </BaseButton>
+        <button class="icon-btn-primary" :class="{ 'loading': saving }" @click="save" title="Save" :disabled="saving">
+           <svg v-if="!saving" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+           <span v-else class="spinner"></span>
+        </button>
       </div>
     </header>
 
@@ -33,7 +34,7 @@ import Editor from '@toast-ui/editor';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import '@toast-ui/editor/dist/theme/toastui-editor-dark.css';
 
-import BaseButton from "@/shared/ui/BaseButton.vue";
+
 import { useMemo } from "@/features/memo/composables/useMemo";
 
 const props = defineProps({
