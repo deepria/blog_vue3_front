@@ -16,7 +16,7 @@
       @dragover.prevent="$emit('drag-state', true)"
       @dragleave.prevent="$emit('drag-state', false)"
       @drop.prevent="$emit('drop', $event)"
-      @click="$emit('pick')"
+      @click="openFilePicker"
     >
       <div class="upload-content">
         <div class="upload-icon">
@@ -27,49 +27,43 @@
         <p class="upload-title"><strong>Click to upload</strong> or drag and drop</p>
         <p class="sub-text">Supports all file types and optional protection keys</p>
       </div>
-      <input ref="inputRef" type="file" style="display:none" @change="$emit('change', $event)" />
+      <input
+        ref="inputRef"
+        type="file"
+        style="display:none"
+        @click.stop
+        @change="handleChange"
+      />
     </div>
 
-    <div v-if="uploadTask" class="upload-status-card">
-      <div class="upload-info">
-        <span>{{ uploadTask.name }}</span>
-        <span>{{ uploadTask.progress }}%</span>
-      </div>
-      <BaseProgressBar :value="uploadTask.progress" />
-    </div>
   </BaseCard>
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import BaseCard from "@/shared/ui/BaseCard.vue";
-import BaseProgressBar from "@/shared/ui/BaseProgressBar.vue";
 
-const props = defineProps({
+defineProps({
   isDragging: {
     type: Boolean,
     default: false,
   },
-  uploadTask: {
-    type: Object,
-    default: null,
-  },
-  triggerKey: {
-    type: Number,
-    default: 0,
-  },
 });
 
-defineEmits(["pick", "change", "drop", "drag-state"]);
+const emit = defineEmits(["change", "drop", "drag-state"]);
 
 const inputRef = ref(null);
 
-watch(
-  () => props.triggerKey,
-  () => {
-    inputRef.value?.click();
-  },
-);
+function openFilePicker() {
+  inputRef.value?.click();
+}
+
+function handleChange(event) {
+  emit("change", event);
+  if (event?.target) {
+    event.target.value = "";
+  }
+}
 </script>
 
 <style scoped>
@@ -108,13 +102,4 @@ watch(
   border-color: var(--color-primary);
 }
 
-.upload-status-card {
-  margin-top: 16px;
-}
-
-.upload-info {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
 </style>

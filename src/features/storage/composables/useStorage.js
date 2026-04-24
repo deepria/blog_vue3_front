@@ -33,13 +33,20 @@ export function useStorage() {
       authKey,
     });
 
-    await fetch(upload.upload_url, {
+    const response = await fetch(upload.upload_url, {
       method: "PUT",
       headers: {
         "Content-Type": file.type || "application/octet-stream",
       },
       body: file,
     });
+
+    if (!response.ok) {
+      throw {
+        userMessage: `Upload failed (${response.status})`,
+        status: response.status,
+      };
+    }
 
     uploadProgress.value = 100;
     if (onProgress) onProgress(100);

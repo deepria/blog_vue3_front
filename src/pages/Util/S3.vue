@@ -14,9 +14,6 @@
     <div class="s3-grid page-content">
       <StorageUploadPanel
         :is-dragging="isDragging"
-        :upload-task="uploadTask"
-        :trigger-key="uploadTrigger"
-        @pick="triggerUpload"
         @change="handleFileChange"
         @drop="handleDrop"
         @drag-state="isDragging = $event"
@@ -47,9 +44,16 @@
         <div class="selected-file-preview" v-if="selectedFile">
           Selected: {{ selectedFile.name }}
         </div>
+        <div v-if="uploadTask" class="upload-status-card">
+          <div class="upload-info">
+            <span>{{ uploadTask.name }}</span>
+            <span>{{ uploadTask.progress }}%</span>
+          </div>
+          <BaseProgressBar :value="uploadTask.progress" />
+        </div>
       </div>
       <template #footer>
-        <BaseButton variant="secondary" @click="cancelUpload">Cancel</BaseButton>
+        <BaseButton variant="secondary" @click="cancelUpload" :disabled="isUploading">Cancel</BaseButton>
         <BaseButton variant="primary" @click="upload" :loading="isUploading">Start Upload</BaseButton>
       </template>
     </BaseModal>
@@ -80,6 +84,7 @@ import StorageUploadPanel from "@/features/storage/components/StorageUploadPanel
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import BaseInput from "@/shared/ui/BaseInput.vue";
 import BaseModal from "@/shared/ui/BaseModal.vue";
+import BaseProgressBar from "@/shared/ui/BaseProgressBar.vue";
 
 const { modal } = App.useApp();
 const { files, loading, loadFiles, uploadFile, getDownloadUrl, getDeleteUrl } = useStorage();
@@ -91,7 +96,6 @@ const authKey = ref("");
 const authKeyInput = ref("");
 const isUploading = ref(false);
 const uploadTask = ref(null);
-const uploadTrigger = ref(0);
 const showUploadModal = ref(false);
 const showAuthModal = ref(false);
 const previewVisible = ref(false);
@@ -102,10 +106,6 @@ let resolveAuthPromise = null;
 const refreshDirectory = async () => {
   await loadFiles();
   message.success("Refreshed");
-};
-
-const triggerUpload = () => {
-  uploadTrigger.value += 1;
 };
 
 const handleFileChange = (event) => {
@@ -255,6 +255,19 @@ onMounted(() => {
   background-color: var(--color-bg-panel);
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
+}
+
+.upload-status-card {
+  margin-top: var(--space-2);
+}
+
+.upload-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 12px;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
 }
 
 .auth-desc {
