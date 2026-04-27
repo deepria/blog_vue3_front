@@ -85,10 +85,11 @@ import BaseButton from "@/shared/ui/BaseButton.vue";
 import BaseInput from "@/shared/ui/BaseInput.vue";
 import BaseModal from "@/shared/ui/BaseModal.vue";
 import BaseProgressBar from "@/shared/ui/BaseProgressBar.vue";
-import { isWebView } from "@/shared/utils/platform";
+import { useDownload } from "@/shared/composables/useDownload";
 
 const { modal } = App.useApp();
 const { files, loading, loadFiles, uploadFile, getDownloadUrl, getDeleteUrl } = useStorage();
+const { downloadFromUrl } = useDownload();
 
 const isDragging = ref(false);
 const selectedFile = ref(null);
@@ -173,16 +174,6 @@ function closeAuthPopup() {
   resolveAuthPromise?.(null);
 }
 
-function openDownloadUrl(url) {
-  const link = document.createElement("a");
-  link.href = url;
-  link.rel = "noopener noreferrer";
-  link.target = isWebView() ? "_self" : "_blank";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
 async function requestAction(file, action) {
   let providedAuthKey = null;
   if (file.has_password) {
@@ -199,7 +190,7 @@ async function requestAction(file, action) {
 
   if (action === "download") {
     const data = await getDownloadUrl(file.key, providedAuthKey);
-    openDownloadUrl(data.url);
+    await downloadFromUrl(data.url, file.display_name);
     return;
   }
 

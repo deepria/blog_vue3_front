@@ -1,59 +1,98 @@
-import { isWebView } from '../utils/platform';
-import apiClient from '@/services/api';
+i정mport { isWebView } from "@/shared/utils/platform";
 
-/**
- * A composable to handle file downloads seamlessly across Web and WebView (Android/iOS)
- */
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      resolve(result.split(",")[1] || "");
+    };
+    reader.onerror = () => reject(reader.error || new Error("Failed to read file blob"));
+    reader.readAsDataURL(blob);
+  });
+}
+
+function triggerBrowserDownload(url, filename) {
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename || "";
+  link.rel = "noopener noreferrer";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+async function handoffToNative(blob, filename) {
+  const base64Data = await blobToBase64(blob);
+
+  if (window.Android?.downloadBlob) {
+    window.Android.downloadBlob(base64Data, filename);
+    return true;
+  }
+
+  if (window.AndroidBridge?.downloadBlob) {
+    window.AndroidBridge.downloadBlob(base64Data, filename);
+    return true;
+  }
+
+  if (window.webkit?.messageHandlers?.downloadBlob?.postMessage) {
+    window.webkit.messageHandlers.downloadBlob.postMessage({
+      base64: base64Data,
+      filename,
+      mimeType: blob.type || "application/octet-stream",
+    });
+    return true;
+  }
+
+  if (window.ReactNativeWebView?.postMessage) {
+    window.ReactNativeWebView.postMessage(
+      JSON.stringify({
+        type: "downloadBlob",
+        base64: base64Data,
+        filename,
+        mimeType: blob.type || "application/octet-stream",
+      }),
+    );
+    return true;
+  }
+
+  return false;
+}
+
 export function useDownload() {
-  
-  /**
-   * Downloads a file from a given URL or handles it via S3 API
-   * 
-   * @param {string} filename - The stored filename
-   * @param {string} originalFileName - The human-readable file name
-   */
-  const downloadFile = async (filename, originalFileName) => {
-    try {
-      // 1. Get the pre-signed URL (this part is specific to your backend, keep it here or abstract it further if needed)
-      const { data: downloadUrl } = await apiClient.get('/api/s3/download-url', {
-        params: {
-          filename: filename,
-          originalName: originalFileName
-        },
-      });
-
-      // 2. Platform specific download handling
-      if (isWebView() && navigator.userAgent.includes("Android") && window.Android?.isApp?.()) {
-        // --- Android WebView Logic ---
-        const response = await apiClient.get(downloadUrl, {
-          responseType: "blob",
-        });
-
-        const blob = new Blob([response.data]);
-        const reader = new FileReader();
-        reader.onload = function () {
-          // Send base64 to the native bridge
-          const base64Data = reader.result.split(",")[1];
-          window.Android.downloadBlob(base64Data, originalFileName);
-        };
-        reader.readAsDataURL(blob);
-        
-      } else {
-        // --- Web Browser Logic ---
-        const link = document.createElement("a");
-        link.href = downloadUrl;
-        link.target = "_blank";
-        // The backend should set Content-Disposition for this to work natively
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-      return true;
-    } catch (error) {
-      console.error("Download failed:", error);
-      throw error;
+  async function downloadFromUrl(url, filename) {
+    if (!url) {
+      throw { userMessage: "Download URL is missing" };
     }
-  };
 
-  return { downloadFile };
+    if (!isWebView()) {
+      triggerBrowserDownload(url, filename);
+      return true;
+    }
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw {
+        userMessage: `Download failed (${response.status})`,
+        status: response.status,
+      };
+    }
+
+    const blob = await response.blob();
+    const handledByNative = await handoffToNative(blob, filename);
+
+    if (handledByNative) {
+      return true;
+    }
+
+    const objectUrl = URL.createObjectURL(blob);
+    try {
+      triggerBrowserDownload(objectUrl, filename);
+    } finally {
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    }
+    return true;
+  }
+
+  return { downloadFromUrl };
 }
