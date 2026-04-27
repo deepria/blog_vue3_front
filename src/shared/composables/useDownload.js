@@ -1,4 +1,4 @@
-i정mport { isWebView } from "@/shared/utils/platform";
+import { isWebView } from "@/shared/utils/platform";
 
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
