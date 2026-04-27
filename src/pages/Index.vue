@@ -187,7 +187,6 @@
 import { computed, onMounted } from "vue";
 import { message } from "ant-design-vue";
 import BaseCard from "@/shared/ui/BaseCard.vue";
-import BaseInput from "@/shared/ui/BaseInput.vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import { useDashboard } from "@/features/dashboard/composables/useDashboard";
 
