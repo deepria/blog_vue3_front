@@ -1,5 +1,6 @@
 <template>
   <LegacyBaseButton
+    v-bind="$attrs"
     :variant="variant"
     :size="size"
     :loading="loading"
@@ -12,6 +13,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false,
+});
+
 import LegacyBaseButton from "@/components/ui/BaseButton.vue";
 
 defineProps({

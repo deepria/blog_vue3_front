@@ -44,7 +44,7 @@ defineProps({
   --card-shadow: var(--shadow-sm);
   
   background-color: var(--card-bg);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   border: var(--card-border);
   box-shadow: var(--card-shadow);
   display: flex;
@@ -56,8 +56,8 @@ defineProps({
 
 .base-card.glass {
   --card-bg: var(--glass-bg-elevated);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border: var(--glass-border);
 }
 
@@ -67,7 +67,7 @@ defineProps({
   inset: 0;
   pointer-events: none;
   background: var(--surface-gloss);
-  opacity: 0.8;
+  opacity: 0.38;
   z-index: 0;
 }
 
@@ -79,7 +79,7 @@ defineProps({
 
 .base-card.glass.hoverable:hover {
   --card-bg: var(--glass-bg-hover);
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--shadow-lg);
 }
 
 .base-card.hoverable:hover::before {

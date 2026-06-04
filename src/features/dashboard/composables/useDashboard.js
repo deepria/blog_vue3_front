@@ -7,6 +7,8 @@ import { useClipboard } from '@/features/dashboard/composables/useClipboard';
 
 export function useDashboard() {
   const dashboardLoading = ref(true);
+  const dashboardError = ref("");
+  const dashboardWarnings = ref([]);
   const metrics = ref({
     notesTotal: 0,
     tasksActive: 0,
@@ -31,40 +33,56 @@ export function useDashboard() {
 
   const refreshDashboard = async () => {
     dashboardLoading.value = true;
-    try {
-      const [rawTasks, notesRaw, s3Response] = await Promise.all([
-        todoApi.fetchTodos(),
-        memoApi.fetchNotes(),
-        storageApi.listFiles(),
-        fetchClipboard()
-      ]);
+    dashboardError.value = "";
+    dashboardWarnings.value = [];
 
-      const tasks = rawTasks || [];
-      const notes = notesRaw || [];
-      const s3Files = s3Response || [];
+    const [tasksResult, notesResult, filesResult, clipboardResult] = await Promise.allSettled([
+      todoApi.fetchTodos(),
+      memoApi.fetchNotes(),
+      storageApi.listFiles(),
+      fetchClipboard()
+    ]);
 
-      const completedTasks = tasks.filter((task) => task?.completed).length;
-      const totalTasks = tasks.length;
-      const taskCompletionRate =
-        totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+    const failedSections = [];
+    const getValue = (result, label, fallback) => {
+      if (result.status === "fulfilled") return result.value || fallback;
+      failedSections.push(label);
+      console.error(`Failed to load dashboard ${label}`, result.reason);
+      return fallback;
+    };
 
-      metrics.value = {
-        notesTotal: notes.length,
-        tasksActive: totalTasks - completedTasks,
-        tasksCompletionRate: taskCompletionRate,
-        filesTotal: s3Files.length,
-      };
-
-      recentActivities.value = buildRecentActivities(notes, tasks);
-    } catch (e) {
-      console.error("Failed to load dashboard data", e);
-    } finally {
-      dashboardLoading.value = false;
+    const tasks = getValue(tasksResult, "tasks", []);
+    const notes = getValue(notesResult, "memos", []);
+    const s3Files = getValue(filesResult, "files", []);
+    if (clipboardResult.status === "rejected") {
+      failedSections.push("clipboard");
+      console.error("Failed to load dashboard clipboard", clipboardResult.reason);
     }
+
+    const completedTasks = tasks.filter((task) => task?.completed).length;
+    const totalTasks = tasks.length;
+    const taskCompletionRate =
+      totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+
+    metrics.value = {
+      notesTotal: notes.length,
+      tasksActive: totalTasks - completedTasks,
+      tasksCompletionRate: taskCompletionRate,
+      filesTotal: s3Files.length,
+    };
+
+    recentActivities.value = buildRecentActivities(notes, tasks);
+    dashboardWarnings.value = failedSections;
+    dashboardError.value = failedSections.length
+      ? `${failedSections.join(", ")} data could not be loaded.`
+      : "";
+    dashboardLoading.value = false;
   };
 
   return {
     dashboardLoading,
+    dashboardError,
+    dashboardWarnings,
     metrics,
     recentActivities,
     refreshDashboard,

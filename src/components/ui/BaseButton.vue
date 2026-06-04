@@ -1,5 +1,6 @@
 <template>
   <button
+    v-bind="$attrs"
     :class="[
       'base-button',
       `variant-${variant}`,
@@ -21,6 +22,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false,
+});
+
 defineProps({
   variant: {
     type: String,
@@ -57,7 +62,7 @@ defineEmits(['click']);
   position: relative;
   font-family: var(--font-family);
   font-weight: 500;
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: 0;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.15s ease-in-out;

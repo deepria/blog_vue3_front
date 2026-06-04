@@ -26,7 +26,7 @@ import "@/assets/styles/layout.css";
 }
 
 .content-area {
-  padding-left: 240px; /* PC Sidebar width */
+  padding-left: var(--nav-width);
   min-height: 100vh;
   transition: padding-left 0.3s ease;
   padding-right: 20px;
@@ -45,7 +45,7 @@ import "@/assets/styles/layout.css";
   .content-area {
     padding-left: 0;
     padding-right: 0;
-    padding-bottom: calc(92px + var(--safe-bottom)); /* Space for mobile nav */
+    padding-bottom: calc(var(--mobile-nav-height) + 28px + var(--safe-bottom));
   }
   
   .nav-pc {

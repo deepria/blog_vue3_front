@@ -11,20 +11,20 @@
   --color-bg-base: #09090B;
   --color-bg-surface: #18181B;
   --color-bg-elevated: #27272A;
-  --color-bg-panel: rgba(24, 24, 27, 0.6);
-  --color-bg-panel-strong: rgba(24, 24, 27, 0.8);
+  --color-bg-panel: rgba(24, 24, 27, 0.82);
+  --color-bg-panel-strong: rgba(24, 24, 27, 0.92);
   --color-bg-panel-soft: rgba(255, 255, 255, 0.03);
   --bg-overlay: rgba(0, 0, 0, 0.8);
 
   /* Transparent Surfaces for Glass */
-  --glass-bg: rgba(24, 24, 27, 0.65);
-  --glass-bg-elevated: rgba(39, 39, 42, 0.65);
-  --glass-bg-hover: rgba(63, 63, 70, 0.4);
+  --glass-bg: rgba(24, 24, 27, 0.88);
+  --glass-bg-elevated: rgba(24, 24, 27, 0.92);
+  --glass-bg-hover: rgba(39, 39, 42, 0.94);
 
   /* Text - High contrast */
   --color-text-primary: #FAFAFA;
-  --color-text-secondary: #A1A1AA;
-  --color-text-muted: #71717A;
+  --color-text-secondary: #D4D4D8;
+  --color-text-muted: #A1A1AA;
   --color-text-disabled: #52525B;
   --text-inverse: #09090B;
 

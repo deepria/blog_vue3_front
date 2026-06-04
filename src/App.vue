@@ -1,7 +1,5 @@
 <template>
   <div class="app">
-    <SketchWidget /> <!-- Background animated layer -->
-
     <a-config-provider 
       :theme="{ 
         algorithm: theme.darkAlgorithm,
@@ -25,7 +23,6 @@
 
 <script setup>
 import Navigation from "@/components/Navigation.vue";
-import SketchWidget from "@/components/SketchWidget.vue";
 import { theme } from "ant-design-vue";
 import '@/assets/styles/global.css';
 </script>

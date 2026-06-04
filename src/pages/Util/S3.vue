@@ -20,7 +20,7 @@
       />
 
       <StorageFileList
-        :files="files"
+        :files="previewableFiles"
         :loading="loading"
         @preview="requestAction($event, 'preview')"
         @download="requestAction($event, 'download')"
@@ -67,9 +67,35 @@
       </template>
     </BaseModal>
 
-    <BaseModal v-model="previewVisible" title="Preview">
-      <div class="preview-container">
-        <img v-if="previewUrl" :src="previewUrl" class="preview-image" />
+    <teleport to="body">
+      <transition name="image-preview-fade">
+        <div
+          v-if="imagePreview.visible"
+          class="image-preview-backdrop"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="`Preview ${imagePreview.name}`"
+          @click="closeImagePreview"
+        >
+          <button class="image-preview-close" type="button" aria-label="Close preview" @click.stop="closeImagePreview">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <img :src="imagePreview.url" :alt="imagePreview.name" class="image-preview-media" @click.stop />
+        </div>
+      </transition>
+    </teleport>
+
+    <BaseModal v-model="textPreview.visible" :title="textPreview.name || 'Preview'">
+      <div class="text-preview-container">
+        <div v-if="textPreview.loading" class="text-preview-loading">Loading preview...</div>
+        <MarkdownViewer
+          v-else-if="textPreview.type === 'markdown'"
+          :content="textPreview.content"
+          custom-class="storage-markdown-preview"
+        />
+        <pre v-else class="text-preview-body">{{ textPreview.content }}</pre>
       </div>
     </BaseModal>
   </div>
@@ -81,6 +107,7 @@ import { onMounted, ref } from "vue";
 import { useStorage } from "@/features/storage/composables/useStorage";
 import StorageFileList from "@/features/storage/components/StorageFileList.vue";
 import StorageUploadPanel from "@/features/storage/components/StorageUploadPanel.vue";
+import MarkdownViewer from "@/components/ui/MarkdownViewer.vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import BaseInput from "@/shared/ui/BaseInput.vue";
 import BaseModal from "@/shared/ui/BaseModal.vue";
@@ -88,7 +115,7 @@ import BaseProgressBar from "@/shared/ui/BaseProgressBar.vue";
 import { useDownload } from "@/shared/composables/useDownload";
 
 const { modal } = App.useApp();
-const { files, loading, loadFiles, uploadFile, getDownloadUrl, getDeleteUrl } = useStorage();
+const { loading, previewableFiles, loadFiles, uploadFile, getDownloadUrl, getDeleteUrl } = useStorage();
 const { downloadFromUrl } = useDownload();
 
 const isDragging = ref(false);
@@ -100,8 +127,18 @@ const isUploading = ref(false);
 const uploadTask = ref(null);
 const showUploadModal = ref(false);
 const showAuthModal = ref(false);
-const previewVisible = ref(false);
-const previewUrl = ref("");
+const imagePreview = ref({
+  visible: false,
+  url: "",
+  name: "",
+});
+const textPreview = ref({
+  visible: false,
+  loading: false,
+  name: "",
+  type: "text",
+  content: "",
+});
 const pendingAction = ref(null);
 let resolveAuthPromise = null;
 
@@ -175,6 +212,11 @@ function closeAuthPopup() {
 }
 
 async function requestAction(file, action) {
+  if (action === "preview" && getPreviewType(file) === "unsupported") {
+    message.info("미리보기 기능을 사용할 수 없는 파일입니다.");
+    return;
+  }
+
   let providedAuthKey = null;
   if (file.has_password) {
     providedAuthKey = await waitForAuthConfirmation();
@@ -183,8 +225,7 @@ async function requestAction(file, action) {
 
   if (action === "preview") {
     const data = await getDownloadUrl(file.key, providedAuthKey);
-    previewUrl.value = data.url;
-    previewVisible.value = true;
+    await openPreview(file, data.url);
     return;
   }
 
@@ -209,6 +250,64 @@ async function requestAction(file, action) {
       message.success("Deleted");
     },
   });
+}
+
+async function openPreview(file, url) {
+  const previewType = getPreviewType(file);
+
+  if (previewType === "image") {
+    imagePreview.value = {
+      visible: true,
+      url,
+      name: file.display_name,
+    };
+    return;
+  }
+
+  textPreview.value = {
+    visible: true,
+    loading: true,
+    name: file.display_name,
+    type: previewType,
+    content: "",
+  };
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Preview failed (${response.status})`);
+    const content = await response.text();
+    textPreview.value = {
+      visible: true,
+      loading: false,
+      name: file.display_name,
+      type: previewType,
+      content,
+    };
+  } catch (error) {
+    textPreview.value.visible = false;
+    message.error(error?.message || "Preview failed");
+  }
+}
+
+function closeImagePreview() {
+  imagePreview.value = {
+    visible: false,
+    url: "",
+    name: "",
+  };
+}
+
+function getPreviewType(file) {
+  if (file.previewType) return file.previewType;
+  const name = file.display_name?.toLowerCase() || "";
+  if ([".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif"].some((ext) => name.endsWith(ext))) {
+    return "image";
+  }
+  if (name.endsWith(".md") || name.endsWith(".markdown")) return "markdown";
+  if ([".txt", ".log", ".csv", ".json", ".xml", ".yaml", ".yml"].some((ext) => name.endsWith(ext))) {
+    return "text";
+  }
+  return "unsupported";
 }
 
 onMounted(() => {
@@ -277,24 +376,111 @@ onMounted(() => {
   color: var(--color-text-secondary);
 }
 
-.preview-container {
+@media (max-width: 640px) {
+  /* removed .section-header flex-direction column override */
+}
+</style>
+
+<style>
+.image-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 200px;
-  background-color: var(--color-bg-panel);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.82);
+  padding: 56px 20px 28px;
 }
 
-.preview-image {
-  max-width: 100%;
-  max-height: 70vh;
-  border-radius: var(--radius-md);
+.image-preview-media {
+  display: block;
+  max-width: min(100%, 1280px);
+  max-height: calc(100dvh - 96px);
   object-fit: contain;
 }
 
+.image-preview-close {
+  position: fixed;
+  top: calc(16px + var(--safe-top));
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-full);
+  background: rgba(9, 9, 11, 0.72);
+  color: var(--color-text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.image-preview-close:hover {
+  background: rgba(24, 24, 27, 0.92);
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
+.image-preview-fade-enter-active,
+.image-preview-fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.image-preview-fade-enter-from,
+.image-preview-fade-leave-to {
+  opacity: 0;
+}
+
+.text-preview-container {
+  min-height: 220px;
+  max-height: min(68vh, 760px);
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-base);
+}
+
+.text-preview-loading {
+  padding: var(--space-6);
+  color: var(--color-text-secondary);
+}
+
+.text-preview-body {
+  margin: 0;
+  padding: var(--space-4);
+  color: var(--color-text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.storage-markdown-preview {
+  padding: var(--space-4);
+  color: var(--color-text-primary);
+}
+
+.storage-markdown-preview p,
+.storage-markdown-preview li {
+  color: var(--color-text-secondary);
+}
+
+.storage-markdown-preview pre {
+  padding: var(--space-3);
+  overflow: auto;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+}
+
 @media (max-width: 640px) {
-  /* removed .section-header flex-direction column override */
+  .image-preview-backdrop {
+    padding: 56px 12px 24px;
+  }
+
+  .image-preview-close {
+    right: 12px;
+  }
 }
 </style>

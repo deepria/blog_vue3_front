@@ -9,7 +9,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-family: var(--font-family);
-    letter-spacing: var(--tracking-tight);
+    letter-spacing: 0;
 }
 
 #app {
@@ -20,7 +20,7 @@ body {
 h1, h2, h3, h4, h5, h6 {
     color: var(--color-text-primary);
     font-weight: 700;
-    letter-spacing: -0.025em;
+    letter-spacing: var(--tracking-tight);
     margin-bottom: var(--space-4);
 }
 

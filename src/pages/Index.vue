@@ -18,27 +18,27 @@
           <div class="quick-task-head">
             <p class="eyebrow">Quick Clipboard</p>
             <div class="clipboard-actions flex items-center">
-              <BaseButton size="sm" variant="ghost" :loading="clipboardSaving" :disabled="!clipboardText" @click="handleSaveClipboard" title="Save Clipboard">
+              <BaseButton size="sm" variant="ghost" :loading="clipboardSaving" :disabled="!clipboardText" @click="handleSaveClipboard" title="Save Clipboard" aria-label="Save clipboard">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                   <polyline points="17 21 17 13 7 13 7 21"></polyline>
                   <polyline points="7 3 7 8 15 8"></polyline>
                 </svg>
               </BaseButton>
-              <BaseButton size="sm" variant="ghost" :loading="clipboardLoading" @click="fetchClipboard" title="Refresh Clipboard">
+              <BaseButton size="sm" variant="ghost" :loading="clipboardLoading" @click="fetchClipboard" title="Refresh Clipboard" aria-label="Refresh clipboard">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="23 4 23 10 17 10"></polyline>
                   <polyline points="1 20 1 14 7 14"></polyline>
                   <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                 </svg>
               </BaseButton>
-              <BaseButton size="sm" variant="ghost" :disabled="!clipboardText" @click="handleClearClipboard" title="Clear Clipboard">
+              <BaseButton size="sm" variant="ghost" :disabled="!clipboardText" @click="handleClearClipboard" title="Clear Clipboard" aria-label="Clear clipboard">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
               </BaseButton>
-              <BaseButton size="sm" variant="ghost" @click="handleCopyClipboard" title="Copy to Clipboard">
+              <BaseButton size="sm" variant="ghost" @click="handleCopyClipboard" title="Copy to Clipboard" aria-label="Copy clipboard text">
                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               </BaseButton>
             </div>
@@ -50,6 +50,16 @@
           ></textarea>
         </BaseCard>
       </section>
+
+      <BaseCard v-if="dashboardError" class="dashboard-alert dashboard-card" glass>
+        <div class="alert-copy">
+          <strong>Some workspace data is unavailable.</strong>
+          <span>{{ dashboardError }} Check the local API connection, then try again.</span>
+        </div>
+        <BaseButton size="sm" variant="secondary" :loading="dashboardLoading" @click="refreshDashboard">
+          Retry
+        </BaseButton>
+      </BaseCard>
 
       <section class="kpi-row">
         <BaseCard class="stat-card dashboard-card dashboard-glass" glass hoverable interactive
@@ -160,7 +170,10 @@
                     glass>
             <div class="activity-item">
               <div class="dot"></div>
-              <div class="activity-text">No recent updates yet.</div>
+              <div class="activity-text">
+                <strong>No recent updates yet.</strong>
+                <span class="activity-hint">Start with a memo, task, or file upload.</span>
+              </div>
             </div>
           </BaseCard>
           <BaseCard
@@ -192,6 +205,7 @@ import { useDashboard } from "@/features/dashboard/composables/useDashboard";
 
 const {
   dashboardLoading,
+  dashboardError,
   metrics,
   recentActivities,
   refreshDashboard,
@@ -270,11 +284,47 @@ onMounted(() => {
   gap: var(--space-6);
 }
 
+.dashboard-card {
+  background-color: var(--glass-bg-elevated);
+}
+
+.dashboard-card--elevated {
+  box-shadow: var(--shadow-lg);
+}
+
 .hero-cluster {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
   gap: var(--space-6);
   align-items: stretch;
+}
+
+.dashboard-alert {
+  border-color: rgba(251, 191, 36, 0.42);
+}
+
+.dashboard-alert :deep(.base-card-body) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.alert-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.alert-copy strong {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body);
+}
+
+.alert-copy span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  line-height: 1.5;
 }
 
 .hero-copy {
@@ -496,6 +546,18 @@ onMounted(() => {
   color: var(--color-text-primary);
 }
 
+.activity-text strong {
+  display: block;
+  font-weight: 600;
+}
+
+.activity-hint {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  margin-top: var(--space-1);
+}
+
 .activity-time {
   display: block;
   font-size: var(--font-size-caption);
@@ -548,6 +610,10 @@ onMounted(() => {
   .quick-task-head {
     flex-direction: row !important;
     align-items: center !important;
+  }
+  .dashboard-alert :deep(.base-card-body) {
+    align-items: flex-start;
+    flex-direction: column;
   }
   .kpi-row {
     grid-template-columns: repeat(2, 1fr);
