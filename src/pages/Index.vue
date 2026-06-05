@@ -5,7 +5,7 @@
         <BaseCard class="hero-card dashboard-card dashboard-glass dashboard-card--elevated" glass hoverable>
           <div class="hero-copy">
             <p class="eyebrow">Today Brief</p>
-            <h1 class="header-title">Welcome Back, deepria</h1>
+            <h1 class="header-title">Welcome Back, {{ accountName }}</h1>
             <p class="header-subtitle">{{ today }}</p>
           </div>
           <div class="hero-meta">
@@ -202,6 +202,9 @@ import { message } from "ant-design-vue";
 import BaseCard from "@/shared/ui/BaseCard.vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import { useDashboard } from "@/features/dashboard/composables/useDashboard";
+import { useAppStore } from "@/store/app";
+
+const app = useAppStore();
 
 const {
   dashboardLoading,
@@ -225,6 +228,11 @@ const today = computed(() => {
   const days = ["일", "월", "화", "수", "목", "금", "토"];
   const day = days[date.getDay()];
   return `${yyyy}.${mm}.${dd}(${day})`;
+});
+
+const accountName = computed(() => {
+  const email = app.user?.email || "";
+  return email.split("@")[0] || app.user?.name || "there";
 });
 
 const handleSaveClipboard = async () => {
