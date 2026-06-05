@@ -179,6 +179,9 @@ const upload = async () => {
       file: selectedFile.value,
       displayName: customFileName.value.trim() || selectedFile.value.name,
       authKey: authKey.value.trim(),
+      onProgress: (progress) => {
+        uploadTask.value = { name: selectedFile.value.name, progress };
+      },
     });
     uploadTask.value = { name: selectedFile.value.name, progress: 100 };
     message.success("Upload complete");
