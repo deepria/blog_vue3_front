@@ -17,6 +17,14 @@ export const authApi = {
     return `${apiClient.defaults.baseURL || ""}/api/auth/${provider}/login?returnTo=${encodeURIComponent(returnTo)}`;
   },
 
+  mobileLoginUrl(provider) {
+    return `${apiClient.defaults.baseURL || ""}/api/auth/${provider}/mobile-login`;
+  },
+
+  async completeMobileLogin(code) {
+    return unwrapData(await apiClient.post("/api/auth/mobile/complete", { code }));
+  },
+
   connectUrl(provider, returnTo = window.location.href) {
     return `${apiClient.defaults.baseURL || ""}/api/auth/${provider}/connect?returnTo=${encodeURIComponent(returnTo)}`;
   },
