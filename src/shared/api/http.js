@@ -9,11 +9,30 @@ export const apiClient = axios.create({
     "Content-Type": "application/json",
   },
   timeout: 30000,
+  withCredentials: true,
 });
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(normalizeHttpError(error)),
+  async (error) => {
+    const originalRequest = error.config;
+    if (
+      error?.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes("/api/auth/refresh") &&
+      !originalRequest.url?.includes("/api/auth/logout")
+    ) {
+      originalRequest._retry = true;
+      try {
+        await apiClient.post("/api/auth/refresh");
+        return apiClient(originalRequest);
+      } catch (_) {
+        // Fall through to the normalized original error.
+      }
+    }
+    return Promise.reject(normalizeHttpError(error));
+  },
 );
 
 export function unwrapData(response) {

@@ -19,7 +19,10 @@
       </nav>
       
       <div class="footer-area">
-        <!-- Future Settings or User Profile could go here -->
+        <div v-if="app.user" class="user-area">
+          <span class="user-name">{{ app.user.name }}</span>
+          <a-button size="small" type="text" @click="logout">Logout</a-button>
+        </div>
       </div>
     </div>
   </div>
@@ -27,6 +30,16 @@
 
 <script setup>
 import { navigationItems } from "@/shared/navigation/items";
+import { useRouter } from "vue-router";
+import { useAppStore } from "@/store/app";
+
+const router = useRouter();
+const app = useAppStore();
+
+async function logout() {
+  await app.logout();
+  router.push({ name: "Login" });
+}
 </script>
 
 <style scoped>
@@ -108,5 +121,18 @@ import { navigationItems } from "@/shared/navigation/items";
 
 .footer-area {
   padding: var(--space-4);
+}
+
+.user-area {
+  display: grid;
+  gap: 8px;
+}
+
+.user-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
 </style>

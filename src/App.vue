@@ -15,7 +15,8 @@
       }"
     >
       <a-app class="ant-app-container">
-        <navigation />
+        <navigation v-if="!route.meta.public" />
+        <router-view v-else />
       </a-app>
     </a-config-provider>
   </div>
@@ -24,7 +25,10 @@
 <script setup>
 import Navigation from "@/components/Navigation.vue";
 import { theme } from "ant-design-vue";
+import { useRoute } from "vue-router";
 import '@/assets/styles/global.css';
+
+const route = useRoute();
 </script>
 
 <style>

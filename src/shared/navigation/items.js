@@ -4,6 +4,7 @@ import {
   CheckSquareOutlined,
   CloudServerOutlined,
   MessageOutlined,
+  UserOutlined,
 } from "@ant-design/icons-vue";
 
 export const navigationItems = [
@@ -12,4 +13,5 @@ export const navigationItems = [
   { to: "/todo", label: "Tasks", icon: CheckSquareOutlined },
   { to: "/s3", label: "Storage", icon: CloudServerOutlined },
   { to: "/chat", label: "Chat", icon: MessageOutlined },
+  { to: "/account", label: "Account", icon: UserOutlined },
 ];

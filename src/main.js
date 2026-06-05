@@ -41,8 +41,8 @@ message.config({
   maxCount: 1,
 });
 
-app.use(router);
 app.use(pinia);
+app.use(router);
 
 library.add(faUser, faPen, faRotate);
 app.component("font-awesome-icon", FontAwesomeIcon);
