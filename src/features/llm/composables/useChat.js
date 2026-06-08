@@ -33,6 +33,7 @@ export function useChat() {
     const newSession = {
       id: crypto.randomUUID(),
       title: 'New Chat',
+      interactionId: null,
       messages: [],
       createdAt: Date.now(),
       lastModified: Date.now()
@@ -120,10 +121,11 @@ export function useChat() {
     loadingSince.value = Date.now();
 
     try {
-      const reply = await chatApi.sendMessage(text);
+      const reply = await chatApi.sendMessage(text, session.interactionId);
+      session.interactionId = reply.interactionId || session.interactionId;
       const assistantMsg = {
         role: 'assistant',
-        content: reply,
+        content: reply.reply,
         timestamp: Date.now()
       };
 

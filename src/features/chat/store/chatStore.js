@@ -41,6 +41,7 @@ export const useChatStore = defineStore("chat", () => {
     const session = {
       id: crypto.randomUUID(),
       title: "New Chat",
+      interactionId: null,
       messages: [],
       createdAt: Date.now(),
       lastModified: Date.now(),
@@ -110,7 +111,8 @@ export const useChatStore = defineStore("chat", () => {
     loadingSince.value = Date.now();
 
     try {
-      const reply = await chatApi.sendMessage(content);
+      const reply = await chatApi.sendMessage(content, session.interactionId);
+      session.interactionId = reply.interactionId || session.interactionId;
       session.messages.push({
         role: "assistant",
         content: reply.reply,
