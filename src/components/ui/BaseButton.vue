@@ -61,11 +61,11 @@ defineEmits(['click']);
   justify-content: center;
   position: relative;
   font-family: var(--font-family);
-  font-weight: 500;
+  font-weight: 650;
   letter-spacing: 0;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.15s ease-in-out;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
   user-select: none;
   outline: none;
   border: 1px solid transparent;
@@ -76,7 +76,7 @@ defineEmits(['click']);
 }
 
 .base-button:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: translateY(1px);
 }
 
 .base-button.disabled {
@@ -100,13 +100,13 @@ defineEmits(['click']);
 .size-sm {
   padding: 0 var(--space-3);
   font-size: var(--font-size-caption);
-  height: 28px;
+  height: 32px;
   border-radius: var(--radius-sm);
 }
 .size-md {
   padding: 0 var(--space-4);
   font-size: var(--font-size-body);
-  height: 36px;
+  height: 40px;
 }
 .size-lg {
   padding: 0 var(--space-6);
@@ -116,22 +116,22 @@ defineEmits(['click']);
 
 /* --- Variants --- */
 .variant-primary {
-  background-color: var(--color-text-primary);
+  background-color: var(--color-primary);
   color: var(--text-inverse);
   box-shadow: var(--shadow-sm);
 }
 .variant-primary:hover:not(:disabled) {
-  background-color: #E4E4E7; /* Zinc 200 */
+  background-color: var(--color-primary-strong);
 }
 
 .variant-secondary {
-  background-color: var(--color-bg-elevated);
+  background-color: var(--color-bg-surface);
   border-color: var(--color-border);
   color: var(--color-text-primary);
   box-shadow: var(--shadow-sm);
 }
 .variant-secondary:hover:not(:disabled) {
-  background-color: #3F3F46; /* Zinc 700 */
+  background-color: var(--color-bg-panel);
   border-color: var(--color-border-strong);
 }
 
@@ -140,8 +140,8 @@ defineEmits(['click']);
   color: var(--color-text-secondary);
 }
 .variant-ghost:hover:not(:disabled) {
-  background-color: var(--color-bg-panel);
-  color: var(--color-text-primary);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary-strong);
 }
 
 .variant-danger {

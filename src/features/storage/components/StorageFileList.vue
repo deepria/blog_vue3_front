@@ -94,7 +94,7 @@ const getFileExt = (name) => {
 
 .file-grid {
   display: grid;
-  gap: var(--space-2);
+  gap: 10px;
 }
 
 .file-card :deep(.base-card-body) {
@@ -117,7 +117,7 @@ const getFileExt = (name) => {
 .file-name {
   display: flex;
   align-items: center;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--color-text-primary);
   padding-right: var(--space-3);
   min-width: 0;
@@ -138,7 +138,7 @@ const getFileExt = (name) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-primary);
+  color: var(--color-warning);
   margin-left: var(--space-2);
   flex-shrink: 0;
 }
@@ -163,7 +163,20 @@ const getFileExt = (name) => {
 
 .empty-state {
   text-align: center;
-  padding: var(--space-8);
+  padding: 36px 20px;
   color: var(--color-text-muted);
+}
+
+@media (max-width: 640px) {
+  .file-details {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .file-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 </style>

@@ -53,3 +53,45 @@ function getPriorityColor(key) {
   return props.priorityOptions.find((priority) => priority.key === key)?.color || "#666";
 }
 </script>
+
+<style scoped>
+.task-list-container {
+  display: grid;
+  gap: 12px;
+}
+
+.task-list-container :deep(> div) {
+  display: grid;
+  gap: 10px;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 2px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.group-header::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}
+</style>

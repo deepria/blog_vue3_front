@@ -1,10 +1,11 @@
 <template>
-  <div class="todo-page">
-    <header class="todo-header">
-      <div class="header-copy">
-        <h1 class="page-title">Tasks</h1>
-      </div>
-      <div class="header-actions">
+  <PageShell
+    class="todo-page"
+    title="Tasks"
+    eyebrow="Plan"
+    description="Capture, group, prioritize, and save your active work list."
+  >
+    <template #actions>
         <div class="primary-actions">
           <button class="icon-btn-secondary" @click="handleRefresh" title="Refresh">
              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
@@ -21,8 +22,7 @@
              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
           </button>
         </div>
-      </div>
-    </header>
+    </template>
 
     <div class="quick-add-container">
       <TodoQuickAdd
@@ -105,7 +105,7 @@
         <BaseButton variant="primary" @click="confirmPopup">Done</BaseButton>
       </template>
     </BaseModal>
-  </div>
+  </PageShell>
 </template>
 
 <script setup>
@@ -117,6 +117,7 @@ import { useTodos } from "@/features/todo/composables/useTodos";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import BaseInput from "@/shared/ui/BaseInput.vue";
 import BaseModal from "@/shared/ui/BaseModal.vue";
+import PageShell from "@/shared/ui/PageShell.vue";
 
 const {
   groupOptions,
@@ -206,24 +207,7 @@ onMounted(() => {
 
 <style scoped>
 .todo-page {
-  padding: var(--space-6);
-  max-width: var(--max-width);
-  margin: 0 auto;
-}
-
-.todo-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-6);
-}
-
-.page-title {
-  font-size: var(--font-size-hero);
-  font-weight: 800;
-  color: var(--color-text-primary);
-  margin: 0;
-  letter-spacing: var(--tracking-tight);
+  display: block;
 }
 
 .header-actions {
@@ -239,7 +223,7 @@ onMounted(() => {
 }
 
 .quick-add-container {
-  margin-bottom: var(--space-6);
+  margin-bottom: 0;
 }
 
 .edit-form {
@@ -273,7 +257,7 @@ onMounted(() => {
 .base-select,
 .mini-input {
   width: 100%;
-  background-color: var(--color-bg-elevated);
+  background-color: var(--color-bg-surface);
   color: var(--color-text-primary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -288,7 +272,7 @@ onMounted(() => {
 .mini-input:focus {
   border-color: var(--color-primary);
   outline: none;
-  box-shadow: 0 0 0 1px var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
 }
 
 .mini-input::placeholder {
@@ -313,7 +297,7 @@ onMounted(() => {
   flex-direction: column;
   gap: var(--space-6);
   padding: var(--space-4);
-  background-color: var(--color-bg-base);
+  background-color: var(--color-bg-panel);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
 }

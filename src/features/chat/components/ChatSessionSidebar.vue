@@ -48,7 +48,8 @@ defineEmits(["create", "select", "delete"]);
   display: flex;
   flex-direction: column;
   height: 100%;
-  color: #ffffff;
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface);
 }
 
 .sidebar-header {
@@ -66,15 +67,24 @@ defineEmits(["create", "select", "delete"]);
   align-items: center;
   justify-content: space-between;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   margin-bottom: 8px;
-  background: rgba(255, 255, 255, 0.015);
-  color: #ffffff;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .session-item.active {
-  background: rgba(66, 184, 131, 0.12);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+  border-color: var(--color-border);
+}
+
+.session-item:hover {
+  background: var(--color-bg-panel);
+  color: var(--color-text-primary);
 }
 
 .session-title {

@@ -29,7 +29,7 @@ import "@/assets/styles/layout.css";
   padding-left: var(--nav-width);
   min-height: 100vh;
   transition: padding-left 0.3s ease;
-  padding-right: 20px;
+  padding-right: 0;
 }
 
 .nav-mobile {

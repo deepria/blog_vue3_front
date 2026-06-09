@@ -282,7 +282,7 @@ onMounted(() => {
 /* ... replacing everything under style ... */
 <style scoped>
 .dashboard-container {
-  padding: var(--space-4);
+  padding: 36px 28px 96px;
   max-width: var(--max-width);
   margin: 0 auto;
 }
@@ -293,7 +293,7 @@ onMounted(() => {
 }
 
 .dashboard-card {
-  background-color: var(--glass-bg-elevated);
+  background-color: var(--color-bg-surface);
 }
 
 .dashboard-card--elevated {
@@ -302,8 +302,8 @@ onMounted(() => {
 
 .hero-cluster {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: var(--space-6);
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  gap: 20px;
   align-items: stretch;
 }
 
@@ -338,21 +338,21 @@ onMounted(() => {
 .hero-copy {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 6px;
 }
 
 .eyebrow {
   font-size: var(--font-size-caption);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--color-text-muted);
-  font-weight: 600;
+  color: var(--color-primary);
+  font-weight: 800;
   margin: 0;
 }
 
 .header-title {
   font-size: var(--font-size-hero);
-  font-weight: 800;
+  font-weight: 780;
   color: var(--color-text-primary);
   margin: 0;
   letter-spacing: var(--tracking-tight);
@@ -376,7 +376,7 @@ onMounted(() => {
   align-items: center;
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
-  background-color: var(--color-bg-elevated);
+  background-color: var(--color-bg-panel);
   border: 1px solid var(--color-border);
   color: var(--color-text-primary);
   font-size: var(--font-size-caption);
@@ -393,7 +393,7 @@ onMounted(() => {
 .clipboard-textarea {
   width: 100%;
   height: 80px;
-  background-color: var(--color-bg-base);
+  background-color: var(--color-bg-panel);
   color: var(--color-text-primary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -407,7 +407,7 @@ onMounted(() => {
 .clipboard-textarea:focus {
   border-color: var(--color-primary);
   outline: none;
-  box-shadow: 0 0 0 1px var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
 }
 
 .clipboard-actions {
@@ -426,48 +426,10 @@ onMounted(() => {
   margin: var(--space-1) 0 0;
 }
 
-.icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background-color: var(--color-primary);
-  color: var(--text-inverse);
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.icon-btn:hover {
-  transform: scale(1.05);
-}
-
-.icon-btn-secondary {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background-color: var(--color-bg-base);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.icon-btn-secondary:hover {
-  background-color: var(--color-bg-elevated);
-  color: var(--color-text-primary);
-  border-color: var(--color-border-bright);
-}
-
 .kpi-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-6);
+  gap: 14px;
 }
 
 .stat-topline {
@@ -490,14 +452,14 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border-radius: var(--radius-md);
-  background-color: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-bright);
+  background-color: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
 }
 
 .blue-glow { color: #3b82f6; }
-.purple-glow { color: #a855f7; }
-.cyan-glow { color: #06b6d4; }
-.amber-glow { color: #f59e0b; }
+.purple-glow { color: #7c3aed; }
+.cyan-glow { color: #0f766e; }
+.amber-glow { color: #d97706; }
 
 .stat-content {
   margin-top: var(--space-6);
@@ -508,7 +470,7 @@ onMounted(() => {
 
 .stat-value {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 780;
   color: var(--color-text-primary);
 }
 
@@ -585,8 +547,8 @@ onMounted(() => {
 .clipboard-textarea {
   width: 100%;
   min-height: 120px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   color: var(--color-text-primary);
   padding: var(--space-3);
@@ -598,7 +560,7 @@ onMounted(() => {
 }
 
 .clipboard-textarea:focus {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-bg-surface);
   border-color: var(--color-primary);
 }
 
@@ -613,7 +575,7 @@ onMounted(() => {
 
 @media (max-width: 640px) {
   .dashboard-container {
-    padding: var(--space-4);
+    padding: 24px 16px 104px;
   }
   .quick-task-head {
     flex-direction: row !important;

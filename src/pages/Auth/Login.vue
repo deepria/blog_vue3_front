@@ -1,9 +1,14 @@
 <template>
   <section class="login-page">
+    <div class="login-copy">
+      <div class="brand-mark">D</div>
+      <h1>Deepria Cloud</h1>
+      <p>Your memos, tasks, files, and AI workspace in one quiet place.</p>
+    </div>
     <div class="login-panel">
       <p v-if="errorMessage" class="auth-error">{{ errorMessage }}</p>
       <p v-if="statusMessage" class="auth-status">{{ statusMessage }}</p>
-      <h1>Sign in</h1>
+      <h2>Sign in</h2>
       <div class="provider-actions">
         <a-button size="large" block @click="login('google')">
           Continue with Google
@@ -108,22 +113,63 @@ onBeforeUnmount(() => {
 .login-page {
   min-height: 100vh;
   display: grid;
-  place-items: center;
+  grid-template-columns: minmax(0, 0.95fr) minmax(320px, 420px);
+  align-items: center;
+  gap: 48px;
   padding: 24px;
+  width: min(100%, 980px);
+  margin: 0 auto;
+}
+
+.login-copy {
+  display: grid;
+  gap: 14px;
+}
+
+.brand-mark {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: var(--text-inverse);
+  font-size: 22px;
+  font-weight: 800;
 }
 
 .login-panel {
-  width: min(100%, 360px);
-  padding: 24px;
+  width: 100%;
+  padding: 28px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-elevated);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-lg);
+}
+
+h1,
+h2 {
+  margin: 0;
+  color: var(--color-text-primary);
 }
 
 h1 {
+  font-size: clamp(34px, 6vw, 56px);
+  line-height: 1.05;
+}
+
+h2 {
   margin: 0 0 20px;
   font-size: 24px;
   color: var(--color-text-primary);
+}
+
+.login-copy p {
+  max-width: 520px;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 16px;
 }
 
 .provider-actions {
@@ -141,5 +187,13 @@ h1 {
   margin: 0 0 16px;
   color: var(--color-text-secondary);
   font-size: 14px;
+}
+
+@media (max-width: 780px) {
+  .login-page {
+    grid-template-columns: 1fr;
+    align-content: center;
+    gap: 28px;
+  }
 }
 </style>

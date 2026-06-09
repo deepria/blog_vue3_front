@@ -53,9 +53,9 @@ const close = () => {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background-color: var(--bg-overlay);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,8 +64,8 @@ const close = () => {
 }
 
 .modal-container {
-  background-color: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   width: 100%;
   max-width: 480px;
@@ -89,7 +89,7 @@ const close = () => {
   font-weight: 600;
   color: var(--color-text-primary);
   margin: 0;
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: 0;
 }
 
 .close-btn {
@@ -121,7 +121,7 @@ const close = () => {
 .modal-footer {
   padding: var(--space-4) var(--space-6);
   border-top: 1px solid var(--color-border);
-  background-color: var(--color-bg-surface);
+  background-color: var(--color-bg-panel);
   display: flex;
   justify-content: flex-end;
   gap: var(--space-3);

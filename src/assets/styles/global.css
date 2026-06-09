@@ -2,9 +2,7 @@ html,
 body {
     margin: 0;
     padding: 0;
-    background: radial-gradient(circle at top left, var(--color-primary-glow), transparent 30%),
-                var(--color-bg-base);
-    background-attachment: fixed;
+    background: var(--color-bg-base);
     color: var(--color-text-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -20,7 +18,7 @@ body {
 h1, h2, h3, h4, h5, h6 {
     color: var(--color-text-primary);
     font-weight: 700;
-    letter-spacing: var(--tracking-tight);
+    letter-spacing: 0;
     margin-bottom: var(--space-4);
 }
 
@@ -57,7 +55,7 @@ p {
   height: 36px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  background-color: var(--color-bg-base);
+  background-color: var(--color-bg-surface);
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -65,9 +63,9 @@ p {
 }
 
 .icon-btn-secondary:hover {
-  background-color: var(--color-bg-elevated);
+  background-color: var(--color-bg-panel);
   color: var(--color-text-primary);
-  border-color: var(--color-border-bright);
+  border-color: var(--color-border-strong);
 }
 
 .icon-btn-primary {
@@ -87,5 +85,11 @@ p {
 
 .icon-btn-primary:hover {
   background-color: var(--color-primary-strong);
-  transform: scale(1.05);
+  transform: translateY(-1px);
+}
+
+.empty-state {
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
 }

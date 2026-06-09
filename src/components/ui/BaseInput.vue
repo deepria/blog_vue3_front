@@ -81,9 +81,9 @@ const onInput = (event) => {
 }
 
 .base-input-label {
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .input-container {
@@ -96,9 +96,9 @@ const onInput = (event) => {
 .base-input {
   width: 100%;
   font-family: inherit;
-  background-color: var(--color-bg-base);
+  background-color: var(--color-bg-surface);
   color: var(--color-text-primary);
-  border: 1px solid var(--color-border-strong);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   outline: none;
   transition: all 0.2s ease;
@@ -115,7 +115,7 @@ const onInput = (event) => {
 
 .base-input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary), var(--shadow-sm);
+  box-shadow: 0 0 0 3px var(--color-primary-glow), var(--shadow-sm);
 }
 
 .base-input:disabled {

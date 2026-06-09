@@ -1,18 +1,18 @@
 <template>
-  <div class="memo-list-page">
-    <header class="memo-header">
-      <div class="header-copy">
-        <h1 class="page-title">Memos</h1>
-      </div>
-      <div class="header-actions">
+  <PageShell
+    class="memo-list-page"
+    title="Memos"
+    eyebrow="Knowledge"
+    description="Search your notes, preview markdown, and jump back into writing."
+  >
+    <template #actions>
          <button class="icon-btn-secondary" @click="handleRefresh" title="Refresh">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
          </button>
          <button class="icon-btn-primary" @click="createMemo" title="New Memo">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
          </button>
-      </div>
-    </header>
+    </template>
 
     <transition name="page-section" appear>
       <div v-if="contentVisible" class="page-content">
@@ -90,7 +90,7 @@
         </div>
       </div>
     </transition>
-  </div>
+  </PageShell>
 </template>
 
 <script setup>
@@ -103,6 +103,7 @@ import BaseInput from "@/shared/ui/BaseInput.vue";
 import BaseCard from "@/shared/ui/BaseCard.vue";
 import BaseSkeleton from "@/shared/ui/BaseSkeleton.vue";
 import MarkdownViewer from "@/components/ui/MarkdownViewer.vue";
+import PageShell from "@/shared/ui/PageShell.vue";
 
 const router = useRouter();
 const { modal } = App.useApp();
@@ -182,30 +183,7 @@ onMounted(async () => {
 
 <style scoped>
 .memo-list-page {
-    padding: var(--space-6);
-    max-width: var(--max-width);
-    margin: 0 auto;
-}
-
-.memo-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--space-4);
-    margin-bottom: var(--space-8);
-}
-
-.header-copy {
-    display: flex;
-    align-items: flex-end;
-}
-
-.page-title {
-    font-size: var(--font-size-hero);
-    font-weight: 800;
-    color: var(--color-text-primary);
-    margin: 0;
-    letter-spacing: var(--tracking-tight);
+    display: block;
 }
 
 .header-actions {
@@ -214,7 +192,7 @@ onMounted(async () => {
 }
 
 .search-bar {
-    margin-bottom: var(--space-6);
+    margin-bottom: 4px;
     max-width: 600px;
 }
 
@@ -225,7 +203,7 @@ onMounted(async () => {
 .memo-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--space-4);
+    gap: 14px;
 }
 
 .memo-wrapper {
@@ -234,7 +212,7 @@ onMounted(async () => {
 
 .memo-card {
     border-radius: var(--radius-lg);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .memo-main {
@@ -249,12 +227,12 @@ onMounted(async () => {
     width: 40px;
     height: 40px;
     border-radius: var(--radius-md);
-    background-color: var(--color-bg-elevated);
+    background-color: var(--color-primary-soft);
     border: 1px solid var(--color-border);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-primary);
+    color: var(--color-primary-strong);
 }
 
 .memo-icon svg {
@@ -312,7 +290,7 @@ onMounted(async () => {
 
 /* Preview Panel */
 .preview-panel {
-    background-color: var(--color-bg-elevated);
+    background-color: var(--color-bg-surface);
     border: 1px solid var(--color-border);
     border-top: none;
     border-bottom-left-radius: var(--radius-lg);
@@ -321,7 +299,7 @@ onMounted(async () => {
     margin-top: -2px;
     position: relative;
     z-index: 1;
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-md);
 }
 
 .preview-body {
@@ -361,7 +339,7 @@ onMounted(async () => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: var(--space-8) 0;
+    padding: 42px 20px;
     color: var(--color-text-muted);
     gap: var(--space-3);
 }
@@ -399,10 +377,6 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
-    .memo-header {
-        align-items: center;
-        margin-bottom: var(--space-4);
-    }
     .memo-grid {
         grid-template-columns: 1fr;
     }

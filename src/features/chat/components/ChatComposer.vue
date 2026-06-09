@@ -42,7 +42,7 @@ defineEmits(["update:modelValue", "send"]);
 <style scoped>
 .input-area {
   padding: var(--space-4);
-  background-color: var(--color-bg-base);
+  background-color: var(--color-bg-surface);
   border-top: 1px solid var(--color-border);
 }
 
@@ -50,9 +50,9 @@ defineEmits(["update:modelValue", "send"]);
   display: flex;
   align-items: flex-end;
   gap: var(--space-3);
-  background-color: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
   box-shadow: var(--shadow-sm);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -60,7 +60,7 @@ defineEmits(["update:modelValue", "send"]);
 
 .input-wrapper:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
 }
 
 :deep(.ant-input-textarea textarea) {
@@ -84,7 +84,7 @@ defineEmits(["update:modelValue", "send"]);
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: var(--radius-md);
   border: none;
   background-color: var(--color-primary);
   color: var(--text-inverse);
@@ -95,7 +95,7 @@ defineEmits(["update:modelValue", "send"]);
 }
 
 .send-btn:hover:not(.disabled) {
-  transform: scale(1.05);
+  transform: translateY(-1px);
   background-color: var(--color-primary-strong);
 }
 

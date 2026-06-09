@@ -1,13 +1,18 @@
 <template>
-  <section class="account-page">
-    <header class="account-header">
+  <PageShell
+    class="account-page"
+    title="Account"
+    eyebrow="Profile"
+    description="Manage your identity and connected sign-in providers."
+  >
+    <div class="account-header">
       <img v-if="app.user?.avatar_url" :src="app.user.avatar_url" alt="" class="avatar" />
       <div>
         <h1>{{ app.user?.name }}</h1>
         <p>{{ app.user?.email }}</p>
       </div>
       <a-button class="logout-button" @click="logout">Logout</a-button>
-    </header>
+    </div>
 
     <div class="provider-list">
       <div v-for="provider in providers" :key="provider.id" class="provider-row">
@@ -23,7 +28,7 @@
         </a-button>
       </div>
     </div>
-  </section>
+  </PageShell>
 </template>
 
 <script setup>
@@ -31,6 +36,7 @@ import { message } from "ant-design-vue";
 import { useAppStore } from "@/store/app";
 import { useRouter } from "vue-router";
 import { authApi } from "@/features/auth/api/authApi";
+import PageShell from "@/shared/ui/PageShell.vue";
 
 const app = useAppStore();
 const router = useRouter();
@@ -63,15 +69,18 @@ async function logout() {
 
 <style scoped>
 .account-page {
-  width: min(100%, 720px);
-  padding: 32px 0;
+  display: block;
 }
 
 .account-header {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 24px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .logout-button {
@@ -111,12 +120,25 @@ span {
   gap: 16px;
   padding: 16px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-elevated);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .provider-row div {
   display: grid;
   gap: 4px;
+}
+
+@media (max-width: 640px) {
+  .account-header,
+  .provider-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .logout-button {
+    margin-left: 0;
+  }
 }
 </style>

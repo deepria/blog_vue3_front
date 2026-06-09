@@ -52,48 +52,35 @@ defineEmits(['edit', 'delete', 'toggle']);
 
 <style scoped>
 .task-item {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: var(--glass-border);
-    border-radius: var(--radius-sm);
+    background: var(--color-bg-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
     padding: var(--space-3) var(--space-4);
     display: flex;
     align-items: center;
     gap: var(--space-4);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
     position: relative;
     overflow: hidden;
     min-height: 60px;
 }
 
 .specular-highlight {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    z-index: 5;
+    display: none;
 }
 
 .gloss-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--surface-gloss);
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.5;
+    display: none;
 }
 
 .task-item:hover {
-    transform: translateY(-4px) scale(1.01);
+    transform: translateY(-1px);
     background: var(--glass-bg-hover);
-    box-shadow: var(--glass-shadow-deep);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-strong);
 }
 
 .task-item:hover .gloss-overlay {
@@ -119,7 +106,7 @@ defineEmits(['edit', 'delete', 'toggle']);
 .task-text {
     font-size: var(--font-size-body);
     color: var(--color-text-primary);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 /* Delete Button */
@@ -129,11 +116,16 @@ defineEmits(['edit', 'delete', 'toggle']);
     color: var(--color-text-muted);
     cursor: pointer;
     padding: 0;
-    opacity: 0.5;
+    opacity: 0;
     transition: all 0.2s;
 }
 .delete-btn:hover {
     color: var(--color-danger, #ef4444);
+    opacity: 1;
+}
+
+.task-item:hover .delete-btn,
+.task-item:focus-within .delete-btn {
     opacity: 1;
 }
 
@@ -147,12 +139,12 @@ defineEmits(['edit', 'delete', 'toggle']);
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
-    background: var(--color-bg-base); /* Using base bg */
+    background: var(--color-bg-surface);
     cursor: pointer;
 }
 .custom-checkbox.checked {
     border-color: var(--color-primary);
-    background: rgba(66, 184, 131, 0.12);
+    background: var(--color-primary-soft);
 }
 .custom-checkbox:hover {
     border-color: var(--color-primary);

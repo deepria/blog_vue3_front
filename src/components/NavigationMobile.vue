@@ -22,15 +22,15 @@ import { navigationItems } from "@/shared/navigation/items";
 <style scoped>
 .navigation-mobile {
   position: fixed;
-  bottom: calc(16px + var(--safe-bottom));
+  bottom: calc(14px + var(--safe-bottom));
   left: 50%;
   transform: translateX(-50%);
   height: 64px;
-  background-color: var(--glass-bg-elevated);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  background-color: var(--color-bg-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: var(--glass-border);
-  border-radius: var(--radius-full);
+  border-radius: 18px;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -52,7 +52,7 @@ import { navigationItems } from "@/shared/navigation/items";
   transition: all 0.2s ease;
   position: relative;
   height: 48px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   gap: 4px;
 }
 
@@ -73,8 +73,8 @@ import { navigationItems } from "@/shared/navigation/items";
 }
 
 .nav-item.active {
-  color: var(--color-primary);
-  background-color: var(--color-bg-elevated);
+  color: var(--color-primary-strong);
+  background-color: var(--color-primary-soft);
 }
 
 .nav-item.active .icon-wrapper {

@@ -54,23 +54,33 @@ defineEmits(["update:modelValue", "update:groupKey", "submit"]);
 <style scoped>
 .quick-add-wrapper {
   display: grid;
-  grid-template-columns: 180px 1fr;
+  grid-template-columns: minmax(150px, 190px) 1fr;
   gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .quick-group-select {
-  border-radius: 10px;
-  border: var(--glass-border);
-  background: var(--glass-bg);
+  min-height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-panel);
   color: var(--color-text-primary);
   padding: 0 12px;
+  font-weight: 650;
 }
 
 .quick-add-btn {
   border: none;
   background: transparent;
-  color: inherit;
+  color: var(--color-primary);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media (max-width: 768px) {

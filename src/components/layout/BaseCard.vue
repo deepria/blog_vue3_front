@@ -39,7 +39,7 @@ defineProps({
 
 <style scoped>
 .base-card {
-  --card-bg: var(--color-bg-elevated);
+  --card-bg: var(--color-bg-surface);
   --card-border: 1px solid var(--color-border);
   --card-shadow: var(--shadow-sm);
   
@@ -55,9 +55,9 @@ defineProps({
 }
 
 .base-card.glass {
-  --card-bg: var(--glass-bg-elevated);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  --card-bg: var(--color-bg-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: var(--glass-border);
 }
 
@@ -66,20 +66,20 @@ defineProps({
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: var(--surface-gloss);
-  opacity: 0.38;
+  background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0));
+  opacity: 0.4;
   z-index: 0;
 }
 
 .base-card.hoverable:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
   border-color: var(--color-border-strong);
 }
 
 .base-card.glass.hoverable:hover {
   --card-bg: var(--glass-bg-hover);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .base-card.hoverable:hover::before {
@@ -92,11 +92,11 @@ defineProps({
 }
 
 .base-card.interactive:active {
-  transform: scale(0.98);
+  transform: scale(0.99);
 }
 
 .base-card-header {
-  padding: var(--space-4) var(--space-4) 0;
+  padding: 18px 18px 0;
   position: relative;
   z-index: 1;
 }
@@ -106,18 +106,18 @@ defineProps({
   font-size: var(--font-size-title);
   font-weight: 600;
   color: var(--color-text-primary);
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: 0;
 }
 
 .base-card-body {
-  padding: var(--space-4);
+  padding: 18px;
   flex: 1;
   position: relative;
   z-index: 1;
 }
 
 .base-card-footer {
-  padding: 0 var(--space-4) var(--space-4);
+  padding: 0 18px 18px;
   display: flex;
   align-items: center;
   gap: var(--space-3);

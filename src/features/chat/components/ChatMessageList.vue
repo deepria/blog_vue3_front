@@ -71,7 +71,7 @@ watch(
   flex: 1;
   overflow-y: auto;
   padding: var(--space-6) var(--space-4);
-  background-color: var(--color-bg-base);
+  background-color: var(--color-bg-panel);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -86,6 +86,8 @@ watch(
   height: 100%;
   color: var(--color-text-muted);
   gap: var(--space-4);
+  background: transparent;
+  border: 0;
 }
 
 .empty-icon {
@@ -117,16 +119,18 @@ watch(
 }
 
 .message-wrapper.user .message-content {
-  background-color: var(--color-bg-elevated);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
+  background-color: var(--color-primary);
+  color: var(--text-inverse);
+  border: 1px solid var(--color-primary);
   border-bottom-right-radius: 4px;
 }
 
 .message-wrapper.assistant .message-content {
-  background-color: transparent;
+  background-color: var(--color-bg-surface);
   color: var(--color-text-primary);
-  padding: var(--space-2) 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-bottom-left-radius: 4px;
 }
 
 .typing-indicator {
@@ -154,7 +158,7 @@ watch(
 }
 
 :deep(pre) {
-  background-color: #000 !important;
+  background-color: #0f172a !important;
   border-radius: var(--radius-md) !important;
   border: 1px solid var(--color-border) !important;
   margin: var(--space-3) 0 !important;

@@ -116,7 +116,9 @@ onUnmounted(() => {
   display: flex;
   height: 100dvh;
   overflow: hidden;
-  background-color: transparent;
+  background-color: var(--color-bg-base);
+  padding: 28px;
+  gap: 18px;
 }
 
 @media (max-width: 1024px) {
@@ -127,8 +129,11 @@ onUnmounted(() => {
 
 .sidebar {
   width: 280px;
-  background-color: var(--color-bg-elevated);
-  border-right: 1px solid var(--color-border);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .chat-container {
@@ -137,6 +142,11 @@ onUnmounted(() => {
   flex-direction: column;
   min-width: 0;
   position: relative;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .chat-header {
@@ -145,8 +155,8 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: var(--space-4) var(--space-6);
   border-bottom: 1px solid var(--color-border);
-  background-color: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
+  background-color: var(--color-bg-surface);
+  backdrop-filter: none;
   z-index: 10;
 }
 
@@ -163,7 +173,7 @@ onUnmounted(() => {
 .status-badge {
   font-size: var(--font-size-caption);
   color: var(--color-primary);
-  background-color: var(--color-primary-glow);
+  background-color: var(--color-primary-soft);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
   font-weight: 600;
@@ -195,8 +205,14 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
+  .main-layout {
+    padding: 0;
+  }
+
   .chat-container {
     padding-top: var(--header-height);
+    border: 0;
+    border-radius: 0;
   }
 }
 </style>

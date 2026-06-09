@@ -1,15 +1,15 @@
 <template>
-  <div class="s3-container">
-    <header class="section-header">
-      <div class="header-copy">
-        <h1 class="page-title">File Storage</h1>
-      </div>
-      <div class="header-actions">
+  <PageShell
+    class="s3-container"
+    title="File Storage"
+    eyebrow="Vault"
+    description="Upload, protect, preview, download, and remove files from your cloud library."
+  >
+    <template #actions>
         <button class="icon-btn-secondary" @click="refreshDirectory" title="Refresh">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
         </button>
-      </div>
-    </header>
+    </template>
 
     <div class="s3-grid page-content">
       <StorageUploadPanel
@@ -98,7 +98,7 @@
         <pre v-else class="text-preview-body">{{ textPreview.content }}</pre>
       </div>
     </BaseModal>
-  </div>
+  </PageShell>
 </template>
 
 <script setup>
@@ -113,6 +113,7 @@ import BaseInput from "@/shared/ui/BaseInput.vue";
 import BaseModal from "@/shared/ui/BaseModal.vue";
 import BaseProgressBar from "@/shared/ui/BaseProgressBar.vue";
 import { useDownload } from "@/shared/composables/useDownload";
+import PageShell from "@/shared/ui/PageShell.vue";
 
 const { modal } = App.useApp();
 const { loading, previewableFiles, loadFiles, uploadFile, getDownloadUrl, getDeleteUrl } = useStorage();
@@ -320,30 +321,14 @@ onMounted(() => {
 
 <style scoped>
 .s3-container {
-  padding: var(--space-6);
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding-bottom: 120px;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-6);
-}
-
-.page-title {
-  font-size: var(--font-size-hero);
-  font-weight: 800;
-  color: var(--color-text-primary);
-  margin: 0;
-  letter-spacing: var(--tracking-tight);
+  display: block;
 }
 
 .s3-grid {
   display: grid;
+  grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.18fr);
   gap: var(--space-6);
+  align-items: start;
 }
 
 .form-group {
@@ -380,7 +365,15 @@ onMounted(() => {
 }
 
 @media (max-width: 640px) {
-  /* removed .section-header flex-direction column override */
+  .s3-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 960px) {
+  .s3-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 

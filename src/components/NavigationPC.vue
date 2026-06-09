@@ -2,7 +2,11 @@
   <div class="navigation-pc">
     <div class="sidebar">
       <div class="logo-area">
-        <h1>Workspace</h1>
+        <div class="brand-mark">D</div>
+        <div>
+          <h1>Deepria Cloud</h1>
+          <p>Personal workspace</p>
+        </div>
       </div>
       
       <nav class="nav-menu">
@@ -20,8 +24,9 @@
       
       <div class="footer-area">
         <div v-if="app.user" class="user-area">
+          <span class="user-kicker">Signed in</span>
           <span class="user-name">{{ app.user.name }}</span>
-          <a-button size="small" type="text" @click="logout">Logout</a-button>
+          <a-button size="small" @click="logout">Logout</a-button>
         </div>
       </div>
     </div>
@@ -49,7 +54,7 @@ async function logout() {
   left: 0;
   height: 100vh;
   width: var(--nav-width);
-  background-color: var(--color-bg-base);
+  background-color: var(--color-bg-surface);
   border-right: 1px solid var(--color-border);
   z-index: 100;
   display: flex;
@@ -60,28 +65,45 @@ async function logout() {
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding: 18px 14px;
 }
 
 .logo-area {
-  padding: var(--space-6) var(--space-6) var(--space-6);
+  padding: 8px 8px 24px;
   display: flex;
   align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: var(--text-inverse);
+  font-weight: 800;
 }
 
 .logo-area h1 {
-  font-size: var(--font-size-title);
-  font-weight: 700;
-  background: linear-gradient(135deg, #FAFAFA 0%, #A1A1AA 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 15px;
+  font-weight: 760;
+  color: var(--color-text-primary);
   margin: 0;
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: 0;
+}
+
+.logo-area p {
+  margin: 2px 0 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
 }
 
 .nav-menu {
   flex: 1;
-  padding: 0 var(--space-4);
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -91,23 +113,23 @@ async function logout() {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
   color: var(--color-text-secondary);
   text-decoration: none;
   transition: all 0.15s ease;
-  font-weight: 500;
+  font-weight: 650;
   font-size: var(--font-size-body);
 }
 
 .nav-item:hover {
-  background-color: var(--color-bg-elevated);
+  background-color: var(--color-bg-panel);
   color: var(--color-text-primary);
 }
 
 .nav-item.active {
-  background-color: var(--color-bg-elevated);
-  color: var(--color-text-primary);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary-strong);
 }
 
 .nav-item.active .nav-icon {
@@ -120,12 +142,23 @@ async function logout() {
 }
 
 .footer-area {
-  padding: var(--space-4);
+  padding: 16px 0 0;
 }
 
 .user-area {
   display: grid;
-  gap: 8px;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-panel);
+}
+
+.user-kicker {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .user-name {

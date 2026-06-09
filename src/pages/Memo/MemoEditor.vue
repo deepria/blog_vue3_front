@@ -140,18 +140,18 @@ onBeforeUnmount(() => {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: transparent;
+  background-color: var(--color-bg-base);
 }
 
 .editor-header {
-  height: 72px;
+  min-height: 72px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--space-6);
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  border-bottom: var(--glass-border);
+  background: var(--color-bg-surface);
+  backdrop-filter: none;
+  border-bottom: 1px solid var(--color-border);
   z-index: 10;
 }
 
@@ -165,8 +165,8 @@ onBeforeUnmount(() => {
 .title-input-naked {
   background: transparent;
   border: none;
-  font-size: var(--font-size-title);
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 750;
   color: var(--color-text-primary);
   width: 100%;
   outline: none;
@@ -190,11 +190,16 @@ onBeforeUnmount(() => {
 .editor-container {
   flex: 1;
   overflow: hidden;
-  background-color: var(--color-bg-base);
+  background-color: var(--color-bg-surface);
+  padding: 18px;
 }
 
 .editor-wrapper {
   height: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 /* Toast UI Overrides for seamless integration */
@@ -203,10 +208,28 @@ onBeforeUnmount(() => {
     background-color: transparent !important;
 }
 :deep(.toastui-editor-toolbar) {
-    background-color: var(--color-bg-surface) !important;
+    background-color: var(--color-bg-panel) !important;
     border-bottom: 1px solid var(--color-border) !important;
 }
 :deep(.toastui-editor-md-container), :deep(.toastui-editor-ww-container) {
-    background-color: var(--color-bg-base) !important;
+    background-color: var(--color-bg-surface) !important;
+}
+
+@media (max-width: 720px) {
+  .editor-header {
+    padding: 12px 16px;
+  }
+
+  .left-section {
+    min-width: 0;
+  }
+
+  .title-input-naked {
+    font-size: 16px;
+  }
+
+  .editor-container {
+    padding: 10px;
+  }
 }
 </style>
