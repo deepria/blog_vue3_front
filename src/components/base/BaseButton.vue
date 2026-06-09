@@ -91,14 +91,14 @@ defineProps({
 .variant-primary {
   background-color: var(--color-primary);
   color: var(--text-inverse);
-  box-shadow: var(--shadow-glow);
+  box-shadow: var(--shadow-sm);
 }
 .variant-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
+  background-color: var(--color-primary-strong);
   transform: translateY(-1px);
 }
 .variant-primary:active:not(:disabled) {
-  background-color: var(--color-primary-active);
+  background-color: var(--color-primary-strong);
   transform: translateY(0);
 }
 
@@ -125,7 +125,7 @@ defineProps({
   color: var(--text-muted);
 }
 .variant-ghost:hover:not(:disabled) {
-  background-color: rgba(255,255,255,0.05);
+  background-color: var(--color-bg-panel);
   color: var(--text-main);
 }
 

@@ -66,7 +66,7 @@
                   @click="$router.push('/memo')">
           <div class="stat-topline">
             <span class="stat-tag">Memo</span>
-            <div class="stat-icon-wrapper blue-glow">
+            <div class="stat-icon-wrapper tone-blue">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
                    stroke="currentColor">
                 <path
@@ -88,7 +88,7 @@
                   @click="$router.push('/todo')">
           <div class="stat-topline">
             <span class="stat-tag">Todo</span>
-            <div class="stat-icon-wrapper purple-glow">
+            <div class="stat-icon-wrapper tone-violet">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
                    stroke="currentColor">
                 <path
@@ -110,7 +110,7 @@
                   @click="$router.push('/todo')">
           <div class="stat-topline">
             <span class="stat-tag">Flow</span>
-            <div class="stat-icon-wrapper cyan-glow">
+            <div class="stat-icon-wrapper tone-teal">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
                    stroke="currentColor">
                 <path
@@ -133,7 +133,7 @@
                   @click="$router.push('/s3')">
           <div class="stat-topline">
             <span class="stat-tag">Storage</span>
-            <div class="stat-icon-wrapper amber-glow">
+            <div class="stat-icon-wrapper tone-amber">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
                    stroke="currentColor">
                 <path
@@ -456,10 +456,10 @@ onMounted(() => {
   border: 1px solid var(--color-border);
 }
 
-.blue-glow { color: #3b82f6; }
-.purple-glow { color: #7c3aed; }
-.cyan-glow { color: #0f766e; }
-.amber-glow { color: #d97706; }
+.tone-blue { color: #3b82f6; }
+.tone-violet { color: #7c3aed; }
+.tone-teal { color: #0f766e; }
+.tone-amber { color: #d97706; }
 
 .stat-content {
   margin-top: var(--space-6);

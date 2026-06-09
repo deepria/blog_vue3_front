@@ -61,16 +61,6 @@ defineProps({
   border: var(--glass-border);
 }
 
-.base-card.glass::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0));
-  opacity: 0.4;
-  z-index: 0;
-}
-
 .base-card.hoverable:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
@@ -80,11 +70,6 @@ defineProps({
 .base-card.glass.hoverable:hover {
   --card-bg: var(--glass-bg-hover);
   box-shadow: var(--shadow-md);
-}
-
-.base-card.hoverable:hover::before {
-  background: var(--surface-shine);
-  opacity: 1;
 }
 
 .base-card.interactive {
@@ -98,7 +83,6 @@ defineProps({
 .base-card-header {
   padding: 18px 18px 0;
   position: relative;
-  z-index: 1;
 }
 
 .base-card-title {
@@ -113,7 +97,6 @@ defineProps({
   padding: 18px;
   flex: 1;
   position: relative;
-  z-index: 1;
 }
 
 .base-card-footer {
@@ -122,7 +105,6 @@ defineProps({
   align-items: center;
   gap: var(--space-3);
   position: relative;
-  z-index: 1;
 }
 
 @media (max-width: 768px) {

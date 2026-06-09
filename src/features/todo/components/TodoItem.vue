@@ -83,11 +83,6 @@ defineEmits(['edit', 'delete', 'toggle']);
     border-color: var(--color-border-strong);
 }
 
-.task-item:hover .gloss-overlay {
-    background: var(--surface-shine);
-    opacity: 0.8;
-}
-
 .task-priority-indicator {
     width: 4px;
     height: 100%;
