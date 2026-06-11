@@ -19,25 +19,6 @@
 
       <div class="toolbar-zone">
         <span class="save-indicator" :class="saveStatusClass">{{ saveStatusLabel }}</span>
-        <div class="font-size-control" aria-label="글자 크기">
-          <button
-            type="button"
-            title="글자 작게"
-            :disabled="editorFontSize <= MIN_FONT_SIZE"
-            @click="decreaseFontSize"
-          >
-            A-
-          </button>
-          <span>{{ editorFontSize }}px</span>
-          <button
-            type="button"
-            title="글자 크게"
-            :disabled="editorFontSize >= MAX_FONT_SIZE"
-            @click="increaseFontSize"
-          >
-            A+
-          </button>
-        </div>
         <button
           class="primary-icon-button"
           type="button"
@@ -58,20 +39,31 @@
         <BaseButton size="sm" @click="loadContent">다시 시도</BaseButton>
       </section>
 
-      <section v-else class="editor-surface" :class="{ loading: loadingNote }">
-        <div v-if="loadingNote" class="editor-loading">
-          <BaseSkeleton height="26px" width="52%" />
-          <BaseSkeleton height="18px" width="92%" />
-          <BaseSkeleton height="18px" width="84%" />
+      <section v-else class="editor-split" :class="{ loading: loadingNote }">
+        <div class="editor-surface">
+          <div v-if="loadingNote" class="editor-loading">
+            <BaseSkeleton height="26px" width="52%" />
+            <BaseSkeleton height="18px" width="92%" />
+            <BaseSkeleton height="18px" width="84%" />
+          </div>
+          <textarea
+            v-else
+            v-model="content"
+            class="markdown-editor"
+            placeholder="여기에 메모를 작성하세요. Markdown을 그대로 사용할 수 있습니다."
+            @input="handleContentUpdate(content)"
+          ></textarea>
         </div>
-        <textarea
-          v-else
-          v-model="content"
-          class="markdown-editor"
-          :style="{ '--memo-editor-font-size': `${editorFontSize}px` }"
-          placeholder="여기에 메모를 작성하세요. Markdown을 그대로 사용할 수 있습니다."
-          @input="handleContentUpdate(content)"
-        ></textarea>
+
+        <aside class="reader-preview" aria-label="읽기 모드 미리보기">
+          <header class="reader-preview-header">
+            <span>읽기 모드</span>
+            <small>{{ previewTitle }}</small>
+          </header>
+          <div class="reader-preview-body">
+            <MarkdownViewer :content="content.trim() || '아직 내용이 없습니다.'" />
+          </div>
+        </aside>
       </section>
     </main>
   </div>
@@ -89,17 +81,14 @@ import {
 } from "@ant-design/icons-vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import BaseSkeleton from "@/shared/ui/BaseSkeleton.vue";
+import MarkdownViewer from "@/components/ui/MarkdownViewer.vue";
 import { useMemo } from "@/features/memo/composables/useMemo";
 
 const props = defineProps({
   id: String,
 });
 
-const MIN_FONT_SIZE = 13;
-const MAX_FONT_SIZE = 22;
-const DEFAULT_FONT_SIZE = 16;
 const AUTO_SAVE_DELAY = 1200;
-const FONT_SIZE_STORAGE_KEY = "memo-editor-font-size";
 
 const router = useRouter();
 const { modal } = App.useApp();
@@ -117,13 +106,6 @@ const saveState = ref("saved");
 const lastSavedAt = ref("");
 const autoSaveTimer = ref(null);
 
-const storedFontSize = Number(localStorage.getItem(FONT_SIZE_STORAGE_KEY));
-const editorFontSize = ref(
-  Number.isFinite(storedFontSize)
-    ? Math.min(Math.max(storedFontSize, MIN_FONT_SIZE), MAX_FONT_SIZE)
-    : DEFAULT_FONT_SIZE
-);
-
 const isDirty = computed(
   () => title.value !== savedSnapshot.value.title || content.value !== savedSnapshot.value.content
 );
@@ -136,6 +118,8 @@ const editorMeta = computed(() => {
   if (lastSavedAt.value) return `${wordCount} words · 마지막 저장 ${lastSavedAt.value}`;
   return `${wordCount} words`;
 });
+
+const previewTitle = computed(() => title.value.trim() || "제목 없는 메모");
 
 const saveStatusLabel = computed(() => {
   if (loadingNote.value) return "불러오는 중";
@@ -162,20 +146,6 @@ const parseMemoDate = (value) => {
   const text = String(value);
   const date = /^\d+$/.test(text) ? new Date(Number(text) * 1000) : new Date(text);
   return Number.isFinite(date.getTime()) ? date : null;
-};
-
-const persistFontSize = () => {
-  localStorage.setItem(FONT_SIZE_STORAGE_KEY, String(editorFontSize.value));
-};
-
-const increaseFontSize = () => {
-  editorFontSize.value = Math.min(editorFontSize.value + 1, MAX_FONT_SIZE);
-  persistFontSize();
-};
-
-const decreaseFontSize = () => {
-  editorFontSize.value = Math.max(editorFontSize.value - 1, MIN_FONT_SIZE);
-  persistFontSize();
 };
 
 const clearAutoSaveTimer = () => {
@@ -415,45 +385,6 @@ onBeforeUnmount(() => {
   color: var(--color-danger);
 }
 
-.font-size-control {
-  display: inline-flex;
-  align-items: center;
-  height: 38px;
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-panel);
-}
-
-.font-size-control button {
-  width: 40px;
-  height: 36px;
-  border: 0;
-  background: transparent;
-  color: var(--color-text-secondary);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.font-size-control button:hover:not(:disabled) {
-  background: var(--color-bg-panel-strong);
-  color: var(--color-text-primary);
-}
-
-.font-size-control button:disabled {
-  color: var(--color-text-disabled);
-  cursor: not-allowed;
-}
-
-.font-size-control span {
-  min-width: 42px;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-caption);
-  text-align: center;
-}
-
 .icon-button,
 .primary-icon-button {
   display: inline-grid;
@@ -488,11 +419,23 @@ onBeforeUnmount(() => {
   padding: 18px;
 }
 
-.editor-surface,
+.editor-split,
 .editor-state {
-  width: min(100%, 1040px);
+  width: min(100%, 1280px);
   min-height: calc(100vh - 112px);
   margin: 0 auto;
+}
+
+.editor-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 42%);
+  gap: 14px;
+}
+
+.editor-surface,
+.reader-preview {
+  min-width: 0;
+  min-height: calc(100vh - 112px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-bg-surface);
@@ -500,7 +443,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
 }
 
-.editor-surface.loading {
+.editor-split.loading .editor-surface {
   padding: 28px;
 }
 
@@ -520,12 +463,50 @@ onBeforeUnmount(() => {
   background: var(--color-bg-surface);
   color: var(--color-text-primary);
   font-family: var(--font-family);
-  font-size: var(--memo-editor-font-size);
+  font-size: 16px;
   line-height: 1.72;
 }
 
 .markdown-editor::placeholder {
   color: var(--color-text-muted);
+}
+
+.reader-preview {
+  display: flex;
+  flex-direction: column;
+}
+
+.reader-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 54px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.reader-preview-header span {
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.reader-preview-header small {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reader-preview-body {
+  flex: 1;
+  overflow: auto;
+  padding: 28px 30px 96px;
+  color: var(--color-text-primary);
+  line-height: 1.72;
 }
 
 .editor-state {
@@ -578,6 +559,7 @@ onBeforeUnmount(() => {
   }
 
   .editor-surface,
+  .reader-preview,
   .editor-state {
     min-height: calc(100vh - 156px);
   }
@@ -585,6 +567,21 @@ onBeforeUnmount(() => {
   .markdown-editor {
     min-height: calc(100vh - 158px);
     padding: 22px 18px 88px;
+  }
+}
+
+@media (max-width: 980px) {
+  .editor-split {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-surface,
+  .reader-preview {
+    min-height: 520px;
+  }
+
+  .reader-preview {
+    min-height: 420px;
   }
 }
 </style>
