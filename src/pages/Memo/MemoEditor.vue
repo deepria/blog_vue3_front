@@ -61,7 +61,11 @@
             <small>{{ previewTitle }}</small>
           </header>
           <div class="reader-preview-body">
-            <MarkdownViewer :content="content.trim() || '아직 내용이 없습니다.'" />
+            <MarkdownViewer
+              :content="content.trim() || '아직 내용이 없습니다.'"
+              interactive-checkboxes
+              @checkbox-toggle="toggleTaskCheckbox"
+            />
           </div>
         </aside>
       </section>
@@ -178,6 +182,27 @@ const scheduleAutoSave = () => {
 const handleContentUpdate = (nextContent) => {
   content.value = nextContent;
   if (editorReady.value) markDirty();
+};
+
+const toggleTaskCheckbox = (targetIndex) => {
+  let currentIndex = -1;
+  let didToggle = false;
+  const taskPattern = /^(\s*[-*+]\s+\[)( |x|X)(\]\s+)/;
+  const nextContent = content.value
+    .split("\n")
+    .map((line) =>
+      line.replace(taskPattern, (match, prefix, state, suffix) => {
+        currentIndex += 1;
+        if (currentIndex !== targetIndex) return match;
+        didToggle = true;
+        return `${prefix}${state === " " ? "x" : " "}${suffix}`;
+      })
+    )
+    .join("\n");
+
+  if (!didToggle) return;
+  content.value = nextContent;
+  markDirty();
 };
 
 const loadContent = async () => {
