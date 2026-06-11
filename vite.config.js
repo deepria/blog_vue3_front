@@ -33,7 +33,7 @@ export default defineConfig({
           vue: ["vue", "vue-router"],
           state: ["pinia"],
           http: ["axios"],
-          editor: ["@toast-ui/editor"],
+          editor: ["@milkdown/crepe", "@milkdown/vue"],
           antd: ["ant-design-vue", "@ant-design/icons-vue"],
         },
       },
