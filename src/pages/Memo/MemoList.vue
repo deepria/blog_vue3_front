@@ -1,106 +1,142 @@
 <template>
   <PageShell
     class="memo-list-page"
-    title="Memos"
+    title="메모"
     eyebrow="Knowledge"
-    description="Search your notes, preview markdown, and jump back into writing."
+    :description="summaryText"
   >
     <template #actions>
-         <button class="icon-btn-secondary" @click="handleRefresh" title="Refresh">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-         </button>
-         <button class="icon-btn-primary" @click="createMemo" title="New Memo">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-         </button>
+      <button class="icon-button" type="button" title="새로고침" @click="handleRefresh">
+        <ReloadOutlined />
+      </button>
+      <button class="primary-action" type="button" @click="createMemo">
+        <PlusOutlined />
+        <span>새 메모</span>
+      </button>
     </template>
 
     <transition name="page-section" appear>
-      <div v-if="contentVisible" class="page-content">
-        <!-- Search & Filter -->
-        <div class="search-bar">
-            <BaseInput 
-                v-model="searchQuery" 
-                placeholder="Search memos..." 
-                class="search-input"
+      <div v-if="contentVisible" class="memo-workbench">
+        <section class="memo-toolbar" aria-label="메모 검색과 정렬">
+          <BaseInput v-model="searchQuery" placeholder="제목으로 메모 검색" class="search-input">
+            <template #suffix>
+              <SearchOutlined />
+            </template>
+          </BaseInput>
+
+          <div class="sort-control" aria-label="정렬">
+            <button
+              type="button"
+              :class="{ active: sortMode === 'recent' }"
+              @click="sortMode = 'recent'"
             >
-                <template #suffix>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                </template>
-            </BaseInput>
-        </div>
-
-        <!-- Empty State -->
-        <div v-if="!loading && filteredNotes.length === 0" class="empty-state">
-          <div class="empty-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              최근순
+            </button>
+            <button
+              type="button"
+              :class="{ active: sortMode === 'title' }"
+              @click="sortMode = 'title'"
+            >
+              제목순
+            </button>
           </div>
-          <p>No memos found</p>
-          <BaseButton v-if="searchQuery" variant="ghost" size="sm" @click="searchQuery = ''">Clear Search</BaseButton>
+        </section>
+
+        <div v-if="error && !loading" class="state-panel">
+          <ExclamationCircleOutlined />
+          <strong>{{ error }}</strong>
+          <BaseButton variant="ghost" size="sm" @click="handleRefresh">다시 시도</BaseButton>
         </div>
 
-        <!-- Loading State -->
-        <div v-if="loading" class="memo-grid">
-            <BaseSkeleton v-for="i in 6" :key="i" height="100px" shape="rect" />
-        </div>
-
-        <!-- Memo Grid -->
-        <div v-else class="memo-grid">
-      <div v-for="note in filteredNotes" :key="note.id" class="memo-wrapper">
-        <BaseCard 
-            class="memo-card" 
-            :class="{ 'is-expanded': expandedId === note.id }"
-            hoverable 
-            interactive
-            @click="togglePreview(note)"
-        >
-            <div class="memo-main">
-                <div class="memo-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                </div>
-                <div class="memo-info">
-                    <span class="memo-title">{{ note.title || 'Untitled Memo' }}</span>
-                    <span class="memo-date">{{ formatDate(note.updatedAt || note.updated_at || Date.now()) }}</span>
-                </div>
-                <div class="memo-actions">
-                     <button class="icon-btn-danger" @click.stop="confirmDelete(note)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                     </button>
-                </div>
+        <section v-else class="memo-layout">
+          <aside class="memo-list-panel" aria-label="메모 목록">
+            <div class="panel-meta">
+              <span>{{ filteredNotes.length }}개 메모</span>
+              <span v-if="searchQuery">검색 중</span>
             </div>
-        </BaseCard>
 
-        <!-- Preview Section -->
-        <transition name="expand">
-            <div v-if="expandedId === note.id" class="preview-panel" @click.stop>
-                <div v-if="loadingPreview" class="preview-loading">
-                    <BaseSkeleton height="20px" width="80%" style="margin-bottom: 8px" />
-                    <BaseSkeleton height="20px" width="60%" />
-                </div>
-                <div v-else class="preview-body">
-                    <MarkdownViewer :content="previewContent" />
-                </div>
-                <div class="preview-footer">
-                    <BaseButton size="sm" variant="primary" @click="editMemo(note.id)">
-                        Edit Memo
-                    </BaseButton>
-                </div>
+            <div v-if="loading" class="memo-list">
+              <BaseSkeleton v-for="i in 6" :key="i" height="84px" shape="rect" />
             </div>
-        </transition>
-      </div>
-        </div>
+
+            <div v-else-if="filteredNotes.length === 0" class="state-panel compact">
+              <FileTextOutlined />
+              <strong>{{ emptyTitle }}</strong>
+              <p>{{ emptyDescription }}</p>
+              <BaseButton v-if="searchQuery" variant="ghost" size="sm" @click="searchQuery = ''">
+                검색 지우기
+              </BaseButton>
+              <BaseButton v-else size="sm" @click="createMemo">첫 메모 쓰기</BaseButton>
+            </div>
+
+            <div v-else class="memo-list">
+              <button
+                v-for="note in filteredNotes"
+                :key="note.id"
+                type="button"
+                class="memo-row"
+                :class="{ selected: selectedId === note.id }"
+                @click="selectMemo(note)"
+              >
+                <span class="memo-row-icon"><FileTextOutlined /></span>
+                <span class="memo-row-copy">
+                  <strong>{{ note.title || "제목 없는 메모" }}</strong>
+                  <small>{{ formatDate(note.updatedAt || note.updated_at) }}</small>
+                </span>
+                <DeleteOutlined class="delete-icon" title="삭제" @click.stop="confirmDelete(note)" />
+              </button>
+            </div>
+          </aside>
+
+          <article class="preview-panel" aria-label="선택한 메모 미리보기">
+            <div v-if="!selectedId && !loading" class="state-panel preview-empty">
+              <FileSearchOutlined />
+              <strong>메모를 선택하세요</strong>
+              <p>목록에서 메모를 선택하면 이곳에서 내용을 확인하고 바로 편집할 수 있습니다.</p>
+            </div>
+
+            <div v-else-if="loadingPreview" class="preview-loading">
+              <BaseSkeleton height="28px" width="62%" />
+              <BaseSkeleton height="18px" width="86%" />
+              <BaseSkeleton height="18px" width="74%" />
+            </div>
+
+            <template v-else-if="selectedNote">
+              <header class="preview-header">
+                <div>
+                  <p>{{ formatDate(selectedNote.updatedAt || selectedNote.updated_at) }}</p>
+                  <h2>{{ selectedNote.title || "제목 없는 메모" }}</h2>
+                </div>
+                <BaseButton size="sm" @click="editMemo(selectedNote.id)">편집</BaseButton>
+              </header>
+
+              <div class="preview-body">
+                <MarkdownViewer :content="previewContent || '아직 내용이 없습니다.'" />
+              </div>
+            </template>
+          </article>
+        </section>
       </div>
     </transition>
   </PageShell>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { message, App } from 'ant-design-vue';
-import { useMemo } from '@/features/memo/composables/useMemo';
+import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import { App, message } from "ant-design-vue";
+import {
+  DeleteOutlined,
+  ExclamationCircleOutlined,
+  FileSearchOutlined,
+  FileTextOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons-vue";
+import { useMemo } from "@/features/memo/composables/useMemo";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import BaseInput from "@/shared/ui/BaseInput.vue";
-import BaseCard from "@/shared/ui/BaseCard.vue";
 import BaseSkeleton from "@/shared/ui/BaseSkeleton.vue";
 import MarkdownViewer from "@/components/ui/MarkdownViewer.vue";
 import PageShell from "@/shared/ui/PageShell.vue";
@@ -108,277 +144,430 @@ import PageShell from "@/shared/ui/PageShell.vue";
 const router = useRouter();
 const { modal } = App.useApp();
 
-// Use the newly created composable
 const {
+  notes,
   loading,
   loadingPreview,
+  error,
   searchQuery,
+  sortMode,
   filteredNotes,
   loadNotes,
   getNote,
-  deleteNote
+  deleteNote,
 } = useMemo();
 
-const expandedId = ref(null);
+const selectedId = ref("");
+const selectedNote = ref(null);
 const previewContent = ref("");
 const contentVisible = ref(false);
 
-const handleRefresh = async () => {
-    await loadNotes();
-    expandedId.value = null;
-    message.success("Refreshed");
+const summaryText = computed(() => {
+  if (loading.value) return "메모를 불러오는 중입니다.";
+  if (!notes.value.length) return "생각을 붙잡고 다시 이어 쓰는 개인 지식 책상입니다.";
+  return `총 ${notes.value.length}개의 메모가 있습니다.`;
+});
+
+const emptyTitle = computed(() => (searchQuery.value ? "검색 결과가 없습니다" : "아직 메모가 없습니다"));
+const emptyDescription = computed(() =>
+  searchQuery.value
+    ? "검색어를 바꾸거나 지운 뒤 다시 확인해보세요."
+    : "짧은 아이디어부터 긴 초안까지 이곳에 모아둘 수 있습니다."
+);
+
+const formatDate = (value) => {
+  if (!value) return "날짜 없음";
+  const text = String(value);
+  const date = /^\d+$/.test(text) ? new Date(Number(text) * 1000) : new Date(text);
+  if (!Number.isFinite(date.getTime())) return "날짜 없음";
+  return new Intl.DateTimeFormat("ko-KR", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 };
 
-const editMemo = (id) => {
-    router.push(`/memo/edit/${id}`);
-};
+const createMemo = () => router.push("/memo/edit");
+const editMemo = (id) => router.push(`/memo/edit/${id}`);
 
-const createMemo = () => router.push('/memo/edit');
-
-const formatDate = (ts) => {
-    const date = /^\d+$/.test(String(ts))
-      ? new Date(Number(ts) * 1000)
-      : new Date(ts);
-    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
-};
-
-const togglePreview = async (note) => {
-    if (expandedId.value === note.id) {
-        expandedId.value = null;
-        return;
-    }
-
-    expandedId.value = note.id;
+const selectMemo = async (note) => {
+  selectedId.value = note.id;
+  selectedNote.value = note;
+  previewContent.value = "";
+  try {
     const fullNote = await getNote(note.id);
-    previewContent.value = fullNote?.content || '(No Content)';
+    if (selectedId.value !== note.id) return;
+    selectedNote.value = fullNote;
+    previewContent.value = fullNote?.content || "";
+  } catch {
+    message.error("메모 내용을 불러오지 못했습니다.");
+  }
+};
+
+const selectFirstMemo = async () => {
+  await nextTick();
+  const first = filteredNotes.value[0];
+  if (!first) {
+    selectedId.value = "";
+    selectedNote.value = null;
+    previewContent.value = "";
+    return;
+  }
+  if (!selectedId.value || !filteredNotes.value.some((note) => note.id === selectedId.value)) {
+    await selectMemo(first);
+  }
+};
+
+const handleRefresh = async () => {
+  try {
+    await loadNotes();
+    await selectFirstMemo();
+    message.success("새로고침 완료");
+  } catch {
+    message.error("새로고침 실패");
+  }
 };
 
 const confirmDelete = (note) => {
-    modal.confirm({
-        title: 'Delete Memo',
-        content: `Are you sure you want to delete "${note.title}"?`,
-        okText: 'Delete',
-        okType: 'danger',
-        cancelText: 'Cancel',
-        centered: true,
-        onOk: async () => {
-            try {
-                await deleteNote(note.id);
-                message.success("Deleted");
-                if (expandedId.value === note.id) expandedId.value = null;
-            } catch {
-                message.error("Delete failed");
-            }
+  modal.confirm({
+    title: "메모 삭제",
+    content: `"${note.title || "제목 없는 메모"}" 메모를 삭제할까요?`,
+    okText: "삭제",
+    okType: "danger",
+    cancelText: "취소",
+    centered: true,
+    onOk: async () => {
+      try {
+        await deleteNote(note.id);
+        if (selectedId.value === note.id) {
+          selectedId.value = "";
+          selectedNote.value = null;
+          previewContent.value = "";
+          await selectFirstMemo();
         }
-    });
+        message.success("삭제했습니다.");
+      } catch {
+        message.error("삭제하지 못했습니다.");
+      }
+    },
+  });
 };
 
+watch([filteredNotes, searchQuery], () => {
+  selectFirstMemo();
+});
+
 onMounted(async () => {
+  try {
     await loadNotes();
+    await selectFirstMemo();
+  } catch {
+    // error state is rendered by the page.
+  } finally {
     requestAnimationFrame(() => {
-        contentVisible.value = true;
+      contentVisible.value = true;
     });
+  }
 });
 </script>
 
 <style scoped>
-.memo-list-page {
-    display: block;
+.memo-workbench {
+  display: grid;
+  gap: 16px;
 }
 
-.header-actions {
-    display: flex;
-    gap: var(--space-2);
+.memo-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
 }
 
-.search-bar {
-    margin-bottom: 4px;
-    max-width: 600px;
+.search-input {
+  max-width: 620px;
 }
 
-.page-content {
-    will-change: transform, opacity;
+.sort-control {
+  display: inline-flex;
+  height: 40px;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-panel);
 }
 
-.memo-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 14px;
+.sort-control button {
+  min-width: 72px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
-.memo-wrapper {
-    position: relative;
+.sort-control button.active {
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-sm);
 }
 
-.memo-card {
-    border-radius: var(--radius-lg);
-    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+.memo-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  min-height: 560px;
 }
 
-.memo-main {
-    display: grid;
-    grid-template-columns: 40px minmax(0, 1fr) auto;
-    align-items: center;
-    gap: var(--space-3);
-    min-height: 44px;
-}
-
-.memo-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-md);
-    background-color: var(--color-primary-soft);
-    border: 1px solid var(--color-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-primary-strong);
-}
-
-.memo-icon svg {
-    width: 20px;
-    height: 20px;
-}
-
-.memo-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    gap: 2px;
-}
-
-.memo-title {
-    font-weight: 600;
-    color: var(--color-text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: var(--font-size-body);
-    line-height: 1.25;
-}
-
-.memo-date {
-    font-size: var(--font-size-caption);
-    color: var(--color-text-muted);
-    line-height: 1.2;
-}
-
-.memo-actions {
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.memo-card:hover .memo-actions {
-    opacity: 1;
-}
-
-.icon-btn-danger {
-    background: none;
-    border: none;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    padding: 6px;
-    border-radius: var(--radius-sm);
-    transition: all 0.2s ease;
-}
-
-.icon-btn-danger:hover {
-    background-color: var(--color-danger);
-    color: white;
-}
-
-/* Preview Panel */
+.memo-list-panel,
 .preview-panel {
-    background-color: var(--color-bg-surface);
-    border: 1px solid var(--color-border);
-    border-top: none;
-    border-bottom-left-radius: var(--radius-lg);
-    border-bottom-right-radius: var(--radius-lg);
-    padding: var(--space-6);
-    margin-top: -2px;
-    position: relative;
-    z-index: 1;
-    box-shadow: var(--shadow-md);
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-sm);
 }
 
-.preview-body {
-    color: var(--color-text-primary);
-    font-size: var(--font-size-body);
-    line-height: 1.6;
-}
-
-.preview-body :deep(h1),
-.preview-body :deep(h2),
-.preview-body :deep(h3),
-.preview-body :deep(h4),
-.preview-body :deep(h5),
-.preview-body :deep(h6),
-.preview-body :deep(p),
-.preview-body :deep(span),
-.preview-body :deep(div),
-.preview-body :deep(li),
-.preview-body :deep(strong),
-.preview-body :deep(em) {
-    color: var(--color-text-primary) !important;
-}
-
-.preview-body :deep(a) {
-    color: var(--color-primary) !important;
-}
-
-.preview-body :deep(code),
-.preview-body :deep(pre) {
-    color: var(--color-primary-strong) !important;
-    background-color: var(--color-bg-base) !important;
-}
-
-/* Empty State */
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 42px 20px;
-    color: var(--color-text-muted);
-    gap: var(--space-3);
-}
-
-.empty-icon {
-    opacity: 0.5;
-}
-
-/* Transitions */
-.expand-enter-active,
-.expand-leave-active {
-  transition: all 0.3s ease;
-  max-height: 500px;
-  opacity: 1;
+.memo-list-panel {
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
-.expand-enter-from,
-.expand-leave-to {
-  max-height: 0;
-  opacity: 0;
-  padding-top: 0;
-  padding-bottom: 0;
+.panel-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+}
+
+.memo-list {
+  display: grid;
+  gap: 8px;
+  overflow: auto;
+  padding: 10px;
+}
+
+.memo-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 28px;
+  gap: 10px;
+  align-items: center;
+  min-height: 72px;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.memo-row:hover,
+.memo-row.selected {
+  border-color: var(--color-border);
+  background: var(--color-bg-panel);
+}
+
+.memo-row-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+}
+
+.memo-row-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.memo-row-copy strong {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.memo-row-copy small {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.delete-icon {
+  color: var(--color-text-muted);
+  opacity: 0.72;
+  transition: color 0.18s ease, opacity 0.18s ease;
+}
+
+.delete-icon:hover {
+  color: var(--color-danger);
+  opacity: 1;
+}
+
+.preview-panel {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 24px 28px 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.preview-header p {
+  margin: 0 0 8px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+}
+
+.preview-header h2 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 22px;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.preview-body {
+  flex: 1;
+  overflow: auto;
+  padding: 24px 28px 36px;
+  color: var(--color-text-primary);
+  line-height: 1.7;
+}
+
+.preview-loading {
+  display: grid;
+  gap: 14px;
+  padding: 28px;
+}
+
+.state-panel {
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  min-height: 220px;
+  padding: 28px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.state-panel :deep(svg),
+.state-panel > span[role="img"] {
+  color: var(--color-primary);
+  font-size: 30px;
+}
+
+.state-panel strong {
+  color: var(--color-text-primary);
+  font-size: 16px;
+}
+
+.state-panel p {
+  max-width: 360px;
+  margin: 0;
+}
+
+.state-panel.compact,
+.preview-empty {
+  min-height: 100%;
+}
+
+.icon-button,
+.primary-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.icon-button {
+  width: 40px;
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+}
+
+.primary-action {
+  gap: 8px;
+  padding: 0 14px;
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: white;
 }
 
 .page-section-enter-active,
 .page-section-appear-active {
-    transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: opacity 0.28s ease, transform 0.28s ease;
 }
 
 .page-section-enter-from,
 .page-section-appear-from {
-    opacity: 0;
-    transform: translateY(18px);
+  opacity: 0;
+  transform: translateY(12px);
 }
 
-@media (max-width: 768px) {
-    .memo-grid {
-        grid-template-columns: 1fr;
-    }
+@media (max-width: 900px) {
+  .memo-toolbar,
+  .memo-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .memo-layout {
+    min-height: auto;
+  }
+
+  .memo-list {
+    max-height: 420px;
+  }
+}
+
+@media (max-width: 620px) {
+  .memo-toolbar {
+    gap: 10px;
+  }
+
+  .sort-control {
+    width: 100%;
+  }
+
+  .sort-control button {
+    flex: 1;
+  }
+
+  .preview-header {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .preview-body {
+    padding: 20px;
+  }
 }
 </style>

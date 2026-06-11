@@ -1,91 +1,94 @@
 <template>
   <div class="editor-page">
     <header class="editor-header">
-      <div class="left-section">
-        <button class="icon-btn-secondary" @click="goBack" title="Back">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
+      <div class="title-zone">
+        <button class="icon-button" type="button" title="목록으로" @click="goBack">
+          <ArrowLeftOutlined />
         </button>
-        <input
-          v-model="title"
-          placeholder="Untitled Memo"
-          class="title-input-naked"
-          @input="markDirty"
-        />
+        <div class="title-stack">
+          <input
+            v-model="title"
+            placeholder="제목 없는 메모"
+            class="title-input"
+            :disabled="loadingNote"
+            @input="markDirty"
+          />
+          <span class="editor-meta">{{ editorMeta }}</span>
+        </div>
       </div>
 
-      <div class="right-section">
+      <div class="toolbar-zone">
         <span class="save-indicator" :class="saveStatusClass">{{ saveStatusLabel }}</span>
-
-        <div class="font-size-control" aria-label="Editor font size">
+        <div class="font-size-control" aria-label="글자 크기">
           <button
-            class="font-size-button"
             type="button"
-            title="Decrease font size"
+            title="글자 작게"
             :disabled="editorFontSize <= MIN_FONT_SIZE"
             @click="decreaseFontSize"
           >
             A-
           </button>
-          <span class="font-size-value">{{ editorFontSize }}px</span>
+          <span>{{ editorFontSize }}px</span>
           <button
-            class="font-size-button"
             type="button"
-            title="Increase font size"
+            title="글자 크게"
             :disabled="editorFontSize >= MAX_FONT_SIZE"
             @click="increaseFontSize"
           >
             A+
           </button>
         </div>
-
         <button
-          class="icon-btn-primary"
-          :class="{ loading: saving }"
-          :disabled="saving || loadingNote"
-          title="Save"
-          @click="save"
+          class="primary-icon-button"
+          type="button"
+          title="저장"
+          :disabled="saving || loadingNote || !canSave"
+          @click="saveNow"
         >
-          <svg v-if="!saving" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-            <polyline points="17 21 17 13 7 13 7 21"></polyline>
-            <polyline points="7 3 7 8 15 8"></polyline>
-          </svg>
-          <span v-else class="spinner"></span>
+          <LoadingOutlined v-if="saving" />
+          <SaveOutlined v-else />
         </button>
       </div>
     </header>
 
-    <div class="editor-container">
-      <div class="editor-wrapper" :class="{ 'is-loading': loadingNote }">
+    <main class="editor-main">
+      <section v-if="loadError" class="editor-state">
+        <ExclamationCircleOutlined />
+        <strong>메모를 불러오지 못했습니다.</strong>
+        <BaseButton size="sm" @click="loadContent">다시 시도</BaseButton>
+      </section>
+
+      <section v-else class="editor-surface" :class="{ loading: loadingNote }">
         <div v-if="loadingNote" class="editor-loading">
-          <BaseSkeleton height="22px" width="60%" />
+          <BaseSkeleton height="26px" width="52%" />
           <BaseSkeleton height="18px" width="92%" />
           <BaseSkeleton height="18px" width="84%" />
         </div>
-        <MemoMilkdownEditor
+        <textarea
           v-else
           v-model="content"
-          :editor-key="editorKey"
-          :font-size="editorFontSize"
-          @update:model-value="handleContentUpdate"
-          @ready="handleEditorReady"
-        />
-      </div>
-    </div>
+          class="markdown-editor"
+          :style="{ '--memo-editor-font-size': `${editorFontSize}px` }"
+          placeholder="여기에 메모를 작성하세요. Markdown을 그대로 사용할 수 있습니다."
+          @input="handleContentUpdate(content)"
+        ></textarea>
+      </section>
+    </main>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { onBeforeRouteLeave, useRouter } from "vue-router";
 import { App, message } from "ant-design-vue";
+import {
+  ArrowLeftOutlined,
+  ExclamationCircleOutlined,
+  LoadingOutlined,
+  SaveOutlined,
+} from "@ant-design/icons-vue";
+import BaseButton from "@/shared/ui/BaseButton.vue";
 import BaseSkeleton from "@/shared/ui/BaseSkeleton.vue";
-import MemoMilkdownEditor from "@/features/memo/components/MemoMilkdownEditor.vue";
 import { useMemo } from "@/features/memo/composables/useMemo";
 
 const props = defineProps({
@@ -95,6 +98,7 @@ const props = defineProps({
 const MIN_FONT_SIZE = 13;
 const MAX_FONT_SIZE = 22;
 const DEFAULT_FONT_SIZE = 16;
+const AUTO_SAVE_DELAY = 1200;
 const FONT_SIZE_STORAGE_KEY = "memo-editor-font-size";
 
 const router = useRouter();
@@ -103,13 +107,15 @@ const { getNote, saveNote } = useMemo();
 
 const title = ref("");
 const content = ref("");
+const currentId = ref(props.id || "");
 const savedSnapshot = ref({ title: "", content: "" });
 const saving = ref(false);
 const loadingNote = ref(false);
 const loadError = ref(false);
 const editorReady = ref(false);
-const editorKey = ref(0);
 const saveState = ref("saved");
+const lastSavedAt = ref("");
+const autoSaveTimer = ref(null);
 
 const storedFontSize = Number(localStorage.getItem(FONT_SIZE_STORAGE_KEY));
 const editorFontSize = ref(
@@ -122,19 +128,41 @@ const isDirty = computed(
   () => title.value !== savedSnapshot.value.title || content.value !== savedSnapshot.value.content
 );
 
+const canSave = computed(() => Boolean(title.value.trim() || content.value.trim()));
+
+const editorMeta = computed(() => {
+  const text = content.value.replace(/[#*_>`\-[\]()]/g, " ").trim();
+  const wordCount = text ? text.split(/\s+/).length : 0;
+  if (lastSavedAt.value) return `${wordCount} words · 마지막 저장 ${lastSavedAt.value}`;
+  return `${wordCount} words`;
+});
+
 const saveStatusLabel = computed(() => {
-  if (loadingNote.value) return "Loading...";
-  if (saving.value) return "Saving...";
-  if (saveState.value === "failed") return "Save failed";
-  if (isDirty.value) return "Unsaved changes";
-  return "Saved";
+  if (loadingNote.value) return "불러오는 중";
+  if (saving.value) return "저장 중";
+  if (saveState.value === "failed") return "저장 실패";
+  if (isDirty.value) return "자동저장 대기";
+  return "저장됨";
 });
 
 const saveStatusClass = computed(() => ({
-  "is-saving": saving.value,
-  "is-dirty": isDirty.value && !saving.value,
-  "is-error": saveState.value === "failed",
+  saving: saving.value,
+  dirty: isDirty.value && !saving.value,
+  error: saveState.value === "failed",
 }));
+
+const formatTime = (value) =>
+  new Intl.DateTimeFormat("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(value);
+
+const parseMemoDate = (value) => {
+  if (!value) return null;
+  const text = String(value);
+  const date = /^\d+$/.test(text) ? new Date(Number(text) * 1000) : new Date(text);
+  return Number.isFinite(date.getTime()) ? date : null;
+};
 
 const persistFontSize = () => {
   localStorage.setItem(FONT_SIZE_STORAGE_KEY, String(editorFontSize.value));
@@ -150,6 +178,12 @@ const decreaseFontSize = () => {
   persistFontSize();
 };
 
+const clearAutoSaveTimer = () => {
+  if (!autoSaveTimer.value) return;
+  clearTimeout(autoSaveTimer.value);
+  autoSaveTimer.value = null;
+};
+
 const snapshotCurrent = () => {
   savedSnapshot.value = {
     title: title.value,
@@ -159,7 +193,16 @@ const snapshotCurrent = () => {
 };
 
 const markDirty = () => {
+  if (!editorReady.value && !currentId.value) return;
   if (saveState.value !== "failed") saveState.value = "dirty";
+};
+
+const scheduleAutoSave = () => {
+  clearAutoSaveTimer();
+  if (!editorReady.value || loadingNote.value || saving.value || !isDirty.value || !canSave.value) return;
+  autoSaveTimer.value = setTimeout(() => {
+    saveNow({ silent: true });
+  }, AUTO_SAVE_DELAY);
 };
 
 const handleContentUpdate = (nextContent) => {
@@ -167,18 +210,80 @@ const handleContentUpdate = (nextContent) => {
   if (editorReady.value) markDirty();
 };
 
-const handleEditorReady = () => {
-  editorReady.value = true;
+const loadContent = async () => {
+  clearAutoSaveTimer();
+  editorReady.value = false;
+  loadError.value = false;
+  currentId.value = props.id || "";
+
+  if (!currentId.value) {
+    title.value = "";
+    content.value = "";
+    lastSavedAt.value = "";
+    snapshotCurrent();
+    editorReady.value = true;
+    return;
+  }
+
+  loadingNote.value = true;
+  try {
+    const note = await getNote(currentId.value);
+    title.value = note?.title || "";
+    content.value = note?.content || "";
+    const updatedAt = parseMemoDate(note?.updatedAt);
+    lastSavedAt.value = updatedAt ? formatTime(updatedAt) : "";
+    snapshotCurrent();
+  } catch {
+    loadError.value = true;
+    saveState.value = "failed";
+  } finally {
+    loadingNote.value = false;
+    editorReady.value = true;
+  }
+};
+
+const saveNow = async ({ silent = false } = {}) => {
+  clearAutoSaveTimer();
+  if (saving.value || loadingNote.value || !canSave.value) return null;
+
+  const nextTitle = title.value.trim() || "제목 없는 메모";
+  saving.value = true;
+  saveState.value = "saving";
+  try {
+    const savedMemo = await saveNote({
+      id: currentId.value,
+      title: nextTitle,
+      content: content.value,
+    });
+
+    currentId.value = savedMemo?.id || currentId.value;
+    title.value = savedMemo?.title || nextTitle;
+    content.value = savedMemo?.content ?? content.value;
+    lastSavedAt.value = formatTime(new Date());
+    snapshotCurrent();
+
+    if (!props.id && currentId.value) {
+      await router.replace(`/memo/edit/${currentId.value}`);
+    }
+    if (!silent) message.success("저장했습니다.");
+    return savedMemo;
+  } catch {
+    saveState.value = "failed";
+    if (!silent) message.error("저장하지 못했습니다.");
+    return null;
+  } finally {
+    saving.value = false;
+  }
 };
 
 const confirmLeave = () =>
   new Promise((resolve) => {
     modal.confirm({
-      title: "Leave memo?",
-      content: "You have unsaved changes. Leave without saving?",
-      okText: "Leave",
+      title: "메모를 나갈까요?",
+      content: "아직 저장되지 않은 변경사항이 있습니다.",
+      okText: "나가기",
       okType: "danger",
-      cancelText: "Stay",
+      cancelText: "계속 쓰기",
       centered: true,
       onOk: () => resolve(true),
       onCancel: () => resolve(false),
@@ -186,6 +291,9 @@ const confirmLeave = () =>
   });
 
 const goBack = async () => {
+  if (isDirty.value && canSave.value) {
+    await saveNow({ silent: true });
+  }
   if (isDirty.value) {
     const shouldLeave = await confirmLeave();
     if (!shouldLeave) return;
@@ -193,208 +301,207 @@ const goBack = async () => {
   router.push("/memo");
 };
 
-const loadContent = async () => {
-  editorReady.value = false;
-  loadError.value = false;
+watch([title, content], scheduleAutoSave);
 
-  if (!props.id) {
-    title.value = "";
-    content.value = "";
-    snapshotCurrent();
-    editorKey.value += 1;
-    return;
+watch(
+  () => props.id,
+  (nextId, previousId) => {
+    if (nextId !== previousId) loadContent();
   }
+);
 
-  loadingNote.value = true;
-  try {
-    const note = await getNote(props.id);
-    if (note) {
-      title.value = note.title || "";
-      content.value = note.content || "";
-      snapshotCurrent();
-    } else {
-      message.warn("Memo not found");
-      title.value = "";
-      content.value = "";
-      snapshotCurrent();
-    }
-  } catch {
-    loadError.value = true;
-    saveState.value = "failed";
-    message.error("Failed to load content");
-  } finally {
-    loadingNote.value = false;
-    editorKey.value += 1;
+onBeforeRouteLeave(async () => {
+  if (isDirty.value && canSave.value) {
+    await saveNow({ silent: true });
   }
-};
-
-const save = async () => {
-  const nextTitle = title.value.trim() || "Untitled Memo";
-
-  saving.value = true;
-  saveState.value = "saving";
-  try {
-    const savedMemo = await saveNote({
-      id: props.id,
-      title: nextTitle,
-      content: content.value,
-    });
-
-    title.value = savedMemo?.title || nextTitle;
-    content.value = savedMemo?.content ?? content.value;
-    snapshotCurrent();
-
-    if (!props.id && savedMemo?.id) {
-      await router.replace(`/memo/edit/${savedMemo.id}`);
-      message.success("Memo created");
-    } else {
-      message.success("Saved");
-    }
-  } catch {
-    saveState.value = "failed";
-    message.error("Save failed");
-  } finally {
-    saving.value = false;
-  }
-};
+  if (!isDirty.value) return true;
+  return await confirmLeave();
+});
 
 onMounted(() => {
   loadContent();
+});
+
+onBeforeUnmount(() => {
+  clearAutoSaveTimer();
 });
 </script>
 
 <style scoped>
 .editor-page {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--color-bg-base);
+  background: var(--color-bg-base);
 }
 
 .editor-header {
-  min-height: 72px;
+  min-height: 76px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding: 0 var(--space-6);
-  background: var(--color-bg-surface);
+  gap: 18px;
+  padding: 12px 24px;
   border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+  position: sticky;
+  top: 0;
   z-index: 10;
 }
 
-.left-section {
+.title-zone {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: 12px;
   flex: 1;
 }
 
-.title-input-naked {
-  width: 100%;
+.title-stack {
   min-width: 0;
-  background: transparent;
-  border: none;
-  color: var(--color-text-primary);
-  font-family: inherit;
-  font-size: 20px;
-  font-weight: 750;
-  letter-spacing: 0;
-  outline: none;
+  display: grid;
+  gap: 4px;
+  flex: 1;
 }
 
-.title-input-naked::placeholder {
+.title-input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 21px;
+  font-weight: 780;
+  letter-spacing: 0;
+  line-height: 1.2;
+  outline: 0;
+}
+
+.title-input::placeholder,
+.editor-meta {
   color: var(--color-text-muted);
 }
 
-.right-section {
+.editor-meta {
+  font-size: var(--font-size-caption);
+}
+
+.toolbar-zone {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--space-3);
+  gap: 10px;
 }
 
 .save-indicator {
-  min-width: 112px;
+  min-width: 88px;
   color: var(--color-text-muted);
   font-size: var(--font-size-caption);
+  font-weight: 700;
   text-align: right;
   white-space: nowrap;
 }
 
-.save-indicator.is-dirty {
+.save-indicator.dirty {
   color: var(--color-warning);
 }
 
-.save-indicator.is-saving {
+.save-indicator.saving {
   color: var(--color-primary);
 }
 
-.save-indicator.is-error {
+.save-indicator.error {
   color: var(--color-danger);
 }
 
 .font-size-control {
   display: inline-flex;
   align-items: center;
-  height: 36px;
+  height: 38px;
   overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg-panel);
 }
 
-.font-size-button {
-  width: 42px;
-  height: 34px;
-  border: none;
-  border-radius: 0;
+.font-size-control button {
+  width: 40px;
+  height: 36px;
+  border: 0;
   background: transparent;
   color: var(--color-text-secondary);
-  font-family: inherit;
+  font: inherit;
   font-size: 12px;
-  font-weight: 750;
+  font-weight: 800;
   cursor: pointer;
 }
 
-.font-size-button:hover:not(:disabled) {
+.font-size-control button:hover:not(:disabled) {
   background: var(--color-bg-panel-strong);
   color: var(--color-text-primary);
 }
 
-.font-size-button:disabled {
+.font-size-control button:disabled {
   color: var(--color-text-disabled);
   cursor: not-allowed;
 }
 
-.font-size-value {
-  min-width: 44px;
+.font-size-control span {
+  min-width: 42px;
   color: var(--color-text-muted);
   font-size: var(--font-size-caption);
   text-align: center;
-  white-space: nowrap;
 }
 
-.editor-container {
+.icon-button,
+.primary-icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font: inherit;
+  cursor: pointer;
+}
+
+.icon-button {
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+}
+
+.primary-icon-button {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+}
+
+.primary-icon-button:disabled {
+  opacity: 0.54;
+  cursor: not-allowed;
+}
+
+.editor-main {
   flex: 1;
   min-height: 0;
-  overflow: hidden;
-  background-color: var(--color-bg-surface);
   padding: 18px;
 }
 
-.editor-wrapper {
-  height: 100%;
-  overflow: hidden;
+.editor-surface,
+.editor-state {
+  width: min(100%, 1040px);
+  min-height: calc(100vh - 112px);
+  margin: 0 auto;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-bg-surface);
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
-.editor-wrapper.is-loading {
-  padding: 28px 32px;
+.editor-surface.loading {
+  padding: 28px;
 }
 
 .editor-loading {
@@ -402,26 +509,63 @@ onMounted(() => {
   gap: 14px;
 }
 
-@media (max-width: 720px) {
+.markdown-editor {
+  width: 100%;
+  min-height: calc(100vh - 114px);
+  height: 100%;
+  resize: none;
+  border: 0;
+  outline: 0;
+  padding: 30px 34px 96px;
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  font-size: var(--memo-editor-font-size);
+  line-height: 1.72;
+}
+
+.markdown-editor::placeholder {
+  color: var(--color-text-muted);
+}
+
+.editor-state {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  min-height: 420px;
+  padding: 32px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.editor-state > span[role="img"] {
+  color: var(--color-danger);
+  font-size: 32px;
+}
+
+.editor-state strong {
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 760px) {
   .editor-header {
-    min-height: auto;
     align-items: stretch;
     flex-direction: column;
     padding: 12px 16px;
   }
 
-  .left-section,
-  .right-section {
+  .title-zone,
+  .toolbar-zone {
     width: 100%;
   }
 
-  .right-section {
+  .toolbar-zone {
     justify-content: space-between;
-    gap: var(--space-2);
   }
 
-  .title-input-naked {
-    font-size: 16px;
+  .title-input {
+    font-size: 17px;
   }
 
   .save-indicator {
@@ -429,25 +573,18 @@ onMounted(() => {
     text-align: left;
   }
 
-  .font-size-control {
-    height: 34px;
-  }
-
-  .font-size-button {
-    width: 36px;
-    height: 32px;
-  }
-
-  .font-size-value {
-    min-width: 36px;
-  }
-
-  .editor-container {
+  .editor-main {
     padding: 10px;
   }
 
-  .editor-wrapper.is-loading {
-    padding: 20px 16px;
+  .editor-surface,
+  .editor-state {
+    min-height: calc(100vh - 156px);
+  }
+
+  .markdown-editor {
+    min-height: calc(100vh - 158px);
+    padding: 22px 18px 88px;
   }
 }
 </style>
