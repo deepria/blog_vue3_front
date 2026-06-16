@@ -6,6 +6,27 @@
           <h3 class="panel-title">File Library</h3>
           <p class="panel-subtitle">{{ loading ? "Loading files..." : `${files.length} files available` }}</p>
         </div>
+        <div class="sort-controls" aria-label="File sort controls">
+          <label class="sort-field">
+            <span class="sr-only">Sort files by</span>
+            <select v-model="sortKey" class="sort-select">
+              <option value="original">Default</option>
+              <option value="name">File name</option>
+              <option value="extension">Extension</option>
+            </select>
+          </label>
+          <button
+            class="icon-btn-secondary sort-direction-btn"
+            type="button"
+            :disabled="sortKey === 'original'"
+            :title="sortDirection === 'asc' ? 'Ascending' : 'Descending'"
+            :aria-label="sortDirection === 'asc' ? 'Sort ascending' : 'Sort descending'"
+            @click="toggleSortDirection"
+          >
+            <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8 4-4 4 4"></path><path d="M7 4v16"></path><path d="M11 12h10"></path><path d="M11 16h7"></path><path d="M11 20h4"></path></svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"></path><path d="M7 20V4"></path><path d="M11 4h10"></path><path d="M11 8h7"></path><path d="M11 12h4"></path></svg>
+          </button>
+        </div>
       </div>
     </template>
 
@@ -18,7 +39,7 @@
     </div>
 
     <div v-else class="file-grid">
-      <BaseCard v-for="file in files" :key="file.key" class="file-card" hoverable>
+      <BaseCard v-for="file in sortedFiles" :key="file.key" class="file-card" hoverable>
         <div class="file-item-row">
           <div class="file-details">
             <div class="file-name" :title="file.display_name">
@@ -52,10 +73,11 @@
 </template>
 
 <script setup>
+import { computed, ref } from "vue";
 import BaseCard from "@/shared/ui/BaseCard.vue";
 import BaseSkeleton from "@/shared/ui/BaseSkeleton.vue";
 
-defineProps({
+const props = defineProps({
   files: {
     type: Array,
     default: () => [],
@@ -67,6 +89,36 @@ defineProps({
 });
 
 defineEmits(["preview", "download", "delete"]);
+
+const sortKey = ref("original");
+const sortDirection = ref("asc");
+const collator = new Intl.Collator(undefined, {
+  numeric: true,
+  sensitivity: "base",
+});
+
+const sortedFiles = computed(() => {
+  if (sortKey.value === "original") return props.files;
+
+  const direction = sortDirection.value === "asc" ? 1 : -1;
+  return [...props.files].sort((left, right) => {
+    const primary = getSortValue(left.display_name, sortKey.value);
+    const secondary = getSortValue(right.display_name, sortKey.value);
+    const primaryResult = collator.compare(primary, secondary);
+    if (primaryResult !== 0) return primaryResult * direction;
+
+    return collator.compare(left.display_name || "", right.display_name || "") * direction;
+  });
+});
+
+const toggleSortDirection = () => {
+  sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
+};
+
+const getSortValue = (name = "", key) => {
+  if (key === "extension") return getFileExt(name).toLowerCase();
+  return name;
+};
 
 const getFileName = (name) => {
   const lastDot = name.lastIndexOf('.');
@@ -90,6 +142,64 @@ const getFileExt = (name) => {
   margin: var(--space-1) 0 0;
   color: var(--color-text-secondary);
   font-size: var(--font-size-caption);
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.sort-field {
+  display: flex;
+}
+
+.sort-select {
+  height: 34px;
+  min-width: 122px;
+  padding: 0 32px 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-caption);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sort-select:focus {
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 38%, transparent);
+  outline-offset: 2px;
+}
+
+.sort-direction-btn {
+  width: 34px;
+  height: 34px;
+}
+
+.sort-direction-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .file-grid {
@@ -168,6 +278,23 @@ const getFileExt = (name) => {
 }
 
 @media (max-width: 640px) {
+  .panel-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sort-controls {
+    width: 100%;
+  }
+
+  .sort-field {
+    flex: 1;
+  }
+
+  .sort-select {
+    width: 100%;
+  }
+
   .file-details {
     align-items: flex-start;
     flex-direction: column;

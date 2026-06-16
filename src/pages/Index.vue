@@ -3,10 +3,24 @@
     <div class="dashboard-grid">
       <section class="hero-cluster">
         <BaseCard class="hero-card dashboard-card dashboard-glass dashboard-card--elevated" glass hoverable>
-          <div class="hero-copy">
-            <p class="eyebrow">Today Brief</p>
-            <h1 class="header-title">Welcome Back, {{ accountName }}</h1>
-            <p class="header-subtitle">{{ today }}</p>
+          <div class="hero-topline">
+            <div class="hero-copy">
+              <p class="eyebrow">Today Brief</p>
+              <h1 class="header-title">Welcome Back, {{ accountName }}</h1>
+              <p class="header-subtitle">{{ today }}</p>
+            </div>
+            <BaseButton
+              class="theme-toggle"
+              size="sm"
+              variant="secondary"
+              :title="themeToggleTitle"
+              :aria-label="themeToggleTitle"
+              :aria-pressed="isDarkMode"
+              @click="app.toggleTheme"
+            >
+              <component :is="isDarkMode ? BulbFilled : BulbOutlined" />
+              <span>{{ isDarkMode ? 'Dark On' : 'Dark Off' }}</span>
+            </BaseButton>
           </div>
           <div class="hero-meta">
             <span class="meta-chip">Notes {{ dashboardLoading ? '-' : metrics.notesTotal }}</span>
@@ -199,6 +213,7 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { message } from "ant-design-vue";
+import { BulbFilled, BulbOutlined } from "@ant-design/icons-vue";
 import BaseCard from "@/shared/ui/BaseCard.vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import { useDashboard } from "@/features/dashboard/composables/useDashboard";
@@ -234,6 +249,9 @@ const accountName = computed(() => {
   const email = app.user?.email || "";
   return email.split("@")[0] || app.user?.name || "there";
 });
+
+const isDarkMode = computed(() => app.theme === "dark");
+const themeToggleTitle = computed(() => (isDarkMode.value ? "Turn dark mode off" : "Turn dark mode on"));
 
 const handleSaveClipboard = async () => {
   try {
@@ -335,10 +353,28 @@ onMounted(() => {
   line-height: 1.5;
 }
 
+.hero-topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
 .hero-copy {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
+}
+
+.theme-toggle {
+  flex-shrink: 0;
+  min-width: 104px;
+}
+
+.theme-toggle :deep(.button-content) {
+  justify-content: center;
+  width: 100%;
 }
 
 .eyebrow {
@@ -580,6 +616,13 @@ onMounted(() => {
   .quick-task-head {
     flex-direction: row !important;
     align-items: center !important;
+  }
+  .hero-topline {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .theme-toggle {
+    width: 100%;
   }
   .dashboard-alert :deep(.base-card-body) {
     align-items: flex-start;

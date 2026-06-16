@@ -11,14 +11,15 @@
 
 <script setup>
 import Navigation from "@/components/Navigation.vue";
+import { useAppStore } from "@/store/app";
 import { theme } from "ant-design-vue";
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 import '@/assets/styles/global.css';
 
 const route = useRoute();
-const isDarkMode = ref(false);
-let mediaQuery;
+const app = useAppStore();
+const isDarkMode = computed(() => app.theme === "dark");
 
 const antTheme = computed(() => ({
   algorithm: isDarkMode.value ? theme.darkAlgorithm : theme.defaultAlgorithm,
@@ -34,18 +35,9 @@ const antTheme = computed(() => ({
   },
 }));
 
-function syncColorScheme(event) {
-  isDarkMode.value = Boolean(event.matches);
-}
-
-onMounted(() => {
-  mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-  syncColorScheme(mediaQuery);
-  mediaQuery.addEventListener("change", syncColorScheme);
-});
-
-onBeforeUnmount(() => {
-  mediaQuery?.removeEventListener("change", syncColorScheme);
+watchEffect(() => {
+  document.documentElement.dataset.theme = app.theme;
+  document.documentElement.style.colorScheme = app.theme;
 });
 </script>
 

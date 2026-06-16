@@ -2,10 +2,13 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { authApi } from "@/features/auth/api/authApi";
 
+const THEME_STORAGE_KEY = "deepria.theme";
+const normalizeTheme = (value) => (value === "dark" ? "dark" : "light");
+
 export const useAppStore = defineStore('app', () => {
     // State
     const isLoading = ref(false);
-    const theme = ref('dark'); // Default to dark for this design
+    const theme = ref(normalizeTheme(localStorage.getItem(THEME_STORAGE_KEY)));
     const user = ref(null);
     const providers = ref([]);
     const authReady = ref(false);
@@ -15,9 +18,13 @@ export const useAppStore = defineStore('app', () => {
         isLoading.value = status;
     };
 
+    const setTheme = (value) => {
+        theme.value = normalizeTheme(value);
+        localStorage.setItem(THEME_STORAGE_KEY, theme.value);
+    };
+
     const toggleTheme = () => {
-        theme.value = theme.value === 'dark' ? 'light' : 'dark';
-        // Logic to toggle global CSS class could go here
+        setTheme(theme.value === 'dark' ? 'light' : 'dark');
     };
 
     const setSession = (session) => {
@@ -35,7 +42,7 @@ export const useAppStore = defineStore('app', () => {
                 try {
                     setSession(await authApi.refresh());
                     return user.value;
-                } catch (_) {
+                } catch {
                     setSession(null);
                     return null;
                 }
@@ -60,6 +67,7 @@ export const useAppStore = defineStore('app', () => {
         providers,
         authReady,
         setLoading,
+        setTheme,
         toggleTheme,
         loadSession,
         logout,

@@ -25,6 +25,15 @@ const emit = defineEmits(['checkbox-toggle']);
 const viewerRef = ref(null);
 let viewerInstance = null;
 
+const prepareRenderedLinks = () => {
+  if (!viewerRef.value) return;
+
+  viewerRef.value.querySelectorAll("a[href]").forEach((link) => {
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+  });
+};
+
 const prepareInteractiveCheckboxes = () => {
   if (!viewerRef.value || !props.interactiveCheckboxes) return;
   viewerRef.value.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
@@ -38,22 +47,25 @@ const updateViewer = () => {
   if (viewerRef.value) {
     if (viewerInstance?.setMarkdown) {
       viewerInstance.setMarkdown(props.content);
+      prepareRenderedLinks();
       prepareInteractiveCheckboxes();
       return;
     }
     viewerInstance?.destroy?.();
     viewerInstance = renderMarkdown(viewerRef.value, props.content);
+    prepareRenderedLinks();
     prepareInteractiveCheckboxes();
   }
 };
 
 const handleClick = (event) => {
-  if (!props.interactiveCheckboxes) return;
   const checkbox = event.target?.closest?.('input[type="checkbox"]');
-  if (!checkbox || !viewerRef.value?.contains(checkbox)) return;
-  event.preventDefault();
-  const index = Number(checkbox.dataset.taskIndex);
-  if (Number.isInteger(index)) emit('checkbox-toggle', index);
+  if (checkbox && viewerRef.value?.contains(checkbox)) {
+    if (!props.interactiveCheckboxes) return;
+    event.preventDefault();
+    const index = Number(checkbox.dataset.taskIndex);
+    if (Number.isInteger(index)) emit('checkbox-toggle', index);
+  }
 };
 
 onMounted(() => {
