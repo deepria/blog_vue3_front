@@ -19,13 +19,28 @@
         @drag-state="isDragging = $event"
       />
 
-      <StorageFileList
-        :files="previewableFiles"
-        :loading="loading"
-        @preview="requestAction($event, 'preview')"
-        @download="requestAction($event, 'download')"
-        @delete="requestAction($event, 'delete')"
-      />
+      <div class="storage-workspace">
+        <StorageDirectoryTree
+          :directories="organization.directories"
+          :selected-id="selectedDirectoryId"
+          :file-counts="directoryFileCounts"
+          :total-files="previewableFiles.length"
+          :unassigned-count="unassignedFiles.length"
+          @create="createDirectory"
+          @rename="renameDirectory"
+          @delete="deleteDirectory"
+          @select="selectedDirectoryId = $event"
+          @move-file="moveFileToDirectory"
+        />
+
+        <StorageFileList
+          :files="visibleFiles"
+          :loading="loading"
+          @preview="requestAction($event, 'preview')"
+          @download="requestAction($event, 'download')"
+          @delete="requestAction($event, 'delete')"
+        />
+      </div>
     </div>
 
     <BaseModal v-model="showUploadModal" title="Upload Settings">
@@ -103,9 +118,11 @@
 
 <script setup>
 import { App, message } from "ant-design-vue";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useStorage } from "@/features/storage/composables/useStorage";
+import { storageApi } from "@/features/storage/api/storageApi";
 import StorageFileList from "@/features/storage/components/StorageFileList.vue";
+import StorageDirectoryTree from "@/features/storage/components/StorageDirectoryTree.vue";
 import StorageUploadPanel from "@/features/storage/components/StorageUploadPanel.vue";
 import MarkdownViewer from "@/components/ui/MarkdownViewer.vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
@@ -128,6 +145,11 @@ const isUploading = ref(false);
 const uploadTask = ref(null);
 const showUploadModal = ref(false);
 const showAuthModal = ref(false);
+const selectedDirectoryId = ref("all");
+const organization = ref({
+  directories: [],
+  file_locations: {},
+});
 const imagePreview = ref({
   visible: false,
   url: "",
@@ -143,9 +165,133 @@ const textPreview = ref({
 const pendingAction = ref(null);
 let resolveAuthPromise = null;
 
+const knownFileKeys = computed(() => new Set(previewableFiles.value.map((file) => file.key)));
+
+const unassignedFiles = computed(() =>
+  previewableFiles.value.filter((file) => !organization.value.file_locations[file.key]),
+);
+
+const visibleFiles = computed(() => {
+  if (selectedDirectoryId.value === "all") return previewableFiles.value;
+  if (selectedDirectoryId.value === "unassigned") return unassignedFiles.value;
+  return previewableFiles.value.filter(
+    (file) => organization.value.file_locations[file.key] === selectedDirectoryId.value,
+  );
+});
+
+const directoryFileCounts = computed(() => {
+  const counts = {};
+  organization.value.directories.forEach((directory) => {
+    counts[directory.id] = 0;
+  });
+  Object.entries(organization.value.file_locations).forEach(([key, directoryId]) => {
+    if (!knownFileKeys.value.has(key) || !directoryId) return;
+    counts[directoryId] = (counts[directoryId] || 0) + 1;
+  });
+  return counts;
+});
+
 const refreshDirectory = async () => {
-  await loadFiles();
+  await Promise.all([loadFiles(), loadOrganization()]);
   message.success("Refreshed");
+};
+
+const loadOrganization = async () => {
+  organization.value = normalizeOrganization(await storageApi.getOrganization());
+};
+
+const saveOrganization = async (nextOrganization) => {
+  organization.value = normalizeOrganization(await storageApi.saveOrganization(nextOrganization));
+};
+
+const normalizeOrganization = (data = {}) => ({
+  directories: Array.isArray(data.directories) ? data.directories : [],
+  file_locations: data.file_locations && typeof data.file_locations === "object" ? data.file_locations : {},
+});
+
+const createDirectory = async () => {
+  const sortOrder = organization.value.directories.length + 1;
+  const nextDirectory = {
+    id: `dir_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+    name: "New folder",
+    parent_id: null,
+    sort_order: sortOrder,
+  };
+  await saveOrganization({
+    ...organization.value,
+    directories: [...organization.value.directories, nextDirectory],
+  });
+  selectedDirectoryId.value = nextDirectory.id;
+  message.success("Folder added");
+};
+
+const renameDirectory = async ({ id, name }) => {
+  await saveOrganization({
+    ...organization.value,
+    directories: organization.value.directories.map((directory) =>
+      directory.id === id ? { ...directory, name } : directory,
+    ),
+  });
+};
+
+const deleteDirectory = async (id) => {
+  const target = organization.value.directories.find((directory) => directory.id === id);
+  if (!target) return;
+  modal.confirm({
+    title: "Delete Folder",
+    content: `Delete "${target.name}"? Files will remain in storage.`,
+    okText: "Delete",
+    okType: "danger",
+    cancelText: "Cancel",
+    centered: true,
+    onOk: async () => {
+      const directoryIds = collectDirectoryIds(id);
+      const fileLocations = { ...organization.value.file_locations };
+      Object.entries(fileLocations).forEach(([key, directoryId]) => {
+        if (directoryIds.has(directoryId)) {
+          delete fileLocations[key];
+        }
+      });
+      await saveOrganization({
+        directories: organization.value.directories.filter((directory) => !directoryIds.has(directory.id)),
+        file_locations: fileLocations,
+      });
+      if (directoryIds.has(selectedDirectoryId.value)) {
+        selectedDirectoryId.value = "unassigned";
+      }
+      message.success("Folder deleted");
+    },
+  });
+};
+
+const collectDirectoryIds = (rootId) => {
+  const ids = new Set([rootId]);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    organization.value.directories.forEach((directory) => {
+      if (directory.parent_id && ids.has(directory.parent_id) && !ids.has(directory.id)) {
+        ids.add(directory.id);
+        changed = true;
+      }
+    });
+  }
+  return ids;
+};
+
+const moveFileToDirectory = async ({ fileKey, directoryId }) => {
+  if (!knownFileKeys.value.has(fileKey)) return;
+  const fileLocations = { ...organization.value.file_locations };
+  if (directoryId) {
+    fileLocations[fileKey] = directoryId;
+  } else {
+    delete fileLocations[fileKey];
+  }
+  await saveOrganization({
+    ...organization.value,
+    file_locations: fileLocations,
+  });
+  message.success(directoryId ? "Moved to folder" : "Moved to unassigned");
 };
 
 const handleFileChange = (event) => {
@@ -250,7 +396,7 @@ async function requestAction(file, action) {
     onOk: async () => {
       const data = await getDeleteUrl(file.key, providedAuthKey);
       await fetch(data.url, { method: "DELETE" });
-      await loadFiles();
+      await Promise.all([loadFiles(), loadOrganization()]);
       message.success("Deleted");
     },
   });
@@ -315,7 +461,7 @@ function getPreviewType(file) {
 }
 
 onMounted(() => {
-  loadFiles();
+  Promise.all([loadFiles(), loadOrganization()]);
 });
 </script>
 
@@ -326,8 +472,14 @@ onMounted(() => {
 
 .s3-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.18fr);
-  gap: var(--space-6);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.storage-workspace {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.38fr) minmax(0, 1fr);
+  gap: var(--space-4);
   align-items: start;
 }
 
@@ -368,10 +520,18 @@ onMounted(() => {
   .s3-grid {
     grid-template-columns: 1fr;
   }
+
+  .storage-workspace {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 960px) {
   .s3-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .storage-workspace {
     grid-template-columns: 1fr;
   }
 }

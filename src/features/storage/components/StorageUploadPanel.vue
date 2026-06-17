@@ -1,10 +1,10 @@
 <template>
-  <BaseCard class="upload-panel" hoverable>
+  <BaseCard class="upload-panel compact-upload" hoverable>
     <template #header>
       <div class="panel-header">
         <div>
-          <h3 class="panel-title">Upload Zone</h3>
-          <p class="panel-subtitle">Drop a file here or tap to choose one</p>
+          <h3 class="panel-title">Upload</h3>
+          <p class="panel-subtitle">Drop or choose a file</p>
         </div>
         <span class="panel-chip">Protected</span>
       </div>
@@ -24,8 +24,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
         </div>
-        <p class="upload-title"><strong>Click to upload</strong> or drag and drop</p>
-        <p class="sub-text">Supports all file types and optional protection keys</p>
+        <p class="upload-title"><strong>Choose file</strong> or drag here</p>
       </div>
       <input
         ref="inputRef"
@@ -99,8 +98,8 @@ function handleChange(event) {
 
 .upload-zone {
   border: 1px dashed var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  padding: 42px 24px;
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
   text-align: center;
   cursor: pointer;
   background: var(--color-bg-panel);
@@ -114,14 +113,15 @@ function handleChange(event) {
 }
 
 .upload-content {
-  display: grid;
-  justify-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 10px;
 }
 
 .upload-icon {
-  width: 52px;
-  height: 52px;
+  width: 36px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -135,6 +135,7 @@ function handleChange(event) {
 .upload-title {
   margin: 0;
   color: var(--color-text-primary);
+  font-size: var(--font-size-caption);
 }
 
 .sub-text {

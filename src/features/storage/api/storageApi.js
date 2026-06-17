@@ -6,6 +6,16 @@ export const storageApi = {
     return unwrapData(response)?.items || [];
   },
 
+  async getOrganization() {
+    const response = await apiClient.get("/api/files/organization");
+    return unwrapData(response) || { directories: [], file_locations: {} };
+  },
+
+  async saveOrganization(organization) {
+    const response = await apiClient.put("/api/files/organization", organization);
+    return unwrapData(response) || { directories: [], file_locations: {} };
+  },
+
   async createUpload({ filename, displayName, contentType, authKey }) {
     const response = await apiClient.post("/api/files/presign-upload", {
       filename,
