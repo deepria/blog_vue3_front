@@ -7,18 +7,23 @@
           <p class="panel-subtitle">{{ loading ? "Loading files..." : `${files.length} files available` }}</p>
         </div>
         <div class="sort-controls" aria-label="File sort controls">
-          <label class="sort-field">
-            <span class="sr-only">Sort files by</span>
-            <select v-model="sortKey" class="sort-select">
-              <option value="original">Default</option>
-              <option value="name">File name</option>
-              <option value="extension">Extension</option>
-            </select>
-          </label>
+          <div class="sort-toggle" :class="`is-${sortKey}`" role="group" aria-label="Sort files by">
+            <span class="sort-toggle-indicator" aria-hidden="true"></span>
+            <button
+              v-for="option in sortOptions"
+              :key="option.value"
+              class="sort-toggle-btn"
+              :class="{ active: sortKey === option.value }"
+              type="button"
+              :aria-pressed="sortKey === option.value"
+              @click="sortKey = option.value"
+            >
+              {{ option.label }}
+            </button>
+          </div>
           <button
             class="icon-btn-secondary sort-direction-btn"
             type="button"
-            :disabled="sortKey === 'original'"
             :title="sortDirection === 'asc' ? 'Ascending' : 'Descending'"
             :aria-label="sortDirection === 'asc' ? 'Sort ascending' : 'Sort descending'"
             @click="toggleSortDirection"
@@ -38,7 +43,7 @@
       <p>No files uploaded yet</p>
     </div>
 
-    <div v-else class="file-grid">
+    <TransitionGroup v-else name="file-list" tag="div" class="file-grid">
       <div
         v-for="file in sortedFiles"
         :key="file.key"
@@ -77,7 +82,7 @@
           </div>
         </BaseCard>
       </div>
-    </div>
+    </TransitionGroup>
   </BaseCard>
 </template>
 
@@ -99,7 +104,12 @@ const props = defineProps({
 
 const emit = defineEmits(["preview", "download", "delete", "drag-start", "drag-end"]);
 
-const sortKey = ref("original");
+const sortOptions = [
+  { value: "name", label: "Name" },
+  { value: "extension", label: "Ext" },
+];
+
+const sortKey = ref("name");
 const sortDirection = ref("asc");
 const collator = new Intl.Collator(undefined, {
   numeric: true,
@@ -107,8 +117,6 @@ const collator = new Intl.Collator(undefined, {
 });
 
 const sortedFiles = computed(() => {
-  if (sortKey.value === "original") return props.files;
-
   const direction = sortDirection.value === "asc" ? 1 : -1;
   return [...props.files].sort((left, right) => {
     const primary = getSortValue(left.display_name, sortKey.value);
@@ -153,6 +161,10 @@ const getFileExt = (name) => {
   color: var(--color-text-primary);
 }
 
+.library-panel {
+  min-width: 0;
+}
+
 .panel-subtitle {
   margin: var(--space-1) 0 0;
   color: var(--color-text-secondary);
@@ -173,24 +185,59 @@ const getFileExt = (name) => {
   flex-shrink: 0;
 }
 
-.sort-field {
-  display: flex;
-}
-
-.sort-select {
+.sort-toggle {
   height: 34px;
-  min-width: 122px;
-  padding: 0 32px 0 12px;
+  position: relative;
+  display: inline-flex;
+  padding: 2px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background-color: var(--color-bg-surface);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-caption);
-  line-height: 1;
-  cursor: pointer;
+  overflow: hidden;
 }
 
-.sort-select:focus {
+.sort-toggle-indicator {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc(50% - 2px);
+  border-radius: calc(var(--radius-sm) - 2px);
+  background: var(--color-primary);
+  transition: transform 0.18s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.sort-toggle.is-extension .sort-toggle-indicator {
+  transform: translateX(100%);
+}
+
+.sort-toggle-btn {
+  position: relative;
+  z-index: 1;
+  min-width: 48px;
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: calc(var(--radius-sm) - 2px);
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-caption);
+  font-weight: 650;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.sort-toggle-btn:not(.active):hover {
+  background: var(--color-bg-panel);
+}
+
+.sort-toggle-btn.active {
+  color: var(--text-inverse);
+}
+
+.sort-toggle-btn:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--color-primary) 38%, transparent);
   outline-offset: 2px;
 }
@@ -198,11 +245,6 @@ const getFileExt = (name) => {
 .sort-direction-btn {
   width: 34px;
   height: 34px;
-}
-
-.sort-direction-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.48;
 }
 
 .sr-only {
@@ -222,8 +264,26 @@ const getFileExt = (name) => {
   gap: 10px;
 }
 
+.file-list-move,
+.file-list-enter-active,
+.file-list-leave-active {
+  transition: transform 0.18s ease, opacity 0.14s ease;
+}
+
+.file-list-enter-from,
+.file-list-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.file-list-leave-active {
+  position: absolute;
+  width: 100%;
+}
+
 .file-card-drag {
   cursor: grab;
+  min-width: 0;
 }
 
 .file-card-drag:active {
@@ -231,7 +291,7 @@ const getFileExt = (name) => {
 }
 
 .file-card :deep(.base-card-body) {
-  padding: var(--space-3) var(--space-4) !important;
+  padding: 10px 12px !important;
 }
 
 .file-item-row {
@@ -245,6 +305,7 @@ const getFileExt = (name) => {
   justify-content: space-between;
   align-items: center;
   min-width: 0;
+  width: 100%;
 }
 
 .file-name {
@@ -254,16 +315,22 @@ const getFileExt = (name) => {
   color: var(--color-text-primary);
   padding-right: var(--space-3);
   min-width: 0;
+  max-width: 100%;
   flex: 1;
+  font-size: var(--font-size-caption);
+  line-height: 1.35;
 }
 
 .name-text {
+  flex: 1;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .name-ext {
+  flex-shrink: 0;
   white-space: nowrap;
 }
 
@@ -278,13 +345,13 @@ const getFileExt = (name) => {
 
 .file-actions {
   display: flex;
-  gap: var(--space-2);
+  gap: 6px;
   flex-shrink: 0;
 }
 
 .mini-btn {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
 }
 
 /* User wants cyan (테마에 어울리는 청록색) for delete */
@@ -310,23 +377,31 @@ const getFileExt = (name) => {
     width: 100%;
   }
 
-  .sort-field {
+  .sort-toggle {
     flex: 1;
   }
 
-  .sort-select {
-    width: 100%;
+  .sort-toggle-btn {
+    flex: 1;
+    min-width: 0;
   }
 
-  .file-details {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 12px;
+  .file-name {
+    padding-right: 8px;
   }
 
   .file-actions {
-    width: 100%;
+    width: auto;
     justify-content: flex-end;
+  }
+
+  .file-card :deep(.base-card-body) {
+    padding: 9px 10px !important;
+  }
+
+  .mini-btn {
+    width: 28px;
+    height: 28px;
   }
 }
 </style>

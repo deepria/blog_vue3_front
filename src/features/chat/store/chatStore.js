@@ -92,21 +92,7 @@ export const useChatStore = defineStore("chat", () => {
     }
   }
 
-  async function sendMessage(text) {
-    const session = currentSession.value;
-    const content = text.trim();
-    if (!session || !content) return;
-
-    session.messages.push({
-      role: "user",
-      content,
-      timestamp: Date.now(),
-    });
-    session.lastModified = Date.now();
-    if (session.messages.length === 1 && session.title === "New Chat") {
-      session.title = content.length > 30 ? `${content.slice(0, 30)}...` : content;
-    }
-
+  async function requestAssistantReply(session, content) {
     loading.value = true;
     loadingSince.value = Date.now();
 
@@ -129,9 +115,75 @@ export const useChatStore = defineStore("chat", () => {
         isError: true,
         timestamp: Date.now(),
       });
+      session.lastModified = Date.now();
     } finally {
       clearLoading();
     }
+  }
+
+  async function sendMessage(text) {
+    const session = currentSession.value;
+    const content = text.trim();
+    if (!session || !content) return;
+
+    session.messages.push({
+      role: "user",
+      content,
+      timestamp: Date.now(),
+    });
+    session.lastModified = Date.now();
+    if (session.messages.length === 1 && session.title === "New Chat") {
+      session.title = content.length > 30 ? `${content.slice(0, 30)}...` : content;
+    }
+
+    await requestAssistantReply(session, content);
+  }
+
+  function renameSession(id, title) {
+    const session = sessions.value.find((item) => item.id === id);
+    const nextTitle = title.trim();
+    if (!session || !nextTitle) return;
+    session.title = nextTitle.slice(0, 80);
+    session.lastModified = Date.now();
+  }
+
+  function deleteMessage(index) {
+    const session = currentSession.value;
+    if (!session || index < 0 || index >= session.messages.length) return;
+    session.messages.splice(index, 1);
+    session.lastModified = Date.now();
+  }
+
+  async function retryMessage(index) {
+    const session = currentSession.value;
+    if (!session || loading.value) return;
+
+    const userMessageIndex = session.messages
+      .slice(0, index + 1)
+      .map((item, itemIndex) => ({ ...item, itemIndex }))
+      .reverse()
+      .find((item) => item.role === "user")?.itemIndex;
+
+    if (userMessageIndex === undefined) return;
+
+    const content = session.messages[userMessageIndex]?.content?.trim();
+    if (!content) return;
+
+    const nextMessages = session.messages.slice(0, userMessageIndex + 1);
+    session.messages.splice(0, session.messages.length, ...nextMessages);
+    session.lastModified = Date.now();
+    await requestAssistantReply(session, content);
+  }
+
+  async function retryLastMessage() {
+    const session = currentSession.value;
+    if (!session?.messages.length) return;
+    const lastIndex = session.messages.length - 1;
+    if (session.messages[lastIndex]?.role === "assistant") {
+      await retryMessage(lastIndex);
+      return;
+    }
+    await retryMessage(lastIndex);
   }
 
   watch(
@@ -157,7 +209,11 @@ export const useChatStore = defineStore("chat", () => {
     createSession,
     deleteSession,
     selectSession,
+    renameSession,
     sendMessage,
+    deleteMessage,
+    retryMessage,
+    retryLastMessage,
     clearLoading,
   };
 });

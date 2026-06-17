@@ -3,7 +3,6 @@
     class="s3-container"
     title="File Storage"
     eyebrow="Vault"
-    description="Upload, protect, preview, download, and remove files from your cloud library."
   >
     <template #actions>
         <button class="icon-btn-secondary" @click="refreshDirectory" title="Refresh">
@@ -476,11 +475,19 @@ onMounted(() => {
   align-items: start;
 }
 
+.s3-grid > * {
+  min-width: 0;
+}
+
 .storage-workspace {
   display: grid;
   grid-template-columns: minmax(240px, 0.38fr) minmax(0, 1fr);
   gap: var(--space-4);
   align-items: start;
+}
+
+.storage-workspace > * {
+  min-width: 0;
 }
 
 .form-group {
@@ -517,6 +524,17 @@ onMounted(() => {
 }
 
 @media (max-width: 640px) {
+  .s3-container :deep(.page-shell-header) {
+    align-items: center;
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .s3-container :deep(.page-shell-actions) {
+    flex-shrink: 0;
+    justify-content: flex-end;
+  }
+
   .s3-grid {
     grid-template-columns: 1fr;
   }

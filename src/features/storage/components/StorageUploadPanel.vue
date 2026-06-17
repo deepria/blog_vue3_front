@@ -1,15 +1,5 @@
 <template>
   <BaseCard class="upload-panel compact-upload" hoverable>
-    <template #header>
-      <div class="panel-header">
-        <div>
-          <h3 class="panel-title">Upload</h3>
-          <p class="panel-subtitle">Drop or choose a file</p>
-        </div>
-        <span class="panel-chip">Protected</span>
-      </div>
-    </template>
-
     <div
       class="upload-zone"
       :class="{ 'is-dragging': isDragging }"
@@ -66,36 +56,6 @@ function handleChange(event) {
 </script>
 
 <style scoped>
-.panel-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.panel-title {
-  margin: 0;
-}
-
-.panel-subtitle {
-  margin: 4px 0 0;
-  color: var(--color-text-secondary);
-  font-size: 13px;
-}
-
-.panel-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 0 12px;
-  min-height: 26px;
-  border-radius: 999px;
-  border: 1px solid var(--color-border);
-  background: var(--color-primary-soft);
-  color: var(--color-primary-strong);
-  font-size: 12px;
-  font-weight: 700;
-}
-
 .upload-zone {
   border: 1px dashed var(--color-border-strong);
   border-radius: var(--radius-md);
@@ -142,6 +102,36 @@ function handleChange(event) {
   margin: 0;
   color: var(--color-text-muted);
   font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .upload-panel :deep(.base-card-body) {
+    padding: 8px 10px;
+  }
+
+  .upload-zone {
+    padding: 8px 10px;
+  }
+
+  .upload-content {
+    gap: 8px;
+  }
+
+  .upload-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-md);
+  }
+
+  .upload-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .upload-title {
+    font-size: 12px;
+    line-height: 1.2;
+  }
 }
 
 </style>

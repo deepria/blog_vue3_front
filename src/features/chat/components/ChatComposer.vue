@@ -1,31 +1,36 @@
 <template>
-  <div class="input-area">
-    <div class="input-wrapper">
+  <footer class="composer-area">
+    <div class="composer-shell" :class="{ focused: isFocused }">
       <a-textarea
         :value="modelValue"
-        placeholder="Message Assistant..."
-        :auto-size="{ minRows: 1, maxRows: 6 }"
+        placeholder="Enter 전송 · Shift+Enter 줄바꿈"
+        :auto-size="{ minRows: 1, maxRows: 7 }"
+        :disabled="loading"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
         @update:value="$emit('update:modelValue', $event)"
-        @pressEnter.prevent="$emit('send')"
+        @keydown.enter.exact.prevent="submit"
       />
       <button
         class="send-btn"
-        :class="{ loading: loading, disabled: !modelValue.trim() }"
+        :class="{ loading: loading }"
         :disabled="!modelValue.trim() || loading"
-        @click="$emit('send')"
-        aria-label="Send message"
+        type="button"
+        aria-label="메시지 보내기"
+        @click="submit"
       >
         <send-outlined v-if="!loading" />
-        <span v-else class="spinner"></span>
+        <loading-outlined v-else />
       </button>
     </div>
-  </div>
+  </footer>
 </template>
 
 <script setup>
-import { SendOutlined } from "@ant-design/icons-vue";
+import { ref } from "vue";
+import { LoadingOutlined, SendOutlined } from "@ant-design/icons-vue";
 
-defineProps({
+const props = defineProps({
   modelValue: {
     type: String,
     default: "",
@@ -36,30 +41,39 @@ defineProps({
   },
 });
 
-defineEmits(["update:modelValue", "send"]);
+const emit = defineEmits(["update:modelValue", "send"]);
+const isFocused = ref(false);
+
+function submit() {
+  if (!props.modelValue.trim() || props.loading) return;
+  emit("send");
+}
 </script>
 
 <style scoped>
-.input-area {
-  padding: var(--space-4);
-  background-color: var(--color-bg-surface);
+.composer-area {
+  padding: 14px clamp(14px, 3vw, 28px) calc(14px + env(safe-area-inset-bottom, 0px));
+  background: var(--color-bg-surface);
   border-top: 1px solid var(--color-border);
 }
 
-.input-wrapper {
+.composer-shell {
   display: flex;
   align-items: flex-end;
-  gap: var(--space-3);
-  background-color: var(--color-bg-panel);
+  gap: 8px;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 8px 8px 8px 14px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  background: var(--color-bg-panel);
   box-shadow: var(--shadow-sm);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
 }
 
-.input-wrapper:focus-within {
-  border-color: var(--color-primary);
+.composer-shell.focused {
+  border-color: var(--color-border-bright);
+  background: var(--color-bg-surface);
   box-shadow: 0 0 0 3px var(--color-primary-glow);
 }
 
@@ -70,7 +84,7 @@ defineEmits(["update:modelValue", "send"]);
   color: var(--color-text-primary) !important;
   padding: 8px 0 !important;
   font-size: var(--font-size-body);
-  line-height: 1.5;
+  line-height: 1.55;
   resize: none;
 }
 
@@ -79,42 +93,40 @@ defineEmits(["update:modelValue", "send"]);
 }
 
 .send-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
   border-radius: var(--radius-md);
-  border: none;
+  border: 1px solid var(--color-primary);
   background-color: var(--color-primary);
   color: var(--text-inverse);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
   flex-shrink: 0;
-  margin-bottom: 2px;
 }
 
-.send-btn:hover:not(.disabled) {
+.send-btn:hover:not(:disabled) {
   transform: translateY(-1px);
   background-color: var(--color-primary-strong);
+  border-color: var(--color-primary-strong);
 }
 
-.send-btn.disabled {
-  background-color: var(--color-bg-panel);
-  color: var(--color-text-muted);
+.send-btn:disabled {
+  background-color: var(--color-bg-panel-strong);
+  border-color: var(--color-border);
+  color: var(--color-text-disabled);
   cursor: not-allowed;
 }
 
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-radius: 50%;
-  border-top-color: currentColor;
-  animation: spin 0.8s linear infinite;
+.send-btn.loading {
+  color: var(--text-inverse);
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+@media (max-width: 768px) {
+  .composer-area {
+    padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
 }
 </style>

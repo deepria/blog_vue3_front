@@ -1,8 +1,21 @@
 <template>
-  <BaseCard class="directory-panel">
+  <BaseCard class="directory-panel" :class="{ 'is-mobile-open': isMobileOpen }">
     <template #header>
       <div class="panel-header">
-        <div>
+        <button
+          class="mobile-folder-toggle"
+          type="button"
+          :aria-expanded="isMobileOpen"
+          @click="isMobileOpen = !isMobileOpen"
+        >
+          <span class="mobile-folder-copy">
+            <span class="panel-title">Folders</span>
+          </span>
+          <span class="mobile-folder-chevron" :class="{ open: isMobileOpen }">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+          </span>
+        </button>
+        <div class="desktop-folder-title">
           <h3 class="panel-title">Folders</h3>
           <p class="panel-subtitle">{{ directories.length }} folders</p>
         </div>
@@ -12,12 +25,12 @@
       </div>
     </template>
 
-    <div class="directory-list">
+    <div class="directory-list" :class="{ 'mobile-open': isMobileOpen }">
       <button
         class="directory-row"
         :class="{ active: selectedId === 'all' }"
         type="button"
-        @click="$emit('select', 'all')"
+        @click="selectDirectory('all')"
       >
         <span class="folder-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><path d="M3 7V5a2 2 0 0 1 2-2h4l2 4"></path></svg>
@@ -30,10 +43,10 @@
         class="directory-row"
         :class="{ active: selectedId === 'unassigned', 'is-drop-target': dragOverId === 'unassigned' }"
         type="button"
-        @click="$emit('select', 'unassigned')"
+        @click="selectDirectory('unassigned')"
         @dragover.prevent="dragOverId = 'unassigned'"
         @dragleave="dragOverId = null"
-        @drop.prevent="handleDrop($event, null, 'unassigned')"
+        @drop.prevent="handleDrop($event, null)"
       >
         <span class="folder-icon muted">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9V5a2 2 0 0 1 2-2h4l2 3h10a2 2 0 0 1 2 2v1"></path><path d="M2 13h20"></path><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>
@@ -54,9 +67,9 @@
         :style="{ paddingLeft: `${12 + directory.depth * 18}px` }"
         @dragover.prevent="dragOverId = directory.id"
         @dragleave="dragOverId = null"
-        @drop.prevent="handleDrop($event, directory.id, directory.id)"
+        @drop.prevent="handleDrop($event, directory.id)"
       >
-        <button class="directory-main" type="button" @click="$emit('select', directory.id)">
+        <button class="directory-main" type="button" @click="selectDirectory(directory.id)">
           <span class="folder-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><path d="M3 7V5a2 2 0 0 1 2-2h4l2 4"></path></svg>
           </span>
@@ -68,9 +81,11 @@
             type="text"
             maxlength="80"
             @click.stop
-            @keydown.enter.prevent="commitRename(directory)"
+            @compositionstart="isComposing = true"
+            @compositionend="finishComposition"
+            @keyup.enter.prevent="commitRename(directory, $event)"
             @keydown.esc.prevent="cancelRename"
-            @blur="commitRename(directory)"
+            @blur="commitRename(directory, $event)"
           />
           <span v-else class="directory-name" :title="directory.name">{{ directory.name }}</span>
           <span class="directory-count">{{ fileCounts[directory.id] || 0 }}</span>
@@ -119,6 +134,8 @@ const dragOverId = ref(null);
 const editingId = ref(null);
 const editingName = ref("");
 const editInput = ref(null);
+const isComposing = ref(false);
+const isMobileOpen = ref(false);
 
 const visibleDirectories = computed(() => {
   const byParent = new Map();
@@ -146,12 +163,16 @@ const visibleDirectories = computed(() => {
   return result;
 });
 
-function handleDrop(event, directoryId, targetId) {
+function handleDrop(event, directoryId) {
   dragOverId.value = null;
   const fileKey = event.dataTransfer?.getData("text/plain");
   if (!fileKey) return;
   emit("move-file", { fileKey, directoryId });
-  emit("select", targetId);
+}
+
+function selectDirectory(id) {
+  emit("select", id);
+  isMobileOpen.value = false;
 }
 
 function startRename(directory) {
@@ -164,9 +185,16 @@ function startRename(directory) {
   });
 }
 
-function commitRename(directory) {
+function finishComposition(event) {
+  isComposing.value = false;
+  editingName.value = event?.target?.value || "";
+}
+
+function commitRename(directory, event) {
   if (editingId.value !== directory.id) return;
-  const name = editingName.value.trim();
+  if (isComposing.value || event?.isComposing) return;
+
+  const name = (event?.target?.value ?? editingName.value).trim();
   editingId.value = null;
   editingName.value = "";
   if (name && name !== directory.name) {
@@ -186,6 +214,10 @@ function cancelRename() {
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
+}
+
+.mobile-folder-toggle {
+  display: none;
 }
 
 .panel-title {
@@ -326,5 +358,74 @@ function cancelRename() {
 
 .empty-folders p {
   margin: 0;
+}
+
+@media (max-width: 640px) {
+  .directory-panel :deep(.base-card-header) {
+    padding: 10px 12px;
+  }
+
+  .directory-panel :deep(.base-card-body) {
+    padding: 0 12px;
+    transition: padding-bottom 0.18s ease;
+  }
+
+  .directory-panel.is-mobile-open :deep(.base-card-body) {
+    padding-bottom: 12px;
+  }
+
+  .panel-header {
+    align-items: center;
+  }
+
+  .desktop-folder-title {
+    display: none;
+  }
+
+  .mobile-folder-toggle {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-text-primary);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .mobile-folder-chevron {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+    transition: transform 0.16s ease;
+  }
+
+  .mobile-folder-chevron.open {
+    transform: rotate(180deg);
+  }
+
+  .directory-list {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: max-height 0.18s ease, opacity 0.14s ease, transform 0.18s ease;
+  }
+
+  .directory-list.mobile-open {
+    display: grid;
+    max-height: 420px;
+    opacity: 1;
+    transform: translateY(0);
+    margin-top: 0;
+  }
+
+  .directory-row {
+    min-height: 34px;
+  }
 }
 </style>
