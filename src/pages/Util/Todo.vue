@@ -6,52 +6,250 @@
     description="Capture, group, prioritize, and save your active work list."
   >
     <template #actions>
-        <div class="primary-actions">
-          <button class="icon-btn-secondary" @click="handleRefresh" title="Refresh">
-             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-          </button>
-          <button class="icon-btn-secondary" @click="openSettings" title="Options">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          </button>
-          <button
-            class="icon-btn-primary"
-            :class="{ 'pulse-animation': hasUnsavedChanges }"
-            @click="handleSave"
-            title="Save"
+      <div class="primary-actions">
+        <button
+          class="icon-btn-secondary"
+          @click="handleRefresh"
+          title="Refresh"
+        >
+          <ReloadOutlined />
+          <svg
+            v-if="false"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           >
-             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-          </button>
-        </div>
+            <path d="M23 4v6h-6"></path>
+            <path d="M1 20v-6h6"></path>
+            <path
+              d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+            ></path>
+          </svg>
+          <svg
+            v-if="false"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M20 11a8 8 0 1 0 2 5.3"></path>
+            <path d="M20 4v7h-7"></path>
+          </svg>
+        </button>
+        <button
+          class="icon-btn-secondary settings-button"
+          @click="openSettings"
+          title="Options"
+        >
+          <SettingOutlined />
+          <svg
+            v-if="false"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+            ></path>
+          </svg>
+          <svg
+            v-if="false"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M12 2v3m0 14v3M2 12h3m14 0h3M4.93 4.93l2.12 2.12m9.9 9.9 2.12 2.12m0-14.14-2.12 2.12m-9.9 9.9-2.12 2.12"
+            ></path>
+          </svg>
+        </button>
+        <button
+          class="icon-btn-primary"
+          :class="{ 'pulse-animation': hasUnsavedChanges }"
+          @click="handleSave"
+          title="Save"
+        >
+          <svg
+            v-if="false"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+            ></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+        </button>
+      </div>
     </template>
 
     <div class="quick-add-container">
-      <TodoQuickAdd
-        v-model="quickAddText"
-        v-model:group-key="quickAddGroupKey"
-        :group-options="groupOptions"
-        @submit="handleQuickAdd"
-      />
+      <TodoQuickAdd v-model="quickAddText" @submit="handleQuickAdd" />
+      <div class="mobile-task-actions" aria-label="작업 도구">
+        <button
+          class="icon-btn-secondary"
+          type="button"
+          title="새로고침"
+          @click="handleRefresh"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M23 4v6h-6"></path>
+            <path d="M1 20v-6h6"></path>
+            <path
+              d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+            ></path>
+          </svg>
+        </button>
+        <button
+          class="icon-btn-secondary settings-button"
+          type="button"
+          title="옵션"
+          @click="openSettings"
+        >
+          <SettingOutlined />
+          <svg
+            v-if="false"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+            ></path>
+          </svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M12 2v3m0 14v3M2 12h3m14 0h3M4.93 4.93l2.12 2.12m9.9 9.9 2.12 2.12m0-14.14-2.12 2.12m-9.9 9.9-2.12 2.12"
+            ></path>
+          </svg>
+        </button>
+        <button
+          class="icon-btn-primary"
+          :class="{ 'pulse-animation': hasUnsavedChanges }"
+          type="button"
+          title="저장"
+          @click="handleSave"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+            ></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <TodoBoard
       :items="sortedItems"
       :group-options="groupOptions"
       :priority-options="priorityOptions"
+      @add="addItem('', $event, null)"
       @edit="openEditModal"
       @delete="deleteItem"
       @toggle="toggleCompletion"
     />
 
-    <BaseModal v-model="showPopup" :title="settingsMode ? 'Manage Groups & Priorities' : isNewItem ? 'New Task' : 'Edit Task'">
+    <BaseModal
+      v-model="showPopup"
+      :title="
+        settingsMode
+          ? 'Manage Groups & Priorities'
+          : isNewItem
+            ? 'New Task'
+            : 'Edit Task'
+      "
+    >
       <div class="edit-form">
-        <BaseInput v-model="selectedItem.text" label="Task Description" placeholder="What needs to be done?" />
+        <BaseInput
+          v-model="selectedItem.text"
+          label="Task Description"
+          placeholder="What needs to be done?"
+        />
 
         <div class="form-row">
           <div class="form-group">
             <label>Group</label>
             <div class="select-wrapper">
               <select v-model="selectedItem.groupKey" class="base-select">
-                <option v-for="g in groupOptions" :key="g.key" :value="g.key">{{ g.name }}</option>
+                <option v-for="g in groupOptions" :key="g.key" :value="g.key">
+                  {{ g.name }}
+                </option>
               </select>
             </div>
           </div>
@@ -59,41 +257,89 @@
             <label>Priority</label>
             <div class="select-wrapper">
               <select v-model="selectedItem.priorityKey" class="base-select">
-                <option v-for="p in priorityOptions" :key="p.key" :value="p.key">{{ p.name }}</option>
+                <option
+                  v-for="p in priorityOptions"
+                  :key="p.key"
+                  :value="p.key"
+                >
+                  {{ p.name }}
+                </option>
               </select>
             </div>
           </div>
         </div>
 
         <div class="options-toggle" @click="settingsMode = !settingsMode">
-          <span>{{ settingsMode ? "Hide Options Manager" : "Manage Groups & Tags" }}</span>
+          <span>{{
+            settingsMode ? "Hide Options Manager" : "Manage Groups & Tags"
+          }}</span>
         </div>
 
         <div v-if="settingsMode" class="options-manager">
           <div class="option-section">
             <h4>Groups</h4>
-            <div v-for="(g, idx) in groupOptions" :key="g.key" class="option-row">
+            <div
+              v-for="(g, idx) in groupOptions"
+              :key="g.key"
+              class="option-row"
+            >
               <input v-model="g.name" class="mini-input" />
               <input type="color" v-model="g.color" class="color-picker" />
-              <button class="icon-btn-danger" @click="groupOptions.splice(idx, 1); markUnsaved()">×</button>
+              <button
+                class="icon-btn-danger"
+                @click="
+                  groupOptions.splice(idx, 1);
+                  markUnsaved();
+                "
+              >
+                ×
+              </button>
             </div>
             <div class="option-row add-new">
-              <input v-model="newGroup.name" class="mini-input" placeholder="New Group" />
-              <input type="color" v-model="newGroup.color" class="color-picker" />
+              <input
+                v-model="newGroup.name"
+                class="mini-input"
+                placeholder="New Group"
+              />
+              <input
+                type="color"
+                v-model="newGroup.color"
+                class="color-picker"
+              />
               <button class="icon-btn-primary" @click="addGroup">+</button>
             </div>
           </div>
 
           <div class="option-section">
             <h4>Priorities</h4>
-            <div v-for="(p, idx) in priorityOptions" :key="p.key" class="option-row">
+            <div
+              v-for="(p, idx) in priorityOptions"
+              :key="p.key"
+              class="option-row"
+            >
               <input v-model="p.name" class="mini-input" />
               <input type="color" v-model="p.color" class="color-picker" />
-              <button class="icon-btn-danger" @click="priorityOptions.splice(idx, 1); markUnsaved()">×</button>
+              <button
+                class="icon-btn-danger"
+                @click="
+                  priorityOptions.splice(idx, 1);
+                  markUnsaved();
+                "
+              >
+                ×
+              </button>
             </div>
             <div class="option-row add-new">
-              <input v-model="newPriority.name" class="mini-input" placeholder="New Priority" />
-              <input type="color" v-model="newPriority.color" class="color-picker" />
+              <input
+                v-model="newPriority.name"
+                class="mini-input"
+                placeholder="New Priority"
+              />
+              <input
+                type="color"
+                v-model="newPriority.color"
+                class="color-picker"
+              />
               <button class="icon-btn-primary" @click="addPriority">+</button>
             </div>
           </div>
@@ -101,7 +347,9 @@
       </div>
 
       <template #footer>
-        <BaseButton variant="secondary" @click="showPopup = false">Cancel</BaseButton>
+        <BaseButton variant="secondary" @click="showPopup = false"
+          >Cancel</BaseButton
+        >
         <BaseButton variant="primary" @click="confirmPopup">Done</BaseButton>
       </template>
     </BaseModal>
@@ -109,6 +357,7 @@
 </template>
 
 <script setup>
+import { ReloadOutlined, SettingOutlined } from "@ant-design/icons-vue";
 import { message } from "ant-design-vue";
 import { onMounted, ref } from "vue";
 import TodoBoard from "@/features/todo/components/TodoBoard.vue";
@@ -135,7 +384,6 @@ const {
 } = useTodos();
 
 const quickAddText = ref("");
-const quickAddGroupKey = ref(null);
 const showPopup = ref(false);
 const isNewItem = ref(false);
 const settingsMode = ref(false);
@@ -145,7 +393,7 @@ const newPriority = ref({ name: "", color: "#ef4444" });
 
 function handleQuickAdd() {
   if (!quickAddText.value.trim()) return;
-  addItem(quickAddText.value.trim(), quickAddGroupKey.value, null);
+  addItem(quickAddText.value.trim(), null, null);
   quickAddText.value = "";
 }
 
@@ -180,13 +428,20 @@ function addGroup() {
 
 function addPriority() {
   if (!newPriority.value.name) return;
-  priorityOptions.value.push({ key: nextPriorityKey.value, ...newPriority.value });
+  priorityOptions.value.push({
+    key: nextPriorityKey.value,
+    ...newPriority.value,
+  });
   newPriority.value = { name: "", color: "#ef4444" };
   markUnsaved();
 }
 
 async function handleRefresh() {
-  if (hasUnsavedChanges.value && !confirm("You have unsaved changes. Discard them?")) return;
+  if (
+    hasUnsavedChanges.value &&
+    !confirm("You have unsaved changes. Discard them?")
+  )
+    return;
   await fetchAll();
   message.success("Refreshed");
 }
@@ -222,8 +477,23 @@ onMounted(() => {
   align-items: center;
 }
 
+.settings-button > svg {
+  display: none;
+}
+
 .quick-add-container {
+  display: flex;
+  gap: 10px;
   margin-bottom: 0;
+}
+
+.quick-add-container > :first-child {
+  min-width: 0;
+  flex: 1;
+}
+
+.mobile-task-actions {
+  display: none;
 }
 
 .edit-form {
@@ -354,12 +624,45 @@ onMounted(() => {
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--color-primary), 0.4); }
-  70% { transform: scale(1.02); box-shadow: 0 0 0 6px rgba(var(--color-primary), 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--color-primary), 0); }
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(var(--color-primary), 0.4);
+  }
+  70% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 6px rgba(var(--color-primary), 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(var(--color-primary), 0);
+  }
 }
 
 @media (max-width: 640px) {
+  .todo-page :deep(.page-shell-header) {
+    display: none;
+  }
+
+  .quick-add-container {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .mobile-task-actions {
+    display: flex;
+    align-self: auto;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .mobile-task-actions .icon-btn-secondary,
+  .mobile-task-actions .icon-btn-primary {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+  }
+
   .form-row {
     flex-direction: column;
   }

@@ -2,7 +2,12 @@
   <div class="editor-page">
     <header class="editor-header">
       <div class="title-zone">
-        <button class="icon-button" type="button" title="목록으로" @click="goBack">
+        <button
+          class="icon-button"
+          type="button"
+          title="목록으로"
+          @click="goBack"
+        >
           <ArrowLeftOutlined />
         </button>
         <div class="title-stack">
@@ -18,7 +23,9 @@
       </div>
 
       <div class="toolbar-zone">
-        <span class="save-indicator" :class="saveStatusClass">{{ saveStatusLabel }}</span>
+        <span class="save-indicator" :class="saveStatusClass">{{
+          saveStatusLabel
+        }}</span>
         <button
           class="primary-icon-button"
           type="button"
@@ -111,15 +118,20 @@ const lastSavedAt = ref("");
 const autoSaveTimer = ref(null);
 
 const isDirty = computed(
-  () => title.value !== savedSnapshot.value.title || content.value !== savedSnapshot.value.content
+  () =>
+    title.value !== savedSnapshot.value.title ||
+    content.value !== savedSnapshot.value.content,
 );
 
-const canSave = computed(() => Boolean(title.value.trim() || content.value.trim()));
+const canSave = computed(() =>
+  Boolean(title.value.trim() || content.value.trim()),
+);
 
 const editorMeta = computed(() => {
   const text = content.value.replace(/[#*_>`\-[\]()]/g, " ").trim();
   const wordCount = text ? text.split(/\s+/).length : 0;
-  if (lastSavedAt.value) return `${wordCount} words · 마지막 저장 ${lastSavedAt.value}`;
+  if (lastSavedAt.value)
+    return `${wordCount} words · 마지막 저장 ${lastSavedAt.value}`;
   return `${wordCount} words`;
 });
 
@@ -148,7 +160,9 @@ const formatTime = (value) =>
 const parseMemoDate = (value) => {
   if (!value) return null;
   const text = String(value);
-  const date = /^\d+$/.test(text) ? new Date(Number(text) * 1000) : new Date(text);
+  const date = /^\d+$/.test(text)
+    ? new Date(Number(text) * 1000)
+    : new Date(text);
   return Number.isFinite(date.getTime()) ? date : null;
 };
 
@@ -173,7 +187,14 @@ const markDirty = () => {
 
 const scheduleAutoSave = () => {
   clearAutoSaveTimer();
-  if (!editorReady.value || loadingNote.value || saving.value || !isDirty.value || !canSave.value) return;
+  if (
+    !editorReady.value ||
+    loadingNote.value ||
+    saving.value ||
+    !isDirty.value ||
+    !canSave.value
+  )
+    return;
   autoSaveTimer.value = setTimeout(() => {
     saveNow({ silent: true });
   }, AUTO_SAVE_DELAY);
@@ -196,7 +217,7 @@ const toggleTaskCheckbox = (targetIndex) => {
         if (currentIndex !== targetIndex) return match;
         didToggle = true;
         return `${prefix}${state === " " ? "x" : " "}${suffix}`;
-      })
+      }),
     )
     .join("\n");
 
@@ -302,7 +323,7 @@ watch(
   () => props.id,
   (nextId, previousId) => {
     if (nextId !== previousId) loadContent();
-  }
+  },
 );
 
 onBeforeRouteLeave(async () => {
@@ -556,18 +577,20 @@ onBeforeUnmount(() => {
 
 @media (max-width: 760px) {
   .editor-header {
-    align-items: stretch;
-    flex-direction: column;
+    align-items: center;
+    gap: 10px;
     padding: 12px 16px;
   }
 
-  .title-zone,
-  .toolbar-zone {
-    width: 100%;
+  .title-zone {
+    width: auto;
   }
 
   .toolbar-zone {
-    justify-content: space-between;
+    width: auto;
+    flex-shrink: 0;
+    justify-content: flex-end;
+    gap: 6px;
   }
 
   .title-input {
@@ -576,7 +599,7 @@ onBeforeUnmount(() => {
 
   .save-indicator {
     min-width: 0;
-    text-align: left;
+    text-align: right;
   }
 
   .editor-main {

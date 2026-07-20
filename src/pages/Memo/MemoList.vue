@@ -6,7 +6,12 @@
     :description="summaryText"
   >
     <template #actions>
-      <button class="icon-button" type="button" title="새로고침" @click="handleRefresh">
+      <button
+        class="icon-button"
+        type="button"
+        title="새로고침"
+        @click="handleRefresh"
+      >
         <ReloadOutlined />
       </button>
       <button class="primary-action" type="button" @click="createMemo">
@@ -17,27 +22,39 @@
 
     <transition name="page-section" appear>
       <div v-if="contentVisible" class="memo-workbench">
-        <section class="memo-toolbar" aria-label="메모 검색과 정렬">
-          <BaseInput v-model="searchQuery" placeholder="제목으로 메모 검색" class="search-input">
+        <section class="memo-toolbar" aria-label="메모 검색">
+          <BaseInput
+            v-model="searchQuery"
+            placeholder="제목으로 메모 검색"
+            class="search-input"
+          >
             <template #suffix>
-              <SearchOutlined />
+              <button
+                v-if="searchQuery"
+                class="search-clear-button"
+                type="button"
+                aria-label="검색어 지우기"
+                title="검색어 지우기"
+                @mousedown.prevent
+                @click="searchQuery = ''"
+              >
+                <CloseOutlined />
+              </button>
             </template>
           </BaseInput>
 
-          <div class="sort-control" aria-label="정렬">
+          <div class="mobile-toolbar-actions">
             <button
+              class="icon-button"
               type="button"
-              :class="{ active: sortMode === 'recent' }"
-              @click="sortMode = 'recent'"
+              title="새로고침"
+              @click="handleRefresh"
             >
-              최근순
+              <ReloadOutlined />
             </button>
-            <button
-              type="button"
-              :class="{ active: sortMode === 'title' }"
-              @click="sortMode = 'title'"
-            >
-              제목순
+            <button class="primary-action" type="button" @click="createMemo">
+              <PlusOutlined />
+              <span>새 메모</span>
             </button>
           </div>
         </section>
@@ -45,54 +62,110 @@
         <div v-if="error && !loading" class="state-panel">
           <ExclamationCircleOutlined />
           <strong>{{ error }}</strong>
-          <BaseButton variant="ghost" size="sm" @click="handleRefresh">다시 시도</BaseButton>
+          <BaseButton variant="ghost" size="sm" @click="handleRefresh"
+            >다시 시도</BaseButton
+          >
         </div>
 
         <section v-else class="memo-layout">
           <aside class="memo-list-panel" aria-label="메모 목록">
-            <div class="panel-meta">
-              <span>{{ filteredNotes.length }}개 메모</span>
-              <span v-if="searchQuery">검색 중</span>
-            </div>
+            <button
+              class="mobile-memo-list-toggle"
+              type="button"
+              :aria-expanded="isMobileListOpen"
+              @click="isMobileListOpen = !isMobileListOpen"
+            >
+              <span>메모 목록 ({{ filteredNotes.length }})</span>
+              <DownOutlined :class="{ open: isMobileListOpen }" />
+            </button>
 
-            <div v-if="loading" class="memo-list">
-              <BaseSkeleton v-for="i in 6" :key="i" height="84px" shape="rect" />
-            </div>
+            <div
+              class="memo-list-content"
+              :class="{ 'mobile-open': isMobileListOpen }"
+            >
+              <div class="sort-control" aria-label="정렬">
+                <button
+                  type="button"
+                  :class="{ active: sortMode === 'recent' }"
+                  @click="sortMode = 'recent'"
+                >
+                  최근순
+                </button>
+                <button
+                  type="button"
+                  :class="{ active: sortMode === 'title' }"
+                  @click="sortMode = 'title'"
+                >
+                  제목순
+                </button>
+              </div>
 
-            <div v-else-if="filteredNotes.length === 0" class="state-panel compact">
-              <FileTextOutlined />
-              <strong>{{ emptyTitle }}</strong>
-              <p>{{ emptyDescription }}</p>
-              <BaseButton v-if="searchQuery" variant="ghost" size="sm" @click="searchQuery = ''">
-                검색 지우기
-              </BaseButton>
-              <BaseButton v-else size="sm" @click="createMemo">첫 메모 쓰기</BaseButton>
-            </div>
+              <div v-if="loading" class="memo-list">
+                <BaseSkeleton
+                  v-for="i in 6"
+                  :key="i"
+                  height="84px"
+                  shape="rect"
+                />
+              </div>
 
-            <div v-else class="memo-list">
-              <button
-                v-for="note in filteredNotes"
-                :key="note.id"
-                type="button"
-                class="memo-row"
-                :class="{ selected: selectedId === note.id }"
-                @click="selectMemo(note)"
+              <div
+                v-else-if="filteredNotes.length === 0"
+                class="state-panel compact"
               >
-                <span class="memo-row-icon"><FileTextOutlined /></span>
-                <span class="memo-row-copy">
-                  <strong>{{ note.title || "제목 없는 메모" }}</strong>
-                  <small>{{ formatDate(note.updatedAt || note.updated_at) }}</small>
-                </span>
-                <DeleteOutlined class="delete-icon" title="삭제" @click.stop="confirmDelete(note)" />
-              </button>
+                <FileTextOutlined />
+                <strong>{{ emptyTitle }}</strong>
+                <p>{{ emptyDescription }}</p>
+                <BaseButton
+                  v-if="searchQuery"
+                  variant="ghost"
+                  size="sm"
+                  @click="searchQuery = ''"
+                >
+                  검색 지우기
+                </BaseButton>
+                <BaseButton v-else size="sm" @click="createMemo"
+                  >첫 메모 쓰기</BaseButton
+                >
+              </div>
+
+              <div v-else class="memo-list">
+                <button
+                  v-for="note in filteredNotes"
+                  :key="note.id"
+                  type="button"
+                  class="memo-row"
+                  :class="{ selected: selectedId === note.id }"
+                  @click="selectMemo(note)"
+                >
+                  <span class="memo-row-icon"><FileTextOutlined /></span>
+                  <span class="memo-row-copy">
+                    <strong>{{ note.title || "제목 없는 메모" }}</strong>
+                    <small>{{
+                      formatDate(note.updatedAt || note.updated_at)
+                    }}</small>
+                  </span>
+                  <DeleteOutlined
+                    class="delete-icon"
+                    title="삭제"
+                    @click.stop="confirmDelete(note)"
+                  />
+                </button>
+              </div>
             </div>
           </aside>
 
           <article class="preview-panel" aria-label="선택한 메모 미리보기">
-            <div v-if="!selectedId && !loading" class="state-panel preview-empty">
+            <div
+              v-if="!selectedId && !loading"
+              class="state-panel preview-empty"
+            >
               <FileSearchOutlined />
               <strong>메모를 선택하세요</strong>
-              <p>목록에서 메모를 선택하면 이곳에서 내용을 확인하고 바로 편집할 수 있습니다.</p>
+              <p>
+                목록에서 메모를 선택하면 이곳에서 내용을 확인하고 바로 편집할 수
+                있습니다.
+              </p>
             </div>
 
             <div v-else-if="loadingPreview" class="preview-loading">
@@ -104,14 +177,26 @@
             <template v-else-if="selectedNote">
               <header class="preview-header">
                 <div>
-                  <p>{{ formatDate(selectedNote.updatedAt || selectedNote.updated_at) }}</p>
-                  <h2>{{ selectedNote.title || "제목 없는 메모" }}</h2>
+                  <p>
+                    {{
+                      formatDate(
+                        selectedNote.updatedAt || selectedNote.updated_at,
+                      )
+                    }}
+                  </p>
+                  <div class="preview-title-row">
+                    <h2>{{ selectedNote.title || "제목 없는 메모" }}</h2>
+                    <BaseButton size="sm" @click="editMemo(selectedNote.id)"
+                      >편집</BaseButton
+                    >
+                  </div>
                 </div>
-                <BaseButton size="sm" @click="editMemo(selectedNote.id)">편집</BaseButton>
               </header>
 
               <div class="preview-body">
-                <MarkdownViewer :content="previewContent || '아직 내용이 없습니다.'" />
+                <MarkdownViewer
+                  :content="previewContent || '아직 내용이 없습니다.'"
+                />
               </div>
             </template>
           </article>
@@ -127,12 +212,13 @@ import { useRouter } from "vue-router";
 import { App, message } from "ant-design-vue";
 import {
   DeleteOutlined,
+  DownOutlined,
+  CloseOutlined,
   ExclamationCircleOutlined,
   FileSearchOutlined,
   FileTextOutlined,
   PlusOutlined,
   ReloadOutlined,
-  SearchOutlined,
 } from "@ant-design/icons-vue";
 import { useMemo } from "@/features/memo/composables/useMemo";
 import BaseButton from "@/shared/ui/BaseButton.vue";
@@ -161,24 +247,30 @@ const selectedId = ref("");
 const selectedNote = ref(null);
 const previewContent = ref("");
 const contentVisible = ref(false);
+const isMobileListOpen = ref(false);
 
 const summaryText = computed(() => {
   if (loading.value) return "메모를 불러오는 중입니다.";
-  if (!notes.value.length) return "생각을 붙잡고 다시 이어 쓰는 개인 지식 책상입니다.";
+  if (!notes.value.length)
+    return "생각을 붙잡고 다시 이어 쓰는 개인 지식 책상입니다.";
   return `총 ${notes.value.length}개의 메모가 있습니다.`;
 });
 
-const emptyTitle = computed(() => (searchQuery.value ? "검색 결과가 없습니다" : "아직 메모가 없습니다"));
+const emptyTitle = computed(() =>
+  searchQuery.value ? "검색 결과가 없습니다" : "아직 메모가 없습니다",
+);
 const emptyDescription = computed(() =>
   searchQuery.value
     ? "검색어를 바꾸거나 지운 뒤 다시 확인해보세요."
-    : "짧은 아이디어부터 긴 초안까지 이곳에 모아둘 수 있습니다."
+    : "짧은 아이디어부터 긴 초안까지 이곳에 모아둘 수 있습니다.",
 );
 
 const formatDate = (value) => {
   if (!value) return "날짜 없음";
   const text = String(value);
-  const date = /^\d+$/.test(text) ? new Date(Number(text) * 1000) : new Date(text);
+  const date = /^\d+$/.test(text)
+    ? new Date(Number(text) * 1000)
+    : new Date(text);
   if (!Number.isFinite(date.getTime())) return "날짜 없음";
   return new Intl.DateTimeFormat("ko-KR", {
     month: "short",
@@ -192,6 +284,7 @@ const createMemo = () => router.push("/memo/edit");
 const editMemo = (id) => router.push(`/memo/edit/${id}`);
 
 const selectMemo = async (note) => {
+  isMobileListOpen.value = false;
   selectedId.value = note.id;
   selectedNote.value = note;
   previewContent.value = "";
@@ -214,7 +307,10 @@ const selectFirstMemo = async () => {
     previewContent.value = "";
     return;
   }
-  if (!selectedId.value || !filteredNotes.value.some((note) => note.id === selectedId.value)) {
+  if (
+    !selectedId.value ||
+    !filteredNotes.value.some((note) => note.id === selectedId.value)
+  ) {
     await selectMemo(first);
   }
 };
@@ -280,13 +376,35 @@ onMounted(async () => {
 
 .memo-toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   align-items: center;
 }
 
 .search-input {
   max-width: 620px;
+}
+
+.search-clear-button {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.search-clear-button:hover {
+  background: var(--color-bg-panel);
+  color: var(--color-text-primary);
+}
+
+.mobile-toolbar-actions {
+  display: none;
 }
 
 .sort-control {
@@ -339,15 +457,16 @@ onMounted(async () => {
   overflow: hidden;
 }
 
-.panel-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--color-border);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-caption);
-  font-weight: 700;
+.mobile-memo-list-toggle {
+  display: none;
+}
+
+.memo-list-content {
+  display: contents;
+}
+
+.memo-list-content > .sort-control {
+  margin: 12px 12px 0;
 }
 
 .memo-list {
@@ -364,6 +483,7 @@ onMounted(async () => {
   align-items: center;
   min-height: 72px;
   width: 100%;
+  padding: 0 10px 0 4px;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   background: transparent;
@@ -411,7 +531,9 @@ onMounted(async () => {
 .delete-icon {
   color: var(--color-text-muted);
   opacity: 0.72;
-  transition: color 0.18s ease, opacity 0.18s ease;
+  transition:
+    color 0.18s ease,
+    opacity 0.18s ease;
 }
 
 .delete-icon:hover {
@@ -447,6 +569,17 @@ onMounted(async () => {
   font-size: 22px;
   line-height: 1.25;
   letter-spacing: 0;
+}
+
+.preview-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.preview-title-row h2 {
+  min-width: 0;
 }
 
 .preview-body {
@@ -523,7 +656,9 @@ onMounted(async () => {
 
 .page-section-enter-active,
 .page-section-appear-active {
-  transition: opacity 0.28s ease, transform 0.28s ease;
+  transition:
+    opacity 0.28s ease,
+    transform 0.28s ease;
 }
 
 .page-section-enter-from,
@@ -548,12 +683,27 @@ onMounted(async () => {
 }
 
 @media (max-width: 620px) {
+  .memo-list-page :deep(.page-shell-header) {
+    display: none;
+  }
+
   .memo-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
   }
 
+  .search-input {
+    max-width: none;
+  }
+
+  .mobile-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
   .sort-control {
-    width: 100%;
+    width: calc(100% - 24px);
   }
 
   .sort-control button {
@@ -562,12 +712,69 @@ onMounted(async () => {
 
   .preview-header {
     align-items: stretch;
-    flex-direction: column;
     padding: 20px;
   }
 
   .preview-body {
     padding: 20px;
+  }
+
+  .memo-list-panel {
+    overflow: visible;
+  }
+
+  .mobile-memo-list-toggle {
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: var(--radius-lg);
+    background: transparent;
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .mobile-memo-list-toggle :deep(svg) {
+    color: var(--color-text-muted);
+    transition: transform 0.16s ease;
+  }
+
+  .mobile-memo-list-toggle :deep(svg.open) {
+    transform: rotate(180deg);
+  }
+
+  .memo-list-content {
+    display: grid;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition:
+      max-height 0.18s ease,
+      opacity 0.14s ease,
+      transform 0.18s ease;
+  }
+
+  .memo-list-content.mobile-open {
+    max-height: 460px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .memo-list-content .memo-list {
+    max-height: 340px;
+  }
+
+  .memo-list-content .state-panel.compact {
+    min-height: 220px;
   }
 }
 </style>

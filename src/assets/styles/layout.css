@@ -8,11 +8,17 @@
 
 input,
 select,
-textarea,
-button,
-[role="button"] {
+textarea {
     -webkit-user-select: auto;
     user-select: auto;
+}
+
+button,
+[role="button"],
+[draggable="true"] {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 html {
