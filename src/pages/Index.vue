@@ -1,660 +1,411 @@
 <template>
-  <div class="dashboard-container">
-    <div class="dashboard-grid">
-      <section class="hero-cluster">
-        <BaseCard class="hero-card dashboard-card dashboard-glass dashboard-card--elevated" glass hoverable>
-          <div class="hero-topline">
-            <div class="hero-copy">
-              <p class="eyebrow">Today Brief</p>
-              <h1 class="header-title">Welcome Back, {{ accountName }}</h1>
-              <p class="header-subtitle">{{ today }}</p>
-            </div>
-            <BaseButton
-              class="theme-toggle"
-              size="sm"
-              variant="secondary"
-              :title="themeToggleTitle"
-              :aria-label="themeToggleTitle"
-              :aria-pressed="isDarkMode"
-              @click="app.toggleTheme"
+  <main class="clipboard-page">
+    <section class="dashboard-top-row">
+      <BaseCard class="welcome-card" glass>
+        <p class="eyebrow">Today brief</p>
+        <h1>Welcome back, {{ accountName }}</h1>
+        <p class="welcome-date">{{ today }}</p>
+      </BaseCard>
+
+      <section class="clipboard-shell" aria-labelledby="clipboard-title">
+        <header class="page-header">
+          <div>
+            <p class="eyebrow">Quick capture</p>
+            <h1 id="clipboard-title">Quick Clipboard</h1>
+            <p class="page-description">
+              Keep the text you need across devices, ready to copy when you need
+              it.
+            </p>
+          </div>
+        </header>
+
+        <label class="sr-only" for="clipboard-text">Clipboard text</label>
+        <textarea
+          id="clipboard-text"
+          v-model="clipboardText"
+          ref="clipboardTextarea"
+          class="clipboard-textarea"
+          placeholder="Paste or type anything here..."
+          :disabled="clipboardLoading"
+          @compositionstart="isComposing = true"
+          @compositionend="handleCompositionEnd"
+          @keydown.meta.enter.prevent="handleSaveShortcut"
+          @keydown.ctrl.enter.prevent="handleSaveShortcut"
+        />
+
+        <footer class="clipboard-footer">
+          <div class="clipboard-meta">
+            <span class="shortcut-hint"
+              ><kbd>⌘/Ctrl</kbd><kbd>Enter</kbd> to save</span
             >
-              <component :is="isDarkMode ? BulbFilled : BulbOutlined" />
-              <span>{{ isDarkMode ? 'Dark On' : 'Dark Off' }}</span>
+            <span
+              class="save-status"
+              :class="{ 'save-status--pending': isDirty }"
+              role="status"
+            >
+              {{ saveStatus }}
+            </span>
+          </div>
+          <div class="clipboard-actions">
+            <BaseButton
+              variant="secondary"
+              :disabled="!clipboardText"
+              @click="handleCopyClipboard"
+            >
+              Copy
+            </BaseButton>
+            <BaseButton
+              variant="ghost"
+              :disabled="!clipboardText || clipboardSaving"
+              @click="handleClearClipboard"
+            >
+              Clear
+            </BaseButton>
+            <BaseButton
+              :loading="clipboardSaving"
+              :disabled="!isDirty"
+              @click="handleSaveClipboard"
+            >
+              Save
             </BaseButton>
           </div>
-          <div class="hero-meta">
-            <span class="meta-chip">Notes {{ dashboardLoading ? '-' : metrics.notesTotal }}</span>
-            <span class="meta-chip">Tasks {{ dashboardLoading ? '-' : metrics.tasksActive }}</span>
-          </div>
-        </BaseCard>
-
-        <BaseCard class="quick-task-card dashboard-card dashboard-glass dashboard-card--elevated" glass hoverable>
-          <div class="quick-task-head">
-            <p class="eyebrow">Quick Clipboard</p>
-            <div class="clipboard-actions flex items-center">
-              <BaseButton size="sm" variant="ghost" :loading="clipboardSaving" :disabled="!clipboardText" @click="handleSaveClipboard" title="Save Clipboard" aria-label="Save clipboard">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                  <polyline points="7 3 7 8 15 8"></polyline>
-                </svg>
-              </BaseButton>
-              <BaseButton size="sm" variant="ghost" :loading="clipboardLoading" @click="fetchClipboard" title="Refresh Clipboard" aria-label="Refresh clipboard">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="23 4 23 10 17 10"></polyline>
-                  <polyline points="1 20 1 14 7 14"></polyline>
-                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                </svg>
-              </BaseButton>
-              <BaseButton size="sm" variant="ghost" :disabled="!clipboardText" @click="handleClearClipboard" title="Clear Clipboard" aria-label="Clear clipboard">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </BaseButton>
-              <BaseButton size="sm" variant="ghost" @click="handleCopyClipboard" title="Copy to Clipboard" aria-label="Copy clipboard text">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              </BaseButton>
-            </div>
-          </div>
-          <textarea
-              v-model="clipboardText"
-              placeholder="Paste or type text here..."
-              class="clipboard-textarea"
-          ></textarea>
-        </BaseCard>
+        </footer>
       </section>
+    </section>
 
-      <BaseCard v-if="dashboardError" class="dashboard-alert dashboard-card" glass>
-        <div class="alert-copy">
-          <strong>Some workspace data is unavailable.</strong>
-          <span>{{ dashboardError }} Check the local API connection, then try again.</span>
-        </div>
-        <BaseButton size="sm" variant="secondary" :loading="dashboardLoading" @click="refreshDashboard">
-          Retry
-        </BaseButton>
-      </BaseCard>
-
-      <section class="kpi-row">
-        <BaseCard class="stat-card dashboard-card dashboard-glass" glass hoverable interactive
-                  @click="$router.push('/memo')">
-          <div class="stat-topline">
-            <span class="stat-tag">Memo</span>
-            <div class="stat-icon-wrapper tone-blue">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
-                   stroke="currentColor">
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ dashboardLoading ? '-' : metrics.notesTotal }}</div>
-            <div class="stat-label">Total Notes</div>
-          </div>
-        </BaseCard>
-
-        <BaseCard class="stat-card dashboard-card dashboard-glass" glass hoverable interactive
-                  @click="$router.push('/todo')">
-          <div class="stat-topline">
-            <span class="stat-tag">Todo</span>
-            <div class="stat-icon-wrapper tone-violet">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
-                   stroke="currentColor">
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                />
-              </svg>
-            </div>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ dashboardLoading ? '-' : metrics.tasksActive }}</div>
-            <div class="stat-label">Active Tasks</div>
-          </div>
-        </BaseCard>
-
-        <BaseCard class="stat-card dashboard-card dashboard-glass" glass hoverable interactive
-                  @click="$router.push('/todo')">
-          <div class="stat-topline">
-            <span class="stat-tag">Flow</span>
-            <div class="stat-icon-wrapper tone-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
-                   stroke="currentColor">
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M11 17a1 1 0 001.447.894l7-3.5A1 1 0 0020 13.5v-3a1 1 0 00-.553-.894l-7-3.5A1 1 0 0011 7v10z"
-                />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h1v12H4z"/>
-              </svg>
-            </div>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ dashboardLoading ? '-' : `${metrics.tasksCompletionRate}%` }}</div>
-            <div class="stat-label">Completion</div>
-          </div>
-        </BaseCard>
-
-        <BaseCard class="stat-card dashboard-card dashboard-glass" glass hoverable interactive
-                  @click="$router.push('/s3')">
-          <div class="stat-topline">
-            <span class="stat-tag">Storage</span>
-            <div class="stat-icon-wrapper tone-amber">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
-                   stroke="currentColor">
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
-                />
-              </svg>
-            </div>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ dashboardLoading ? '-' : metrics.filesTotal }}</div>
-            <div class="stat-label">Stored Files</div>
-          </div>
-        </BaseCard>
-      </section>
-
-      <BaseCard class="activity-card dashboard-card dashboard-glass dashboard-card--elevated" glass>
-        <template #header>
-          <div class="activity-header">
-            <h3 class="card-title">Recent Activity</h3>
-            <span class="activity-pill">{{ recentActivities.length }} items</span>
-          </div>
-        </template>
-        <div class="activity-list">
-          <BaseCard v-if="dashboardLoading" class="activity-entry dashboard-card dashboard-glass" glass>
-            <div class="activity-item">
-              <div class="dot"></div>
-              <div class="activity-text">Loading updates...</div>
-            </div>
-          </BaseCard>
-          <BaseCard v-else-if="recentActivities.length === 0" class="activity-entry dashboard-card dashboard-glass"
-                    glass>
-            <div class="activity-item">
-              <div class="dot"></div>
-              <div class="activity-text">
-                <strong>No recent updates yet.</strong>
-                <span class="activity-hint">Start with a memo, task, or file upload.</span>
-              </div>
-            </div>
-          </BaseCard>
-          <BaseCard
-              v-for="activity in recentActivities"
-              :key="activity.id"
-              class="activity-entry dashboard-card dashboard-glass"
-              glass
-          >
-            <div class="activity-item">
-              <div class="dot"></div>
-              <div class="activity-text">
-                <span class="activity-time">{{ formatRelativeTime(activity.timestamp) }}</span>
-                {{ activity.text }}
-              </div>
-            </div>
-          </BaseCard>
-        </div>
-      </BaseCard>
-    </div>
-  </div>
+    <section
+      v-if="activeSlide"
+      class="dashboard-gallery"
+      aria-label="Dashboard gallery"
+    >
+      <Transition name="slide-fade" mode="out-in">
+        <img
+          :key="activeSlide.id"
+          :src="activeSlide.url"
+          :alt="activeSlide.name"
+        />
+      </Transition>
+    </section>
+  </main>
 </template>
 
 <script setup>
-import { computed, onMounted } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { message } from "ant-design-vue";
-import { BulbFilled, BulbOutlined } from "@ant-design/icons-vue";
 import BaseCard from "@/shared/ui/BaseCard.vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
-import { useDashboard } from "@/features/dashboard/composables/useDashboard";
+import { useClipboard } from "@/features/dashboard/composables/useClipboard";
+import { useDashboardGallery } from "@/features/dashboard/composables/useDashboardGallery";
 import { useAppStore } from "@/store/app";
 
 const app = useAppStore();
+const { activeSlide } = useDashboardGallery();
 
 const {
-  dashboardLoading,
-  dashboardError,
-  metrics,
-  recentActivities,
-  refreshDashboard,
-  formatRelativeTime,
   clipboardText,
   clipboardLoading,
   clipboardSaving,
   saveClipboard,
-  fetchClipboard
-} = useDashboard();
+  fetchClipboard,
+} = useClipboard();
 
+const savedText = ref("");
+const hasLoaded = ref(false);
+const isComposing = ref(false);
+const clipboardTextarea = ref(null);
+const isDirty = computed(
+  () => hasLoaded.value && clipboardText.value !== savedText.value,
+);
+const saveStatus = computed(() => {
+  if (clipboardLoading.value) return "Loading…";
+  if (clipboardSaving.value) return "Saving…";
+  return isDirty.value ? "Unsaved changes" : "Saved";
+});
 const today = computed(() => {
   const date = new Date();
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
   const days = ["일", "월", "화", "수", "목", "금", "토"];
-  const day = days[date.getDay()];
-  return `${yyyy}.${mm}.${dd}(${day})`;
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}(${days[date.getDay()]})`;
 });
-
 const accountName = computed(() => {
   const email = app.user?.email || "";
   return email.split("@")[0] || app.user?.name || "there";
 });
 
-const isDarkMode = computed(() => app.theme === "dark");
-const themeToggleTitle = computed(() => (isDarkMode.value ? "Turn dark mode off" : "Turn dark mode on"));
-
 const handleSaveClipboard = async () => {
+  await nextTick();
+  const currentText = clipboardTextarea.value?.value ?? clipboardText.value;
+  clipboardText.value = currentText;
+
+  if (currentText === savedText.value || clipboardSaving.value) return;
   try {
-    await saveClipboard(clipboardText.value);
+    await saveClipboard(currentText);
+    savedText.value = currentText;
     message.success("Clipboard saved");
   } catch {
     message.error("Failed to save clipboard");
   }
 };
 
+const handleCompositionEnd = (event) => {
+  clipboardText.value = event.target.value;
+  isComposing.value = false;
+};
+
+const handleSaveShortcut = () => {
+  if (!isComposing.value) handleSaveClipboard();
+};
+
 const handleClearClipboard = async () => {
-  try {
-    await saveClipboard('');
-    message.success("Clipboard cleared");
-  } catch {
-    message.error("Failed to clear clipboard");
-  }
+  clipboardText.value = "";
+  await handleSaveClipboard();
 };
 
 const handleCopyClipboard = async () => {
   if (!clipboardText.value) return;
   try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(clipboardText.value);
-    } else {
-      const textArea = document.createElement("textarea");
-      textArea.value = clipboardText.value;
-      textArea.style.position = "fixed";  // Avoid scrolling to bottom
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
-    }
-    message.success("Copied to clipboard!");
+    await navigator.clipboard.writeText(clipboardText.value);
+    message.success("Copied to clipboard");
   } catch {
-    message.error("Failed to copy");
+    message.error("Failed to copy clipboard text");
   }
 };
 
-onMounted(() => {
-  refreshDashboard();
+onMounted(async () => {
+  await fetchClipboard();
+  savedText.value = clipboardText.value;
+  hasLoaded.value = true;
 });
 </script>
 
-/* ... replacing everything under style ... */
 <style scoped>
-.dashboard-container {
-  padding: 36px 28px 96px;
-  max-width: var(--max-width);
+.clipboard-page {
+  max-width: 860px;
   margin: 0 auto;
+  padding: 72px 28px 96px;
 }
 
-.dashboard-grid {
-  display: grid;
-  gap: var(--space-6);
+.dashboard-top-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
 }
 
-.dashboard-card {
-  background-color: var(--color-bg-surface);
-}
-
-.dashboard-card--elevated {
+.welcome-card {
+  flex: 0 0 31%;
+  background: var(--color-bg-surface);
   box-shadow: var(--shadow-lg);
 }
 
-.hero-cluster {
+.welcome-card :deep(.base-card-body) {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
-  gap: 20px;
-  align-items: stretch;
+  gap: 2px;
+  padding: 14px 16px;
 }
 
-.dashboard-alert {
-  border-color: rgba(251, 191, 36, 0.42);
+.welcome-card .eyebrow {
+  margin: 0;
 }
 
-.dashboard-alert :deep(.base-card-body) {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
+.welcome-card h1 {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.25;
 }
 
-.alert-copy {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.alert-copy strong {
-  color: var(--color-text-primary);
-  font-size: var(--font-size-body);
-}
-
-.alert-copy span {
+.welcome-date {
+  margin: 0;
   color: var(--color-text-secondary);
   font-size: var(--font-size-caption);
-  line-height: 1.5;
 }
 
-.hero-topline {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
+.clipboard-shell {
+  flex: 1;
+  display: grid;
+  gap: 20px;
+  padding: 30px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-lg);
 }
 
-.hero-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-
-.theme-toggle {
-  flex-shrink: 0;
-  min-width: 104px;
-}
-
-.theme-toggle :deep(.button-content) {
-  justify-content: center;
+.dashboard-gallery {
+  position: relative;
   width: 100%;
+  aspect-ratio: 1;
+  margin-top: 20px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-panel);
+  box-shadow: var(--shadow-lg);
+}
+
+.dashboard-gallery img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: opacity 0.45s ease;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  opacity: 0;
+}
+
+.page-header,
+.clipboard-footer,
+.clipboard-actions,
+.clipboard-meta {
+  display: flex;
+  align-items: center;
+}
+
+.page-header,
+.clipboard-footer {
+  justify-content: space-between;
+  gap: 20px;
 }
 
 .eyebrow {
-  font-size: var(--font-size-caption);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  margin: 0 0 6px;
   color: var(--color-primary);
+  font-size: var(--font-size-caption);
   font-weight: 800;
-  margin: 0;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
-.header-title {
-  font-size: var(--font-size-hero);
-  font-weight: 780;
-  color: var(--color-text-primary);
+h1 {
   margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-hero);
   letter-spacing: var(--tracking-tight);
 }
 
-.header-subtitle {
+.page-description {
+  margin: 8px 0 0;
   color: var(--color-text-secondary);
-  font-size: var(--font-size-body);
-  margin: 0 0 var(--space-4) 0;
 }
 
-.hero-meta {
-  display: flex;
-  gap: var(--space-3);
-  margin-top: auto;
-}
-
-.meta-chip,
-.activity-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  background-color: var(--color-bg-panel);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-primary);
+.save-status {
+  flex: none;
+  color: var(--color-text-muted);
   font-size: var(--font-size-caption);
-  font-weight: 600;
 }
 
-.quick-task-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--space-4);
+.save-status--pending {
+  color: var(--color-primary);
+  font-weight: 700;
 }
 
 .clipboard-textarea {
   width: 100%;
-  height: 80px;
-  background-color: var(--color-bg-panel);
-  color: var(--color-text-primary);
+  min-height: 140px;
+  resize: vertical;
+  box-sizing: border-box;
+  padding: 18px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-  font-family: var(--font-family);
-  font-size: var(--font-size-body);
-  resize: none;
-  transition: all 0.2s ease;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-panel);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.65;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
 }
 
 .clipboard-textarea:focus {
   border-color: var(--color-primary);
-  outline: none;
+  background: var(--color-bg-surface);
   box-shadow: 0 0 0 3px var(--color-primary-glow);
 }
 
 .clipboard-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  gap: 8px;
 }
-
-.status-msg {
-  font-size: var(--font-size-caption);
-  color: var(--color-text-muted);
-}
-.quick-task-title {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-body);
-  margin: var(--space-1) 0 0;
-}
-
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-}
-
-.stat-topline {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.stat-tag {
-  font-size: var(--font-size-caption);
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-}
-
-.stat-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  background-color: var(--color-bg-panel);
-  border: 1px solid var(--color-border);
-}
-
-.tone-blue { color: #3b82f6; }
-.tone-violet { color: #7c3aed; }
-.tone-teal { color: #0f766e; }
-.tone-amber { color: #d97706; }
-
-.stat-content {
-  margin-top: var(--space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.stat-value {
-  font-size: 28px;
-  font-weight: 780;
-  color: var(--color-text-primary);
-}
-
-.stat-label {
-  font-size: var(--font-size-caption);
-  color: var(--color-text-secondary);
-}
-
-.activity-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-title {
-  font-size: var(--font-size-title);
-  font-weight: 600;
-  margin: 0;
-}
-
-.activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.activity-item {
-  display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--color-primary);
-  margin-top: 6px;
-}
-
-.activity-text {
-  font-size: var(--font-size-body);
-  color: var(--color-text-primary);
-}
-
-.activity-text strong {
-  display: block;
-  font-weight: 600;
-}
-
-.activity-hint {
-  display: block;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-caption);
-  margin-top: var(--space-1);
-}
-
-.activity-time {
-  display: block;
-  font-size: var(--font-size-caption);
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-1);
-}
-
-.quick-task-head {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: space-between !important;
+.clipboard-meta {
   gap: 12px;
-  margin-bottom: 12px;
 }
-
-.clipboard-textarea {
-  width: 100%;
-  min-height: 120px;
-  background: var(--color-bg-panel);
+.shortcut-hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+kbd {
+  padding: 2px 5px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text-primary);
-  padding: var(--space-3);
-  font-family: inherit;
-  font-size: var(--font-size-body);
-  resize: vertical;
-  outline: none;
-  transition: border-color 0.2s, background 0.2s;
+  border-radius: 4px;
+  background: var(--color-bg-panel);
+  font: inherit;
 }
-
-.clipboard-textarea:focus {
-  background: var(--color-bg-surface);
-  border-color: var(--color-primary);
+kbd + kbd {
+  margin-left: 3px;
 }
-
-@media (max-width: 1024px) {
-  .hero-cluster {
-    grid-template-columns: 1fr;
-  }
-  .kpi-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 @media (max-width: 640px) {
-  .dashboard-container {
-    padding: 24px 16px 104px;
+  .clipboard-page {
+    padding: 16px 16px 104px;
   }
-  .quick-task-head {
-    flex-direction: row !important;
-    align-items: center !important;
+  .clipboard-shell {
+    gap: 12px;
+    padding: 16px;
   }
-  .hero-topline {
-    flex-direction: column;
-    gap: var(--space-3);
+  .dashboard-top-row {
+    display: grid;
+    gap: 12px;
   }
-  .theme-toggle {
-    width: 100%;
+  .welcome-card {
+    flex-basis: auto;
   }
-  .dashboard-alert :deep(.base-card-body) {
+  .welcome-card :deep(.base-card-body) {
+    padding: 12px 14px;
+  }
+  .welcome-card h1 {
+    font-size: 22px;
+  }
+  .dashboard-gallery {
+    margin-top: 12px;
+  }
+  .clipboard-footer {
     align-items: flex-start;
     flex-direction: column;
   }
-  .kpi-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-3);
+  .page-header {
+    display: none;
   }
-  .stat-card {
-    min-height: 120px;
+  .clipboard-footer {
+    gap: 14px;
   }
-  .stat-content {
-    margin-top: var(--space-3);
+  .clipboard-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
-  .stat-value {
-    font-size: 20px;
+  .clipboard-meta {
+    width: 100%;
+    justify-content: space-between;
   }
-  .stat-icon-wrapper {
-    width: 32px;
-    height: 32px;
-  }
-  .stat-icon-wrapper svg {
-    width: 16px;
-    height: 16px;
-  }
-  .stat-label {
-    font-size: 10px;
-    letter-spacing: 0;
-  }
-  .header-title {
-    font-size: var(--font-size-title);
+  .clipboard-textarea {
+    min-height: 16vh;
   }
 }
 </style>

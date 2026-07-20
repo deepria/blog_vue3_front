@@ -58,7 +58,9 @@ import { navigationItems } from "@/shared/navigation/items";
 
 .icon-wrapper {
   font-size: 20px;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;

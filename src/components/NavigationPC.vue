@@ -8,7 +8,7 @@
           <p>Personal workspace</p>
         </div>
       </div>
-      
+
       <nav class="nav-menu">
         <router-link
           v-for="item in navigationItems"
@@ -21,8 +21,17 @@
           <span class="nav-label">{{ item.label }}</span>
         </router-link>
       </nav>
-      
+
       <div class="footer-area">
+        <button
+          class="theme-toggle"
+          type="button"
+          :aria-pressed="isDarkMode"
+          @click="app.toggleTheme"
+        >
+          <component :is="isDarkMode ? BulbFilled : BulbOutlined" />
+          {{ isDarkMode ? "Dark mode" : "Light mode" }}
+        </button>
         <div v-if="app.user" class="user-area">
           <span class="user-kicker">Signed in</span>
           <span class="user-name">{{ app.user.name }}</span>
@@ -37,9 +46,12 @@
 import { navigationItems } from "@/shared/navigation/items";
 import { useRouter } from "vue-router";
 import { useAppStore } from "@/store/app";
+import { BulbFilled, BulbOutlined } from "@ant-design/icons-vue";
+import { computed } from "vue";
 
 const router = useRouter();
 const app = useAppStore();
+const isDarkMode = computed(() => app.theme === "dark");
 
 async function logout() {
   await app.logout();
@@ -143,6 +155,28 @@ async function logout() {
 
 .footer-area {
   padding: 16px 0 0;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--space-3);
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--font-size-body);
+  font-weight: 650;
+}
+
+.theme-toggle:hover {
+  background-color: var(--color-bg-panel);
+  color: var(--color-text-primary);
 }
 
 .user-area {

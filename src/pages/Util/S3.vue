@@ -1,13 +1,29 @@
 <template>
-  <PageShell
-    class="s3-container"
-    title="File Storage"
-    eyebrow="Vault"
-  >
+  <PageShell class="s3-container" title="File Storage" eyebrow="Vault">
     <template #actions>
-        <button class="icon-btn-secondary" @click="refreshDirectory" title="Refresh">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-        </button>
+      <button
+        class="icon-btn-secondary"
+        @click="refreshDirectory"
+        title="Refresh"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M23 4v6h-6"></path>
+          <path d="M1 20v-6h6"></path>
+          <path
+            d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+          ></path>
+        </svg>
+      </button>
     </template>
 
     <div class="s3-grid page-content">
@@ -67,16 +83,30 @@
         </div>
       </div>
       <template #footer>
-        <BaseButton variant="secondary" @click="cancelUpload" :disabled="isUploading">Cancel</BaseButton>
-        <BaseButton variant="primary" @click="upload" :loading="isUploading">Start Upload</BaseButton>
+        <BaseButton
+          variant="secondary"
+          @click="cancelUpload"
+          :disabled="isUploading"
+          >Cancel</BaseButton
+        >
+        <BaseButton variant="primary" @click="upload" :loading="isUploading"
+          >Start Upload</BaseButton
+        >
       </template>
     </BaseModal>
 
     <BaseModal v-model="showAuthModal" title="Security Check">
       <p class="auth-desc">Enter the password for this file:</p>
-      <BaseInput v-model="authKeyInput" placeholder="Password" type="password" @enter="confirmAuth" />
+      <BaseInput
+        v-model="authKeyInput"
+        placeholder="Password"
+        type="password"
+        @enter="confirmAuth"
+      />
       <template #footer>
-        <BaseButton variant="secondary" @click="closeAuthPopup">Cancel</BaseButton>
+        <BaseButton variant="secondary" @click="closeAuthPopup"
+          >Cancel</BaseButton
+        >
         <BaseButton variant="primary" @click="confirmAuth">Confirm</BaseButton>
       </template>
     </BaseModal>
@@ -91,19 +121,46 @@
           :aria-label="`Preview ${imagePreview.name}`"
           @click="closeImagePreview"
         >
-          <button class="image-preview-close" type="button" aria-label="Close preview" @click.stop="closeImagePreview">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <button
+            class="image-preview-close"
+            type="button"
+            aria-label="Close preview"
+            @click.stop="closeImagePreview"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
-          <img :src="imagePreview.url" :alt="imagePreview.name" class="image-preview-media" @click.stop />
+          <img
+            :src="imagePreview.url"
+            :alt="imagePreview.name"
+            class="image-preview-media"
+            @click.stop
+          />
         </div>
       </transition>
     </teleport>
 
-    <BaseModal v-model="textPreview.visible" :title="textPreview.name || 'Preview'">
+    <BaseModal
+      v-model="textPreview.visible"
+      :title="textPreview.name || 'Preview'"
+    >
       <div class="text-preview-container">
-        <div v-if="textPreview.loading" class="text-preview-loading">Loading preview...</div>
+        <div v-if="textPreview.loading" class="text-preview-loading">
+          Loading preview...
+        </div>
         <MarkdownViewer
           v-else-if="textPreview.type === 'markdown'"
           :content="textPreview.content"
@@ -132,7 +189,14 @@ import { useDownload } from "@/shared/composables/useDownload";
 import PageShell from "@/shared/ui/PageShell.vue";
 
 const { modal } = App.useApp();
-const { loading, previewableFiles, loadFiles, uploadFile, getDownloadUrl, getDeleteUrl } = useStorage();
+const {
+  loading,
+  previewableFiles,
+  loadFiles,
+  uploadFile,
+  getDownloadUrl,
+  getDeleteUrl,
+} = useStorage();
 const { downloadFromUrl } = useDownload();
 
 const isDragging = ref(false);
@@ -145,6 +209,12 @@ const uploadTask = ref(null);
 const showUploadModal = ref(false);
 const showAuthModal = ref(false);
 const selectedDirectoryId = ref("all");
+const DASHBOARD_DIRECTORY = {
+  id: "dashboard",
+  name: "Dashboard",
+  parent_id: null,
+  sort_order: 0,
+};
 const organization = ref({
   directories: [],
   file_locations: {},
@@ -164,17 +234,22 @@ const textPreview = ref({
 const pendingAction = ref(null);
 let resolveAuthPromise = null;
 
-const knownFileKeys = computed(() => new Set(previewableFiles.value.map((file) => file.key)));
+const knownFileKeys = computed(
+  () => new Set(previewableFiles.value.map((file) => file.key)),
+);
 
 const unassignedFiles = computed(() =>
-  previewableFiles.value.filter((file) => !organization.value.file_locations[file.key]),
+  previewableFiles.value.filter(
+    (file) => !organization.value.file_locations[file.key],
+  ),
 );
 
 const visibleFiles = computed(() => {
   if (selectedDirectoryId.value === "all") return previewableFiles.value;
   if (selectedDirectoryId.value === "unassigned") return unassignedFiles.value;
   return previewableFiles.value.filter(
-    (file) => organization.value.file_locations[file.key] === selectedDirectoryId.value,
+    (file) =>
+      organization.value.file_locations[file.key] === selectedDirectoryId.value,
   );
 });
 
@@ -183,10 +258,12 @@ const directoryFileCounts = computed(() => {
   organization.value.directories.forEach((directory) => {
     counts[directory.id] = 0;
   });
-  Object.entries(organization.value.file_locations).forEach(([key, directoryId]) => {
-    if (!knownFileKeys.value.has(key) || !directoryId) return;
-    counts[directoryId] = (counts[directoryId] || 0) + 1;
-  });
+  Object.entries(organization.value.file_locations).forEach(
+    ([key, directoryId]) => {
+      if (!knownFileKeys.value.has(key) || !directoryId) return;
+      counts[directoryId] = (counts[directoryId] || 0) + 1;
+    },
+  );
   return counts;
 });
 
@@ -196,16 +273,34 @@ const refreshDirectory = async () => {
 };
 
 const loadOrganization = async () => {
-  organization.value = normalizeOrganization(await storageApi.getOrganization());
+  const loadedOrganization = normalizeOrganization(
+    await storageApi.getOrganization(),
+  );
+  const hasDashboardDirectory = loadedOrganization.directories.some(
+    (directory) => directory.id === DASHBOARD_DIRECTORY.id,
+  );
+  if (hasDashboardDirectory) {
+    organization.value = loadedOrganization;
+    return;
+  }
+  await saveOrganization({
+    ...loadedOrganization,
+    directories: [DASHBOARD_DIRECTORY, ...loadedOrganization.directories],
+  });
 };
 
 const saveOrganization = async (nextOrganization) => {
-  organization.value = normalizeOrganization(await storageApi.saveOrganization(nextOrganization));
+  organization.value = normalizeOrganization(
+    await storageApi.saveOrganization(nextOrganization),
+  );
 };
 
 const normalizeOrganization = (data = {}) => ({
   directories: Array.isArray(data.directories) ? data.directories : [],
-  file_locations: data.file_locations && typeof data.file_locations === "object" ? data.file_locations : {},
+  file_locations:
+    data.file_locations && typeof data.file_locations === "object"
+      ? data.file_locations
+      : {},
 });
 
 const createDirectory = async () => {
@@ -234,7 +329,9 @@ const renameDirectory = async ({ id, name }) => {
 };
 
 const deleteDirectory = async (id) => {
-  const target = organization.value.directories.find((directory) => directory.id === id);
+  const target = organization.value.directories.find(
+    (directory) => directory.id === id,
+  );
   if (!target) return;
   modal.confirm({
     title: "Delete Folder",
@@ -252,7 +349,9 @@ const deleteDirectory = async (id) => {
         }
       });
       await saveOrganization({
-        directories: organization.value.directories.filter((directory) => !directoryIds.has(directory.id)),
+        directories: organization.value.directories.filter(
+          (directory) => !directoryIds.has(directory.id),
+        ),
         file_locations: fileLocations,
       });
       if (directoryIds.has(selectedDirectoryId.value)) {
@@ -269,7 +368,11 @@ const collectDirectoryIds = (rootId) => {
   while (changed) {
     changed = false;
     organization.value.directories.forEach((directory) => {
-      if (directory.parent_id && ids.has(directory.parent_id) && !ids.has(directory.id)) {
+      if (
+        directory.parent_id &&
+        ids.has(directory.parent_id) &&
+        !ids.has(directory.id)
+      ) {
         ids.add(directory.id);
         changed = true;
       }
@@ -321,7 +424,7 @@ const upload = async () => {
   uploadTask.value = { name: selectedFile.value.name, progress: 15 };
 
   try {
-    await uploadFile({
+    const uploadedFile = await uploadFile({
       file: selectedFile.value,
       displayName: customFileName.value.trim() || selectedFile.value.name,
       authKey: authKey.value.trim(),
@@ -329,6 +432,15 @@ const upload = async () => {
         uploadTask.value = { name: selectedFile.value.name, progress };
       },
     });
+    if (
+      selectedDirectoryId.value !== "all" &&
+      selectedDirectoryId.value !== "unassigned"
+    ) {
+      await moveFileToDirectory({
+        fileKey: uploadedFile.key,
+        directoryId: selectedDirectoryId.value,
+      });
+    }
     uploadTask.value = { name: selectedFile.value.name, progress: 100 };
     message.success("Upload complete");
     cancelUpload();
@@ -449,11 +561,19 @@ function closeImagePreview() {
 function getPreviewType(file) {
   if (file.previewType) return file.previewType;
   const name = file.display_name?.toLowerCase() || "";
-  if ([".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif"].some((ext) => name.endsWith(ext))) {
+  if (
+    [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif"].some(
+      (ext) => name.endsWith(ext),
+    )
+  ) {
     return "image";
   }
   if (name.endsWith(".md") || name.endsWith(".markdown")) return "markdown";
-  if ([".txt", ".log", ".csv", ".json", ".xml", ".yaml", ".yml"].some((ext) => name.endsWith(ext))) {
+  if (
+    [".txt", ".log", ".csv", ".json", ".xml", ".yaml", ".yml"].some((ext) =>
+      name.endsWith(ext),
+    )
+  ) {
     return "text";
   }
   return "unsupported";
@@ -588,7 +708,9 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .image-preview-close:hover {
@@ -624,7 +746,9 @@ onMounted(() => {
   margin: 0;
   padding: var(--space-4);
   color: var(--color-text-primary);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    monospace;
   font-size: 13px;
   line-height: 1.65;
   white-space: pre-wrap;

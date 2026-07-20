@@ -5,8 +5,25 @@
     eyebrow="Profile"
     description="Manage your identity and connected sign-in providers."
   >
+    <template #actions>
+      <a-button
+        class="theme-toggle"
+        :title="themeToggleTitle"
+        :aria-label="themeToggleTitle"
+        :aria-pressed="isDarkMode"
+        @click="app.toggleTheme"
+      >
+        <component :is="isDarkMode ? BulbFilled : BulbOutlined" />
+      </a-button>
+    </template>
+
     <div class="account-header">
-      <img v-if="app.user?.avatar_url" :src="app.user.avatar_url" alt="" class="avatar" />
+      <img
+        v-if="app.user?.avatar_url"
+        :src="app.user.avatar_url"
+        alt=""
+        class="avatar"
+      />
       <div>
         <h1>{{ app.user?.name }}</h1>
         <p>{{ app.user?.email }}</p>
@@ -15,12 +32,22 @@
     </div>
 
     <div class="provider-list">
-      <div v-for="provider in providers" :key="provider.id" class="provider-row">
+      <div
+        v-for="provider in providers"
+        :key="provider.id"
+        class="provider-row"
+      >
         <div>
           <strong>{{ provider.label }}</strong>
-          <span>{{ connected(provider.id) ? "Connected" : "Not connected" }}</span>
+          <span>{{
+            connected(provider.id) ? "Connected" : "Not connected"
+          }}</span>
         </div>
-        <a-button v-if="connected(provider.id)" :disabled="app.providers.length <= 1" @click="disconnect(provider.id)">
+        <a-button
+          v-if="connected(provider.id)"
+          :disabled="app.providers.length <= 1"
+          @click="disconnect(provider.id)"
+        >
           Disconnect
         </a-button>
         <a-button v-else type="primary" @click="connect(provider.id)">
@@ -35,11 +62,17 @@
 import { message } from "ant-design-vue";
 import { useAppStore } from "@/store/app";
 import { useRouter } from "vue-router";
+import { computed } from "vue";
+import { BulbFilled, BulbOutlined } from "@ant-design/icons-vue";
 import { authApi } from "@/features/auth/api/authApi";
 import PageShell from "@/shared/ui/PageShell.vue";
 
 const app = useAppStore();
 const router = useRouter();
+const isDarkMode = computed(() => app.theme === "dark");
+const themeToggleTitle = computed(() =>
+  isDarkMode.value ? "Turn dark mode off" : "Turn dark mode on",
+);
 const providers = [
   { id: "google", label: "Google" },
   { id: "github", label: "GitHub" },
@@ -70,6 +103,12 @@ async function logout() {
 <style scoped>
 .account-page {
   display: block;
+}
+
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  padding: 0;
 }
 
 .account-header {
@@ -131,6 +170,16 @@ span {
 }
 
 @media (max-width: 640px) {
+  .account-page :deep(.page-shell-header) {
+    align-items: flex-start;
+    flex-direction: row;
+  }
+
+  .account-page :deep(.page-shell-actions) {
+    flex: none;
+    justify-content: flex-end;
+  }
+
   .account-header,
   .provider-row {
     align-items: flex-start;
