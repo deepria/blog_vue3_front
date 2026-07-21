@@ -1,4 +1,7 @@
 import { apiClient, unwrapData } from "@/shared/api/http";
+import { normalizeTodo } from "../lib/todoModel";
+
+export { normalizeTodo } from "../lib/todoModel";
 
 /**
  * Todo API Service
@@ -7,12 +10,12 @@ import { apiClient, unwrapData } from "@/shared/api/http";
 export const todoApi = {
   async fetchTodos() {
     const response = await apiClient.get("/api/todos");
-    return unwrapData(response)?.items || [];
+    return (unwrapData(response)?.items || []).map(normalizeTodo);
   },
 
   async saveTodos(todos) {
     const response = await apiClient.post("/api/todos", { items: todos || [] });
-    return unwrapData(response)?.items || [];
+    return (unwrapData(response)?.items || []).map(normalizeTodo);
   },
 
   async fetchMeta() {

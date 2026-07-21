@@ -1,19 +1,6 @@
 import { computed, ref } from "vue";
 import { memoApi } from "../api/memoApi";
-
-const normalizeTimestamp = (value) => {
-  if (!value) return 0;
-  const text = String(value);
-  const date = /^\d+$/.test(text) ? new Date(Number(text) * 1000) : new Date(text);
-  const time = date.getTime();
-  return Number.isFinite(time) ? time : 0;
-};
-
-const normalizeMemo = (memo = {}) => ({
-  ...memo,
-  updatedAt: memo.updatedAt || memo.updated_at || "",
-  createdAt: memo.createdAt || memo.created_at || "",
-});
+import { normalizeMemo, normalizeMemoTimestamp } from "../lib/memoModel";
 
 export function useMemo() {
   const notes = ref([]);
@@ -48,7 +35,7 @@ export function useMemo() {
       if (sortMode.value === "title") {
         return (a.title || "").localeCompare(b.title || "", "ko");
       }
-      return normalizeTimestamp(b.updatedAt) - normalizeTimestamp(a.updatedAt);
+      return normalizeMemoTimestamp(b.updatedAt) - normalizeMemoTimestamp(a.updatedAt);
     });
   });
 

@@ -207,7 +207,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { App, message } from "ant-design-vue";
 import {
@@ -221,6 +221,7 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons-vue";
 import { useMemo } from "@/features/memo/composables/useMemo";
+import { useMemoSelection } from "@/features/memo/composables/useMemoSelection";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import BaseInput from "@/shared/ui/BaseInput.vue";
 import BaseSkeleton from "@/shared/ui/BaseSkeleton.vue";
@@ -243,11 +244,22 @@ const {
   deleteNote,
 } = useMemo();
 
-const selectedId = ref("");
-const selectedNote = ref(null);
-const previewContent = ref("");
 const contentVisible = ref(false);
-const isMobileListOpen = ref(false);
+const {
+  selectedId,
+  selectedNote,
+  previewContent,
+  isMobileListOpen,
+  selectMemo,
+  selectFirstMemo,
+  confirmDelete,
+} = useMemoSelection({
+  filteredNotes,
+  getNote,
+  deleteNote,
+  notify: message,
+  confirm: modal.confirm,
+});
 
 const summaryText = computed(() => {
   if (loading.value) return "메모를 불러오는 중입니다.";
@@ -283,38 +295,6 @@ const formatDate = (value) => {
 const createMemo = () => router.push("/memo/edit");
 const editMemo = (id) => router.push(`/memo/edit/${id}`);
 
-const selectMemo = async (note) => {
-  isMobileListOpen.value = false;
-  selectedId.value = note.id;
-  selectedNote.value = note;
-  previewContent.value = "";
-  try {
-    const fullNote = await getNote(note.id);
-    if (selectedId.value !== note.id) return;
-    selectedNote.value = fullNote;
-    previewContent.value = fullNote?.content || "";
-  } catch {
-    message.error("메모 내용을 불러오지 못했습니다.");
-  }
-};
-
-const selectFirstMemo = async () => {
-  await nextTick();
-  const first = filteredNotes.value[0];
-  if (!first) {
-    selectedId.value = "";
-    selectedNote.value = null;
-    previewContent.value = "";
-    return;
-  }
-  if (
-    !selectedId.value ||
-    !filteredNotes.value.some((note) => note.id === selectedId.value)
-  ) {
-    await selectMemo(first);
-  }
-};
-
 const handleRefresh = async () => {
   try {
     await loadNotes();
@@ -324,35 +304,6 @@ const handleRefresh = async () => {
     message.error("새로고침 실패");
   }
 };
-
-const confirmDelete = (note) => {
-  modal.confirm({
-    title: "메모 삭제",
-    content: `"${note.title || "제목 없는 메모"}" 메모를 삭제할까요?`,
-    okText: "삭제",
-    okType: "danger",
-    cancelText: "취소",
-    centered: true,
-    onOk: async () => {
-      try {
-        await deleteNote(note.id);
-        if (selectedId.value === note.id) {
-          selectedId.value = "";
-          selectedNote.value = null;
-          previewContent.value = "";
-          await selectFirstMemo();
-        }
-        message.success("삭제했습니다.");
-      } catch {
-        message.error("삭제하지 못했습니다.");
-      }
-    },
-  });
-};
-
-watch([filteredNotes, searchQuery], () => {
-  selectFirstMemo();
-});
 
 onMounted(async () => {
   try {

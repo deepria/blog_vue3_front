@@ -359,10 +359,11 @@
 <script setup>
 import { ReloadOutlined, SettingOutlined } from "@ant-design/icons-vue";
 import { message } from "ant-design-vue";
-import { onMounted, ref } from "vue";
+import { onMounted } from "vue";
 import TodoBoard from "@/features/todo/components/TodoBoard.vue";
 import TodoQuickAdd from "@/features/todo/components/TodoQuickAdd.vue";
 import { useTodos } from "@/features/todo/composables/useTodos";
+import { useTodoEditor } from "@/features/todo/composables/useTodoEditor";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import BaseInput from "@/shared/ui/BaseInput.vue";
 import BaseModal from "@/shared/ui/BaseModal.vue";
@@ -383,58 +384,29 @@ const {
   toggleCompletion,
 } = useTodos();
 
-const quickAddText = ref("");
-const showPopup = ref(false);
-const isNewItem = ref(false);
-const settingsMode = ref(false);
-const selectedItem = ref({ text: "", groupKey: null, priorityKey: null });
-const newGroup = ref({ name: "", color: "#666666" });
-const newPriority = ref({ name: "", color: "#ef4444" });
+const {
+  quickAddText,
+  showPopup,
+  isNewItem,
+  settingsMode,
+  selectedItem,
+  newGroup,
+  newPriority,
+  addQuickItem,
+  openEditModal,
+  openSettings,
+  confirmPopup,
+  addGroup,
+  addPriority,
+} = useTodoEditor({
+  groupOptions,
+  priorityOptions,
+  nextGroupKey,
+  nextPriorityKey,
+  markUnsaved,
+});
 
-function handleQuickAdd() {
-  if (!quickAddText.value.trim()) return;
-  addItem(quickAddText.value.trim(), null, null);
-  quickAddText.value = "";
-}
-
-function openEditModal(item) {
-  selectedItem.value = item;
-  isNewItem.value = false;
-  showPopup.value = true;
-}
-
-function openSettings() {
-  selectedItem.value = {
-    text: "",
-    groupKey: groupOptions.value[0]?.key,
-    priorityKey: priorityOptions.value[0]?.key,
-  };
-  isNewItem.value = true;
-  settingsMode.value = true;
-  showPopup.value = true;
-}
-
-function confirmPopup() {
-  showPopup.value = false;
-  markUnsaved();
-}
-
-function addGroup() {
-  if (!newGroup.value.name) return;
-  groupOptions.value.push({ key: nextGroupKey.value, ...newGroup.value });
-  newGroup.value = { name: "", color: "#666666" };
-  markUnsaved();
-}
-
-function addPriority() {
-  if (!newPriority.value.name) return;
-  priorityOptions.value.push({
-    key: nextPriorityKey.value,
-    ...newPriority.value,
-  });
-  newPriority.value = { name: "", color: "#ef4444" };
-  markUnsaved();
-}
+const handleQuickAdd = () => addQuickItem(addItem);
 
 async function handleRefresh() {
   if (

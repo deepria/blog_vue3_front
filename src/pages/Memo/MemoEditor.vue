@@ -94,6 +94,11 @@ import BaseButton from "@/shared/ui/BaseButton.vue";
 import BaseSkeleton from "@/shared/ui/BaseSkeleton.vue";
 import MarkdownViewer from "@/components/ui/MarkdownViewer.vue";
 import { useMemo } from "@/features/memo/composables/useMemo";
+import {
+  formatMemoTime,
+  parseMemoDate,
+  toggleMarkdownTask,
+} from "@/features/memo/lib/memoContent";
 
 const props = defineProps({
   id: String,
@@ -151,21 +156,6 @@ const saveStatusClass = computed(() => ({
   error: saveState.value === "failed",
 }));
 
-const formatTime = (value) =>
-  new Intl.DateTimeFormat("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(value);
-
-const parseMemoDate = (value) => {
-  if (!value) return null;
-  const text = String(value);
-  const date = /^\d+$/.test(text)
-    ? new Date(Number(text) * 1000)
-    : new Date(text);
-  return Number.isFinite(date.getTime()) ? date : null;
-};
-
 const clearAutoSaveTimer = () => {
   if (!autoSaveTimer.value) return;
   clearTimeout(autoSaveTimer.value);
@@ -206,22 +196,8 @@ const handleContentUpdate = (nextContent) => {
 };
 
 const toggleTaskCheckbox = (targetIndex) => {
-  let currentIndex = -1;
-  let didToggle = false;
-  const taskPattern = /^(\s*[-*+]\s+\[)( |x|X)(\]\s+)/;
-  const nextContent = content.value
-    .split("\n")
-    .map((line) =>
-      line.replace(taskPattern, (match, prefix, state, suffix) => {
-        currentIndex += 1;
-        if (currentIndex !== targetIndex) return match;
-        didToggle = true;
-        return `${prefix}${state === " " ? "x" : " "}${suffix}`;
-      }),
-    )
-    .join("\n");
-
-  if (!didToggle) return;
+  const nextContent = toggleMarkdownTask(content.value, targetIndex);
+  if (nextContent === null) return;
   content.value = nextContent;
   markDirty();
 };
@@ -247,7 +223,7 @@ const loadContent = async () => {
     title.value = note?.title || "";
     content.value = note?.content || "";
     const updatedAt = parseMemoDate(note?.updatedAt);
-    lastSavedAt.value = updatedAt ? formatTime(updatedAt) : "";
+    lastSavedAt.value = updatedAt ? formatMemoTime(updatedAt) : "";
     snapshotCurrent();
   } catch {
     loadError.value = true;
@@ -275,7 +251,7 @@ const saveNow = async ({ silent = false } = {}) => {
     currentId.value = savedMemo?.id || currentId.value;
     title.value = savedMemo?.title || nextTitle;
     content.value = savedMemo?.content ?? content.value;
-    lastSavedAt.value = formatTime(new Date());
+    lastSavedAt.value = formatMemoTime(new Date());
     snapshotCurrent();
 
     if (!props.id && currentId.value) {

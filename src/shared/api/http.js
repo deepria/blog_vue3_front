@@ -27,7 +27,7 @@ apiClient.interceptors.response.use(
       try {
         await apiClient.post("/api/auth/refresh");
         return apiClient(originalRequest);
-      } catch (_) {
+      } catch {
         // Fall through to the normalized original error.
       }
     }

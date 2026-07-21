@@ -1,5 +1,6 @@
 import { computed, ref } from "vue";
 import { storageApi } from "../api/storageApi";
+import { enrichFileForPresentation } from "../lib/filePresentation";
 
 const SINGLE_PUT_LIMIT = 5 * 1024 * 1024 * 1024;
 const DEFAULT_PART_SIZE = 100 * 1024 * 1024;
@@ -11,24 +12,9 @@ export function useStorage() {
   const loading = ref(false);
   const uploadProgress = ref(0);
 
-  const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif"];
-  const textExtensions = [".txt", ".md", ".markdown", ".log", ".csv", ".json", ".xml", ".yaml", ".yml"];
   const previewableFiles = computed(() =>
-    files.value.map((file) => ({
-      ...file,
-      previewType: getPreviewType(file.display_name),
-      isPreviewable: getPreviewType(file.display_name) !== "unsupported",
-    })),
+    files.value.map(enrichFileForPresentation),
   );
-
-  function getPreviewType(fileName = "") {
-    const normalized = fileName.toLowerCase();
-    if (imageExtensions.some((ext) => normalized.endsWith(ext))) return "image";
-    if (textExtensions.some((ext) => normalized.endsWith(ext))) {
-      return normalized.endsWith(".md") || normalized.endsWith(".markdown") ? "markdown" : "text";
-    }
-    return "unsupported";
-  }
 
   async function loadFiles() {
     loading.value = true;

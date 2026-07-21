@@ -187,6 +187,12 @@ import BaseModal from "@/shared/ui/BaseModal.vue";
 import BaseProgressBar from "@/shared/ui/BaseProgressBar.vue";
 import { useDownload } from "@/shared/composables/useDownload";
 import PageShell from "@/shared/ui/PageShell.vue";
+import { getPreviewType } from "@/features/storage/lib/filePresentation";
+import {
+  collectDirectoryIds,
+  DASHBOARD_DIRECTORY,
+  normalizeOrganization,
+} from "@/features/storage/lib/organization";
 
 const { modal } = App.useApp();
 const {
@@ -209,12 +215,6 @@ const uploadTask = ref(null);
 const showUploadModal = ref(false);
 const showAuthModal = ref(false);
 const selectedDirectoryId = ref("all");
-const DASHBOARD_DIRECTORY = {
-  id: "dashboard",
-  name: "Dashboard",
-  parent_id: null,
-  sort_order: 0,
-};
 const organization = ref({
   directories: [],
   file_locations: {},
@@ -273,9 +273,7 @@ const refreshDirectory = async () => {
 };
 
 const loadOrganization = async () => {
-  const loadedOrganization = normalizeOrganization(
-    await storageApi.getOrganization(),
-  );
+  const loadedOrganization = normalizeOrganization(await storageApi.getOrganization());
   const hasDashboardDirectory = loadedOrganization.directories.some(
     (directory) => directory.id === DASHBOARD_DIRECTORY.id,
   );
@@ -294,14 +292,6 @@ const saveOrganization = async (nextOrganization) => {
     await storageApi.saveOrganization(nextOrganization),
   );
 };
-
-const normalizeOrganization = (data = {}) => ({
-  directories: Array.isArray(data.directories) ? data.directories : [],
-  file_locations:
-    data.file_locations && typeof data.file_locations === "object"
-      ? data.file_locations
-      : {},
-});
 
 const createDirectory = async () => {
   const sortOrder = organization.value.directories.length + 1;
@@ -341,7 +331,7 @@ const deleteDirectory = async (id) => {
     cancelText: "Cancel",
     centered: true,
     onOk: async () => {
-      const directoryIds = collectDirectoryIds(id);
+      const directoryIds = collectDirectoryIds(organization.value.directories, id);
       const fileLocations = { ...organization.value.file_locations };
       Object.entries(fileLocations).forEach(([key, directoryId]) => {
         if (directoryIds.has(directoryId)) {
@@ -360,25 +350,6 @@ const deleteDirectory = async (id) => {
       message.success("Folder deleted");
     },
   });
-};
-
-const collectDirectoryIds = (rootId) => {
-  const ids = new Set([rootId]);
-  let changed = true;
-  while (changed) {
-    changed = false;
-    organization.value.directories.forEach((directory) => {
-      if (
-        directory.parent_id &&
-        ids.has(directory.parent_id) &&
-        !ids.has(directory.id)
-      ) {
-        ids.add(directory.id);
-        changed = true;
-      }
-    });
-  }
-  return ids;
 };
 
 const moveFileToDirectory = async ({ fileKey, directoryId }) => {
@@ -473,7 +444,10 @@ function closeAuthPopup() {
 }
 
 async function requestAction(file, action) {
-  if (action === "preview" && getPreviewType(file) === "unsupported") {
+  if (
+    action === "preview" &&
+    (file.previewType || getPreviewType(file.display_name)) === "unsupported"
+  ) {
     message.info("미리보기 기능을 사용할 수 없는 파일입니다.");
     return;
   }
@@ -514,7 +488,7 @@ async function requestAction(file, action) {
 }
 
 async function openPreview(file, url) {
-  const previewType = getPreviewType(file);
+  const previewType = file.previewType || getPreviewType(file.display_name);
 
   if (previewType === "image") {
     imagePreview.value = {
@@ -558,26 +532,6 @@ function closeImagePreview() {
   };
 }
 
-function getPreviewType(file) {
-  if (file.previewType) return file.previewType;
-  const name = file.display_name?.toLowerCase() || "";
-  if (
-    [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif"].some(
-      (ext) => name.endsWith(ext),
-    )
-  ) {
-    return "image";
-  }
-  if (name.endsWith(".md") || name.endsWith(".markdown")) return "markdown";
-  if (
-    [".txt", ".log", ".csv", ".json", ".xml", ".yaml", ".yml"].some((ext) =>
-      name.endsWith(ext),
-    )
-  ) {
-    return "text";
-  }
-  return "unsupported";
-}
 
 onMounted(() => {
   Promise.all([loadFiles(), loadOrganization()]);
