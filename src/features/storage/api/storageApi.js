@@ -18,10 +18,10 @@ export const storageApi = {
     return unwrapData(response)?.items || [];
   },
 
-  async shareFile(key, email) {
+  async shareFile(key, viewerId) {
     const response = await apiClient.post(
       `/api/files/${encodeURIComponent(key)}/viewers`,
-      { email },
+      { viewer_id: viewerId },
     );
     return unwrapData(response);
   },

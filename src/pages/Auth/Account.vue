@@ -3,7 +3,7 @@
     class="account-page"
     title="Account"
     eyebrow="Profile"
-    description="Manage your identity and connected sign-in providers."
+    description="Manage your identity, sign-in providers, and friends."
   >
     <template #actions>
       <a-button
@@ -55,20 +55,171 @@
         </a-button>
       </div>
     </div>
+
+    <section class="friends-section">
+      <div class="section-heading">
+        <div>
+          <h2>Friends</h2>
+          <p>Add friends to share files without entering their email again.</p>
+        </div>
+        <span class="friend-count">{{ friends.length }}</span>
+      </div>
+
+      <div class="friend-request-form">
+        <a-input
+          v-model:value="friendEmail"
+          type="email"
+          placeholder="Friend's registered email"
+          :disabled="sendingRequest"
+          @press-enter="sendFriendRequest"
+        />
+        <a-button
+          type="primary"
+          :loading="sendingRequest"
+          :disabled="!friendEmail.trim()"
+          @click="sendFriendRequest"
+        >
+          Send request
+        </a-button>
+      </div>
+
+      <div v-if="friendsLoading" class="friend-empty">Loading friends...</div>
+      <template v-else>
+        <div v-if="incomingRequests.length" class="friend-group">
+          <h3>Received requests</h3>
+          <div class="friend-list">
+            <div
+              v-for="request in incomingRequests"
+              :key="request.request_id"
+              class="friend-row"
+            >
+              <div class="friend-identity">
+                <img
+                  v-if="request.avatar_url"
+                  :src="request.avatar_url"
+                  alt=""
+                  class="friend-avatar"
+                />
+                <span v-else class="friend-avatar fallback">
+                  {{ initial(request.name) }}
+                </span>
+                <div>
+                  <strong>{{ request.name }}</strong>
+                  <span>{{ request.email }}</span>
+                </div>
+              </div>
+              <div class="friend-actions">
+                <a-button
+                  size="small"
+                  @click="dismissFriendRequest(request.request_id)"
+                >
+                  Decline
+                </a-button>
+                <a-button
+                  size="small"
+                  type="primary"
+                  @click="acceptFriendRequest(request.request_id)"
+                >
+                  Accept
+                </a-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="outgoingRequests.length" class="friend-group">
+          <h3>Sent requests</h3>
+          <div class="friend-list">
+            <div
+              v-for="request in outgoingRequests"
+              :key="request.request_id"
+              class="friend-row"
+            >
+              <div class="friend-identity">
+                <img
+                  v-if="request.avatar_url"
+                  :src="request.avatar_url"
+                  alt=""
+                  class="friend-avatar"
+                />
+                <span v-else class="friend-avatar fallback">
+                  {{ initial(request.name) }}
+                </span>
+                <div>
+                  <strong>{{ request.name }}</strong>
+                  <span>{{ request.email }}</span>
+                </div>
+              </div>
+              <a-button
+                size="small"
+                @click="dismissFriendRequest(request.request_id)"
+              >
+                Cancel
+              </a-button>
+            </div>
+          </div>
+        </div>
+
+        <div class="friend-group">
+          <h3>Your friends</h3>
+          <div v-if="friends.length" class="friend-list">
+            <div
+              v-for="friend in friends"
+              :key="friend.user_id"
+              class="friend-row"
+            >
+              <div class="friend-identity">
+                <img
+                  v-if="friend.avatar_url"
+                  :src="friend.avatar_url"
+                  alt=""
+                  class="friend-avatar"
+                />
+                <span v-else class="friend-avatar fallback">
+                  {{ initial(friend.name) }}
+                </span>
+                <div>
+                  <strong>{{ friend.name }}</strong>
+                  <span>{{ friend.email }}</span>
+                </div>
+              </div>
+              <a-button
+                size="small"
+                danger
+                @click="confirmRemoveFriend(friend)"
+              >
+                Remove
+              </a-button>
+            </div>
+          </div>
+          <div v-else class="friend-empty">
+            No friends yet. Send a request using their registered email.
+          </div>
+        </div>
+      </template>
+    </section>
   </PageShell>
 </template>
 
 <script setup>
-import { message } from "ant-design-vue";
+import { App, message } from "ant-design-vue";
 import { useAppStore } from "@/store/app";
 import { useRouter } from "vue-router";
-import { computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { BulbFilled, BulbOutlined } from "@ant-design/icons-vue";
 import { authApi } from "@/features/auth/api/authApi";
+import { friendApi } from "@/features/friend/api/friendApi";
 import PageShell from "@/shared/ui/PageShell.vue";
 
 const app = useAppStore();
+const { modal } = App.useApp();
 const router = useRouter();
+const friendEmail = ref("");
+const friendsLoading = ref(false);
+const sendingRequest = ref(false);
+const friends = ref([]);
+const incomingRequests = ref([]);
+const outgoingRequests = ref([]);
 const isDarkMode = computed(() => app.theme === "dark");
 const themeToggleTitle = computed(() =>
   isDarkMode.value ? "Turn dark mode off" : "Turn dark mode on",
@@ -98,6 +249,89 @@ async function logout() {
   await app.logout();
   router.push({ name: "Login" });
 }
+
+async function loadFriends() {
+  friendsLoading.value = true;
+  try {
+    const data = await friendApi.overview();
+    friends.value = data?.friends || [];
+    incomingRequests.value = data?.incoming_requests || [];
+    outgoingRequests.value = data?.outgoing_requests || [];
+  } catch (error) {
+    message.error(error.userMessage || "Unable to load friends.");
+  } finally {
+    friendsLoading.value = false;
+  }
+}
+
+async function sendFriendRequest() {
+  const email = friendEmail.value.trim();
+  if (!email || sendingRequest.value) return;
+  sendingRequest.value = true;
+  try {
+    const request = await friendApi.sendRequest(email);
+    outgoingRequests.value.unshift(request);
+    friendEmail.value = "";
+    message.success("Friend request sent.");
+  } catch (error) {
+    message.error(error.userMessage || "Unable to send friend request.");
+  } finally {
+    sendingRequest.value = false;
+  }
+}
+
+async function acceptFriendRequest(requestId) {
+  try {
+    const friend = await friendApi.acceptRequest(requestId);
+    incomingRequests.value = incomingRequests.value.filter(
+      (request) => request.request_id !== requestId,
+    );
+    friends.value.push(friend);
+    friends.value.sort((left, right) => left.name.localeCompare(right.name));
+    message.success("Friend request accepted.");
+  } catch (error) {
+    message.error(error.userMessage || "Unable to accept friend request.");
+  }
+}
+
+async function dismissFriendRequest(requestId) {
+  try {
+    await friendApi.dismissRequest(requestId);
+    incomingRequests.value = incomingRequests.value.filter(
+      (request) => request.request_id !== requestId,
+    );
+    outgoingRequests.value = outgoingRequests.value.filter(
+      (request) => request.request_id !== requestId,
+    );
+    message.success("Friend request removed.");
+  } catch (error) {
+    message.error(error.userMessage || "Unable to remove friend request.");
+  }
+}
+
+function confirmRemoveFriend(friend) {
+  modal.confirm({
+    title: "Remove friend",
+    content: `Remove ${friend.name} from your friends? Existing file access will remain until you remove it from the file.`,
+    okText: "Remove",
+    okType: "danger",
+    cancelText: "Cancel",
+    centered: true,
+    onOk: async () => {
+      await friendApi.removeFriend(friend.user_id);
+      friends.value = friends.value.filter(
+        (item) => item.user_id !== friend.user_id,
+      );
+      message.success("Friend removed.");
+    },
+  });
+}
+
+function initial(name = "") {
+  return name.trim().charAt(0).toUpperCase() || "?";
+}
+
+onMounted(loadFriends);
 </script>
 
 <style scoped>
@@ -152,6 +386,133 @@ span {
   gap: 12px;
 }
 
+.friends-section {
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.section-heading h2,
+.friend-group h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.section-heading h2 {
+  font-size: 20px;
+}
+
+.section-heading p {
+  margin-top: 4px;
+  font-size: var(--font-size-caption);
+}
+
+.friend-count {
+  min-width: 30px;
+  padding: 4px 9px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+  text-align: center;
+  font-weight: 700;
+}
+
+.friend-request-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.friend-group {
+  display: grid;
+  gap: 10px;
+}
+
+.friend-group h3 {
+  font-size: var(--font-size-body);
+}
+
+.friend-list {
+  display: grid;
+  gap: 8px;
+}
+
+.friend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-panel);
+}
+
+.friend-identity {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+}
+
+.friend-identity > div {
+  display: grid;
+  min-width: 0;
+}
+
+.friend-identity strong,
+.friend-identity span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friend-identity span {
+  font-size: var(--font-size-caption);
+}
+
+.friend-avatar {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.friend-avatar.fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+  font-weight: 750;
+}
+
+.friend-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.friend-empty {
+  padding: 20px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  text-align: center;
+  font-size: var(--font-size-caption);
+}
+
 .provider-row {
   display: flex;
   align-items: center;
@@ -184,6 +545,19 @@ span {
   .provider-row {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .friend-request-form {
+    grid-template-columns: 1fr;
+  }
+
+  .friend-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .friend-actions {
+    width: 100%;
   }
 
   .logout-button {

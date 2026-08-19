@@ -135,23 +135,55 @@
       :title="shareTarget ? `Share ${shareTarget.display_name}` : 'Share file'"
       @close="closeShareModal"
     >
-      <div class="share-form">
+      <div class="friend-picker">
         <BaseInput
-          v-model="shareEmail"
-          label="Registered user email"
-          placeholder="name@example.com"
-          type="email"
-          :disabled="sharing"
-          @enter="addViewer"
+          v-model="friendSearch"
+          label="Choose a friend"
+          placeholder="Search by name or email"
+          :disabled="friendsLoading"
         />
-        <BaseButton
-          variant="primary"
-          :loading="sharing"
-          :disabled="!shareEmail.trim()"
-          @click="addViewer"
-        >
-          Add viewer
-        </BaseButton>
+        <p v-if="friendsLoading" class="viewer-empty">Loading friends...</p>
+        <div v-else-if="friends.length === 0" class="friend-picker-empty">
+          <span>Add friends from your Account page before sharing.</span>
+          <router-link :to="{ name: 'Account' }" @click="closeShareModal">
+            Manage friends
+          </router-link>
+        </div>
+        <p v-else-if="filteredFriends.length === 0" class="viewer-empty">
+          No friends match your search.
+        </p>
+        <div v-else class="friend-picker-list">
+          <div
+            v-for="friend in filteredFriends"
+            :key="friend.user_id"
+            class="friend-picker-row"
+          >
+            <div class="friend-picker-identity">
+              <img
+                v-if="friend.avatar_url"
+                :src="friend.avatar_url"
+                alt=""
+                class="friend-picker-avatar"
+              />
+              <span v-else class="friend-picker-avatar fallback">
+                {{ friendInitial(friend.name) }}
+              </span>
+              <div class="viewer-details">
+                <strong>{{ friend.name }}</strong>
+                <span>{{ friend.email }}</span>
+              </div>
+            </div>
+            <BaseButton
+              size="sm"
+              :variant="viewerIds.has(friend.user_id) ? 'secondary' : 'primary'"
+              :disabled="viewerIds.has(friend.user_id)"
+              :loading="sharingFriendId === friend.user_id"
+              @click="shareWithFriend(friend)"
+            >
+              {{ viewerIds.has(friend.user_id) ? "Shared" : "Share" }}
+            </BaseButton>
+          </div>
+        </div>
       </div>
 
       <div class="viewer-section">
@@ -260,6 +292,7 @@ import { App, message } from "ant-design-vue";
 import { computed, onMounted, ref } from "vue";
 import { useStorage } from "@/features/storage/composables/useStorage";
 import { storageApi } from "@/features/storage/api/storageApi";
+import { friendApi } from "@/features/friend/api/friendApi";
 import StorageFileList from "@/features/storage/components/StorageFileList.vue";
 import StorageDirectoryTree from "@/features/storage/components/StorageDirectoryTree.vue";
 import StorageUploadPanel from "@/features/storage/components/StorageUploadPanel.vue";
@@ -303,10 +336,12 @@ const showUploadModal = ref(false);
 const showAuthModal = ref(false);
 const showShareModal = ref(false);
 const shareTarget = ref(null);
-const shareEmail = ref("");
+const friends = ref([]);
+const friendSearch = ref("");
 const fileViewers = ref([]);
 const viewersLoading = ref(false);
-const sharing = ref(false);
+const friendsLoading = ref(false);
+const sharingFriendId = ref(null);
 const selectedDirectoryId = ref("all");
 const organization = ref({
   directories: [],
@@ -347,6 +382,20 @@ const visibleFiles = computed(() => {
   );
 });
 
+const viewerIds = computed(
+  () => new Set(fileViewers.value.map((viewer) => viewer.viewer_id)),
+);
+
+const filteredFriends = computed(() => {
+  const search = friendSearch.value.trim().toLowerCase();
+  if (!search) return friends.value;
+  return friends.value.filter(
+    (friend) =>
+      friend.name.toLowerCase().includes(search) ||
+      friend.email.toLowerCase().includes(search),
+  );
+});
+
 const directoryFileCounts = computed(() => {
   const counts = {};
   organization.value.directories.forEach((directory) => {
@@ -368,32 +417,49 @@ const refreshDirectory = async () => {
 
 const openShareModal = async (file) => {
   shareTarget.value = file;
-  shareEmail.value = "";
+  friendSearch.value = "";
+  friends.value = [];
   fileViewers.value = [];
   showShareModal.value = true;
   viewersLoading.value = true;
+  friendsLoading.value = true;
   try {
-    fileViewers.value = await storageApi.listFileViewers(file.key);
+    const [viewers, friendOverview] = await Promise.all([
+      storageApi.listFileViewers(file.key),
+      friendApi.overview(),
+    ]);
+    fileViewers.value = viewers;
+    friends.value = friendOverview?.friends || [];
   } catch (error) {
     message.error(error?.userMessage || "Could not load sharing settings");
   } finally {
     viewersLoading.value = false;
+    friendsLoading.value = false;
   }
 };
 
 const closeShareModal = () => {
   showShareModal.value = false;
   shareTarget.value = null;
-  shareEmail.value = "";
+  friendSearch.value = "";
+  friends.value = [];
   fileViewers.value = [];
 };
 
-const addViewer = async () => {
-  const email = shareEmail.value.trim();
-  if (!email || !shareTarget.value || sharing.value) return;
-  sharing.value = true;
+const shareWithFriend = async (friend) => {
+  if (
+    !shareTarget.value ||
+    sharingFriendId.value ||
+    viewerIds.value.has(friend.user_id)
+  ) {
+    return;
+  }
+  sharingFriendId.value = friend.user_id;
   try {
-    const viewer = await storageApi.shareFile(shareTarget.value.key, email);
+    const viewer = await storageApi.shareFile(
+      shareTarget.value.key,
+      friend.user_id,
+    );
     const existingIndex = fileViewers.value.findIndex(
       (item) => item.viewer_id === viewer.viewer_id,
     );
@@ -402,14 +468,15 @@ const addViewer = async () => {
     } else {
       fileViewers.value.push(viewer);
     }
-    shareEmail.value = "";
     message.success("File shared");
   } catch (error) {
     message.error(error?.userMessage || "Could not share file");
   } finally {
-    sharing.value = false;
+    sharingFriendId.value = null;
   }
 };
+
+const friendInitial = (name = "") => name.trim().charAt(0).toUpperCase() || "?";
 
 const removeViewer = async (viewer) => {
   if (!shareTarget.value) return;
@@ -793,11 +860,69 @@ onMounted(() => {
   color: var(--color-text-secondary);
 }
 
-.share-form {
+.friend-picker {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
   gap: var(--space-3);
+}
+
+.friend-picker-list {
+  display: grid;
+  gap: var(--space-2);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.friend-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-panel);
+}
+
+.friend-picker-identity {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: var(--space-2);
+}
+
+.friend-picker-avatar {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.friend-picker-avatar.fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+  font-weight: 750;
+}
+
+.friend-picker-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.friend-picker-empty a {
+  color: var(--color-primary);
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .viewer-section {
@@ -879,8 +1004,9 @@ onMounted(() => {
     justify-content: center;
   }
 
-  .share-form {
-    grid-template-columns: 1fr;
+  .friend-picker-empty {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 
