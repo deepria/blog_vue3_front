@@ -9,11 +9,20 @@ const MULTIPART_CONCURRENCY = 3;
 
 export function useStorage() {
   const files = ref([]);
+  const sharedFiles = ref([]);
   const loading = ref(false);
+  const sharedLoading = ref(false);
   const uploadProgress = ref(0);
 
   const previewableFiles = computed(() =>
-    files.value.map(enrichFileForPresentation),
+    files.value.map((file) =>
+      enrichFileForPresentation({ ...file, isShared: false }),
+    ),
+  );
+  const previewableSharedFiles = computed(() =>
+    sharedFiles.value.map((file) =>
+      enrichFileForPresentation({ ...file, isShared: true }),
+    ),
   );
 
   async function loadFiles() {
@@ -22,6 +31,15 @@ export function useStorage() {
       files.value = await storageApi.listFiles();
     } finally {
       loading.value = false;
+    }
+  }
+
+  async function loadSharedFiles() {
+    sharedLoading.value = true;
+    try {
+      sharedFiles.value = await storageApi.listSharedFiles();
+    } finally {
+      sharedLoading.value = false;
     }
   }
 
@@ -58,7 +76,12 @@ export function useStorage() {
     return upload;
   }
 
-  async function uploadMultipartFile({ file, displayName, authKey, onProgress }) {
+  async function uploadMultipartFile({
+    file,
+    displayName,
+    authKey,
+    onProgress,
+  }) {
     const contentType = file.type || "application/octet-stream";
     const upload = await storageApi.initiateMultipartUpload({
       filename: file.name,
@@ -72,42 +95,50 @@ export function useStorage() {
     let completedBytes = 0;
 
     try {
-      await runPartUploads(partCount, MULTIPART_CONCURRENCY, async (partNumber) => {
-        const start = (partNumber - 1) * partSize;
-        const end = Math.min(start + partSize, file.size);
-        const blob = file.slice(start, end);
-        const { url } = await storageApi.createMultipartPart({
-          key: upload.key,
-          uploadId: upload.upload_id,
-          partNumber,
-        });
-        const response = await fetch(url, {
-          method: "PUT",
-          headers: {
-            "Content-Type": contentType,
-          },
-          body: blob,
-        });
+      await runPartUploads(
+        partCount,
+        MULTIPART_CONCURRENCY,
+        async (partNumber) => {
+          const start = (partNumber - 1) * partSize;
+          const end = Math.min(start + partSize, file.size);
+          const blob = file.slice(start, end);
+          const { url } = await storageApi.createMultipartPart({
+            key: upload.key,
+            uploadId: upload.upload_id,
+            partNumber,
+          });
+          const response = await fetch(url, {
+            method: "PUT",
+            headers: {
+              "Content-Type": contentType,
+            },
+            body: blob,
+          });
 
-        if (!response.ok) {
-          throw {
-            userMessage: `Upload failed (${response.status})`,
-            status: response.status,
-          };
-        }
+          if (!response.ok) {
+            throw {
+              userMessage: `Upload failed (${response.status})`,
+              status: response.status,
+            };
+          }
 
-        const etag = response.headers.get("ETag");
-        if (!etag) {
-          throw {
-            userMessage: "Upload failed: S3 CORS must expose the ETag header.",
-            status: "missing_etag",
-          };
-        }
+          const etag = response.headers.get("ETag");
+          if (!etag) {
+            throw {
+              userMessage:
+                "Upload failed: S3 CORS must expose the ETag header.",
+              status: "missing_etag",
+            };
+          }
 
-        completedParts.push({ partNumber, etag });
-        completedBytes += blob.size;
-        updateProgress(Math.floor((completedBytes / file.size) * 95), onProgress);
-      });
+          completedParts.push({ partNumber, etag });
+          completedBytes += blob.size;
+          updateProgress(
+            Math.floor((completedBytes / file.size) * 95),
+            onProgress,
+          );
+        },
+      );
 
       completedParts.sort((a, b) => a.partNumber - b.partNumber);
       await storageApi.completeMultipartUpload({
@@ -132,13 +163,16 @@ export function useStorage() {
 
   async function runPartUploads(total, concurrency, uploadPart) {
     let nextPartNumber = 1;
-    const workers = Array.from({ length: Math.min(concurrency, total) }, async () => {
-      while (nextPartNumber <= total) {
-        const partNumber = nextPartNumber;
-        nextPartNumber += 1;
-        await uploadPart(partNumber);
-      }
-    });
+    const workers = Array.from(
+      { length: Math.min(concurrency, total) },
+      async () => {
+        while (nextPartNumber <= total) {
+          const partNumber = nextPartNumber;
+          nextPartNumber += 1;
+          await uploadPart(partNumber);
+        }
+      },
+    );
     await Promise.all(workers);
   }
 
@@ -147,8 +181,8 @@ export function useStorage() {
     if (onProgress) onProgress(value);
   }
 
-  async function getDownloadUrl(key, authKey) {
-    return storageApi.createDownload({ key, authKey });
+  async function getDownloadUrl(key, authKey, ownerId) {
+    return storageApi.createDownload({ key, authKey, ownerId });
   }
 
   async function getDeleteUrl(key, authKey) {
@@ -157,10 +191,14 @@ export function useStorage() {
 
   return {
     files,
+    sharedFiles,
     loading,
+    sharedLoading,
     uploadProgress,
     previewableFiles,
+    previewableSharedFiles,
     loadFiles,
+    loadSharedFiles,
     uploadFile,
     getDownloadUrl,
     getDeleteUrl,

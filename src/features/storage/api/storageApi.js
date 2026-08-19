@@ -6,13 +6,43 @@ export const storageApi = {
     return unwrapData(response)?.items || [];
   },
 
+  async listSharedFiles() {
+    const response = await apiClient.get("/api/files/shared-with-me");
+    return unwrapData(response)?.items || [];
+  },
+
+  async listFileViewers(key) {
+    const response = await apiClient.get(
+      `/api/files/${encodeURIComponent(key)}/viewers`,
+    );
+    return unwrapData(response)?.items || [];
+  },
+
+  async shareFile(key, email) {
+    const response = await apiClient.post(
+      `/api/files/${encodeURIComponent(key)}/viewers`,
+      { email },
+    );
+    return unwrapData(response);
+  },
+
+  async unshareFile(key, viewerId) {
+    const response = await apiClient.delete(
+      `/api/files/${encodeURIComponent(key)}/viewers/${encodeURIComponent(viewerId)}`,
+    );
+    return unwrapData(response);
+  },
+
   async getOrganization() {
     const response = await apiClient.get("/api/files/organization");
     return unwrapData(response) || { directories: [], file_locations: {} };
   },
 
   async saveOrganization(organization) {
-    const response = await apiClient.put("/api/files/organization", organization);
+    const response = await apiClient.put(
+      "/api/files/organization",
+      organization,
+    );
     return unwrapData(response) || { directories: [], file_locations: {} };
   },
 
@@ -26,7 +56,12 @@ export const storageApi = {
     return unwrapData(response);
   },
 
-  async initiateMultipartUpload({ filename, displayName, contentType, authKey }) {
+  async initiateMultipartUpload({
+    filename,
+    displayName,
+    contentType,
+    authKey,
+  }) {
     const response = await apiClient.post("/api/files/multipart/initiate", {
       filename,
       display_name: displayName,
@@ -65,10 +100,11 @@ export const storageApi = {
     return unwrapData(response);
   },
 
-  async createDownload({ key, authKey }) {
+  async createDownload({ key, authKey, ownerId }) {
     const response = await apiClient.post("/api/files/presign-download", {
       key,
       auth_key: authKey || null,
+      owner_id: ownerId || null,
     });
     return unwrapData(response);
   },

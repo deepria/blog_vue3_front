@@ -27,15 +27,44 @@
     </template>
 
     <div class="s3-grid page-content">
+      <div class="storage-tabs" role="tablist" aria-label="Storage view">
+        <button
+          type="button"
+          role="tab"
+          :aria-selected="viewMode === 'owned'"
+          :class="{ active: viewMode === 'owned' }"
+          @click="viewMode = 'owned'"
+        >
+          My files
+        </button>
+        <button
+          type="button"
+          role="tab"
+          :aria-selected="viewMode === 'shared'"
+          :class="{ active: viewMode === 'shared' }"
+          @click="viewMode = 'shared'"
+        >
+          Shared with me
+          <span v-if="previewableSharedFiles.length" class="tab-count">
+            {{ previewableSharedFiles.length }}
+          </span>
+        </button>
+      </div>
+
       <StorageUploadPanel
+        v-if="viewMode === 'owned'"
         :is-dragging="isDragging"
         @change="handleFileChange"
         @drop="handleDrop"
         @drag-state="isDragging = $event"
       />
 
-      <div class="storage-workspace">
+      <div
+        class="storage-workspace"
+        :class="{ 'shared-workspace': viewMode === 'shared' }"
+      >
         <StorageDirectoryTree
+          v-if="viewMode === 'owned'"
           :directories="organization.directories"
           :selected-id="selectedDirectoryId"
           :file-counts="directoryFileCounts"
@@ -50,9 +79,15 @@
 
         <StorageFileList
           :files="visibleFiles"
-          :loading="loading"
+          :loading="viewMode === 'owned' ? loading : sharedLoading"
+          :empty-text="
+            viewMode === 'owned'
+              ? 'No files uploaded yet'
+              : 'No files have been shared with you'
+          "
           @preview="requestAction($event, 'preview')"
           @download="requestAction($event, 'download')"
+          @share="openShareModal"
           @delete="requestAction($event, 'delete')"
         />
       </div>
@@ -93,6 +128,54 @@
           >Start Upload</BaseButton
         >
       </template>
+    </BaseModal>
+
+    <BaseModal
+      v-model="showShareModal"
+      :title="shareTarget ? `Share ${shareTarget.display_name}` : 'Share file'"
+      @close="closeShareModal"
+    >
+      <div class="share-form">
+        <BaseInput
+          v-model="shareEmail"
+          label="Registered user email"
+          placeholder="name@example.com"
+          type="email"
+          :disabled="sharing"
+          @enter="addViewer"
+        />
+        <BaseButton
+          variant="primary"
+          :loading="sharing"
+          :disabled="!shareEmail.trim()"
+          @click="addViewer"
+        >
+          Add viewer
+        </BaseButton>
+      </div>
+
+      <div class="viewer-section">
+        <p class="viewer-section-title">People with access</p>
+        <p v-if="viewersLoading" class="viewer-empty">Loading...</p>
+        <p v-else-if="fileViewers.length === 0" class="viewer-empty">
+          Only you can access this file.
+        </p>
+        <div v-else class="viewer-list">
+          <div
+            v-for="viewer in fileViewers"
+            :key="viewer.viewer_id"
+            class="viewer-row"
+          >
+            <div class="viewer-details">
+              <strong>{{ viewer.viewer_name }}</strong>
+              <span>{{ viewer.viewer_email }}</span>
+            </div>
+            <BaseButton variant="ghost" size="sm" @click="removeViewer(viewer)">
+              Remove
+            </BaseButton>
+          </div>
+        </div>
+      </div>
     </BaseModal>
 
     <BaseModal v-model="showAuthModal" title="Security Check">
@@ -197,8 +280,11 @@ import {
 const { modal } = App.useApp();
 const {
   loading,
+  sharedLoading,
   previewableFiles,
+  previewableSharedFiles,
   loadFiles,
+  loadSharedFiles,
   uploadFile,
   getDownloadUrl,
   getDeleteUrl,
@@ -206,6 +292,7 @@ const {
 const { downloadFromUrl } = useDownload();
 
 const isDragging = ref(false);
+const viewMode = ref("owned");
 const selectedFile = ref(null);
 const customFileName = ref("");
 const authKey = ref("");
@@ -214,6 +301,12 @@ const isUploading = ref(false);
 const uploadTask = ref(null);
 const showUploadModal = ref(false);
 const showAuthModal = ref(false);
+const showShareModal = ref(false);
+const shareTarget = ref(null);
+const shareEmail = ref("");
+const fileViewers = ref([]);
+const viewersLoading = ref(false);
+const sharing = ref(false);
 const selectedDirectoryId = ref("all");
 const organization = ref({
   directories: [],
@@ -245,6 +338,7 @@ const unassignedFiles = computed(() =>
 );
 
 const visibleFiles = computed(() => {
+  if (viewMode.value === "shared") return previewableSharedFiles.value;
   if (selectedDirectoryId.value === "all") return previewableFiles.value;
   if (selectedDirectoryId.value === "unassigned") return unassignedFiles.value;
   return previewableFiles.value.filter(
@@ -268,12 +362,72 @@ const directoryFileCounts = computed(() => {
 });
 
 const refreshDirectory = async () => {
-  await Promise.all([loadFiles(), loadOrganization()]);
+  await Promise.all([loadFiles(), loadSharedFiles(), loadOrganization()]);
   message.success("Refreshed");
 };
 
+const openShareModal = async (file) => {
+  shareTarget.value = file;
+  shareEmail.value = "";
+  fileViewers.value = [];
+  showShareModal.value = true;
+  viewersLoading.value = true;
+  try {
+    fileViewers.value = await storageApi.listFileViewers(file.key);
+  } catch (error) {
+    message.error(error?.userMessage || "Could not load sharing settings");
+  } finally {
+    viewersLoading.value = false;
+  }
+};
+
+const closeShareModal = () => {
+  showShareModal.value = false;
+  shareTarget.value = null;
+  shareEmail.value = "";
+  fileViewers.value = [];
+};
+
+const addViewer = async () => {
+  const email = shareEmail.value.trim();
+  if (!email || !shareTarget.value || sharing.value) return;
+  sharing.value = true;
+  try {
+    const viewer = await storageApi.shareFile(shareTarget.value.key, email);
+    const existingIndex = fileViewers.value.findIndex(
+      (item) => item.viewer_id === viewer.viewer_id,
+    );
+    if (existingIndex >= 0) {
+      fileViewers.value.splice(existingIndex, 1, viewer);
+    } else {
+      fileViewers.value.push(viewer);
+    }
+    shareEmail.value = "";
+    message.success("File shared");
+  } catch (error) {
+    message.error(error?.userMessage || "Could not share file");
+  } finally {
+    sharing.value = false;
+  }
+};
+
+const removeViewer = async (viewer) => {
+  if (!shareTarget.value) return;
+  try {
+    await storageApi.unshareFile(shareTarget.value.key, viewer.viewer_id);
+    fileViewers.value = fileViewers.value.filter(
+      (item) => item.viewer_id !== viewer.viewer_id,
+    );
+    message.success("Access removed");
+  } catch (error) {
+    message.error(error?.userMessage || "Could not remove access");
+  }
+};
+
 const loadOrganization = async () => {
-  const loadedOrganization = normalizeOrganization(await storageApi.getOrganization());
+  const loadedOrganization = normalizeOrganization(
+    await storageApi.getOrganization(),
+  );
   const hasDashboardDirectory = loadedOrganization.directories.some(
     (directory) => directory.id === DASHBOARD_DIRECTORY.id,
   );
@@ -331,7 +485,10 @@ const deleteDirectory = async (id) => {
     cancelText: "Cancel",
     centered: true,
     onOk: async () => {
-      const directoryIds = collectDirectoryIds(organization.value.directories, id);
+      const directoryIds = collectDirectoryIds(
+        organization.value.directories,
+        id,
+      );
       const fileLocations = { ...organization.value.file_locations };
       Object.entries(fileLocations).forEach(([key, directoryId]) => {
         if (directoryIds.has(directoryId)) {
@@ -459,13 +616,13 @@ async function requestAction(file, action) {
   }
 
   if (action === "preview") {
-    const data = await getDownloadUrl(file.key, providedAuthKey);
+    const data = await getDownloadUrl(file.key, providedAuthKey, file.owner_id);
     await openPreview(file, data.url);
     return;
   }
 
   if (action === "download") {
-    const data = await getDownloadUrl(file.key, providedAuthKey);
+    const data = await getDownloadUrl(file.key, providedAuthKey, file.owner_id);
     await downloadFromUrl(data.url, file.display_name);
     return;
   }
@@ -532,9 +689,8 @@ function closeImagePreview() {
   };
 }
 
-
 onMounted(() => {
-  Promise.all([loadFiles(), loadOrganization()]);
+  Promise.all([loadFiles(), loadSharedFiles(), loadOrganization()]);
 });
 </script>
 
@@ -553,6 +709,42 @@ onMounted(() => {
   min-width: 0;
 }
 
+.storage-tabs {
+  display: inline-flex;
+  width: fit-content;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+}
+
+.storage-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: calc(var(--radius-md) - 3px);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.storage-tabs button.active {
+  background: var(--color-primary);
+  color: var(--text-inverse);
+}
+
+.tab-count {
+  min-width: 19px;
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, currentColor 15%, transparent);
+  font-size: 11px;
+}
+
 .storage-workspace {
   display: grid;
   grid-template-columns: minmax(240px, 0.38fr) minmax(0, 1fr);
@@ -562,6 +754,10 @@ onMounted(() => {
 
 .storage-workspace > * {
   min-width: 0;
+}
+
+.storage-workspace.shared-workspace {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .form-group {
@@ -597,6 +793,63 @@ onMounted(() => {
   color: var(--color-text-secondary);
 }
 
+.share-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.viewer-section {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.viewer-section-title {
+  margin: 0 0 var(--space-3);
+  font-weight: 700;
+}
+
+.viewer-empty {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.viewer-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.viewer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-panel);
+}
+
+.viewer-details {
+  display: grid;
+  min-width: 0;
+}
+
+.viewer-details strong,
+.viewer-details span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.viewer-details span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
 @media (max-width: 640px) {
   .s3-container :deep(.page-shell-header) {
     align-items: center;
@@ -614,6 +867,19 @@ onMounted(() => {
   }
 
   .storage-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .storage-tabs {
+    width: 100%;
+  }
+
+  .storage-tabs button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .share-form {
     grid-template-columns: 1fr;
   }
 }
