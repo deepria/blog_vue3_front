@@ -31,6 +31,7 @@ import { faRotate } from "@fortawesome/free-solid-svg-icons";
 
 import "./assets/styles/global.css";
 import "./app/styles/reset.css";
+import { registerPwa } from "./shared/pwa";
 
 const app = createApp(App);
 const pinia = createPinia();
@@ -48,3 +49,4 @@ library.add(faUser, faPen, faRotate);
 app.component("font-awesome-icon", FontAwesomeIcon);
 
 app.mount("#app");
+registerPwa();

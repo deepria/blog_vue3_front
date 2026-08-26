@@ -2,6 +2,7 @@
   <div class="app">
     <a-config-provider :theme="antTheme">
       <a-app class="ant-app-container">
+        <PwaStatus />
         <navigation v-if="!route.meta.public" />
         <router-view v-else />
       </a-app>
@@ -11,11 +12,12 @@
 
 <script setup>
 import Navigation from "@/components/Navigation.vue";
+import PwaStatus from "@/components/PwaStatus.vue";
 import { useAppStore } from "@/store/app";
 import { theme } from "ant-design-vue";
 import { computed, watchEffect } from "vue";
 import { useRoute } from "vue-router";
-import '@/assets/styles/global.css';
+import "@/assets/styles/global.css";
 
 const route = useRoute();
 const app = useAppStore();

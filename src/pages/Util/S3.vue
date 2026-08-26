@@ -304,6 +304,7 @@ import BaseProgressBar from "@/shared/ui/BaseProgressBar.vue";
 import { useDownload } from "@/shared/composables/useDownload";
 import PageShell from "@/shared/ui/PageShell.vue";
 import { getPreviewType } from "@/features/storage/lib/filePresentation";
+import { fetchOnline } from "@/shared/utils/network";
 import {
   collectDirectoryIds,
   DASHBOARD_DIRECTORY,
@@ -704,7 +705,13 @@ async function requestAction(file, action) {
     centered: true,
     onOk: async () => {
       const data = await getDeleteUrl(file.key, providedAuthKey);
-      await fetch(data.url, { method: "DELETE" });
+      const response = await fetchOnline(data.url, { method: "DELETE" });
+      if (!response.ok) {
+        throw {
+          userMessage: `Delete failed (${response.status})`,
+          status: response.status,
+        };
+      }
       await Promise.all([loadFiles(), loadOrganization()]);
       message.success("Deleted");
     },
@@ -732,7 +739,7 @@ async function openPreview(file, url) {
   };
 
   try {
-    const response = await fetch(url);
+    const response = await fetchOnline(url);
     if (!response.ok) throw new Error(`Preview failed (${response.status})`);
     const content = await response.text();
     textPreview.value = {
@@ -744,7 +751,7 @@ async function openPreview(file, url) {
     };
   } catch (error) {
     textPreview.value.visible = false;
-    message.error(error?.message || "Preview failed");
+    message.error(error?.userMessage || error?.message || "Preview failed");
   }
 }
 

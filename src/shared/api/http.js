@@ -42,15 +42,23 @@ export function unwrapData(response) {
 export function normalizeHttpError(error) {
   const status = error?.response?.status ?? null;
   const apiError = error?.response?.data?.error;
+  const isOffline =
+    typeof navigator !== "undefined" &&
+    !navigator.onLine &&
+    !error?.response;
   const message =
-    apiError?.message ||
-    error?.message ||
-    "Request failed. Please try again.";
+    (isOffline
+      ? "인터넷 연결이 없습니다. 연결 후 다시 시도해 주세요."
+      : apiError?.message ||
+        error?.message ||
+        "Request failed. Please try again.");
 
   return {
     ...error,
     status,
-    code: apiError?.code || error?.code || "request_failed",
+    code: isOffline
+      ? "offline"
+      : apiError?.code || error?.code || "request_failed",
     details: apiError?.details ?? null,
     userMessage: message,
   };

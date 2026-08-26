@@ -1,6 +1,7 @@
 import { computed, ref } from "vue";
 import { storageApi } from "../api/storageApi";
 import { enrichFileForPresentation } from "../lib/filePresentation";
+import { fetchOnline } from "@/shared/utils/network";
 
 const SINGLE_PUT_LIMIT = 5 * 1024 * 1024 * 1024;
 const DEFAULT_PART_SIZE = 100 * 1024 * 1024;
@@ -55,7 +56,7 @@ export function useStorage() {
       authKey,
     });
 
-    const response = await fetch(upload.upload_url, {
+    const response = await fetchOnline(upload.upload_url, {
       method: "PUT",
       headers: {
         "Content-Type": file.type || "application/octet-stream",
@@ -107,7 +108,7 @@ export function useStorage() {
             uploadId: upload.upload_id,
             partNumber,
           });
-          const response = await fetch(url, {
+          const response = await fetchOnline(url, {
             method: "PUT",
             headers: {
               "Content-Type": contentType,

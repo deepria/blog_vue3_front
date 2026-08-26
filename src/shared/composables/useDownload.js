@@ -1,4 +1,5 @@
 import { isWebView } from "@/shared/utils/platform";
+import { assertOnline, fetchOnline } from "@/shared/utils/network";
 
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
@@ -65,12 +66,14 @@ export function useDownload() {
       throw { userMessage: "Download URL is missing" };
     }
 
+    assertOnline();
+
     if (!isWebView()) {
       triggerBrowserDownload(url, filename);
       return true;
     }
 
-    const response = await fetch(url);
+    const response = await fetchOnline(url);
     if (!response.ok) {
       throw {
         userMessage: `Download failed (${response.status})`,

@@ -41,6 +41,10 @@ const errorMessage = computed(() => {
 });
 
 function login(provider) {
+  if (!navigator.onLine) {
+    message.warning("인터넷 연결 후 다시 로그인해 주세요.");
+    return;
+  }
   const returnTo = route.query.returnTo || window.location.origin;
   if ((hasMobileAuthBridge() || isAndroidWebView()) && provider === "google") {
     openExternalAuth(authApi.mobileLoginUrl(provider));
