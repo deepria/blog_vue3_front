@@ -281,8 +281,8 @@ const sortOptions = [
   { value: "created_at", label: "Created" },
 ];
 
-const sortKey = ref("name");
-const sortDirection = ref("asc");
+const sortKey = ref("created_at");
+const sortDirection = ref("desc");
 const sortedFiles = computed(() =>
   sortFiles(props.files, sortKey.value, sortDirection.value),
 );
