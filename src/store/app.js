@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { authApi } from "@/features/auth/api/authApi";
+import { useSettingsStore } from "@/features/settings/store/settingsStore";
 
 const THEME_STORAGE_KEY = "deepria.theme";
 const normalizeTheme = (value) => (value === "dark" ? "dark" : "light");
@@ -28,6 +29,7 @@ export const useAppStore = defineStore('app', () => {
     };
 
     const setSession = (session) => {
+        useSettingsStore().setUser(session?.user?.id || null);
         user.value = session?.user || null;
         providers.value = session?.providers || [];
         authReady.value = true;

@@ -249,6 +249,7 @@
 import { computed, ref } from "vue";
 import BaseCard from "@/shared/ui/BaseCard.vue";
 import BaseSkeleton from "@/shared/ui/BaseSkeleton.vue";
+import { sortFiles } from "@/features/storage/lib/filePresentation";
 
 const props = defineProps({
   files: {
@@ -277,29 +278,14 @@ const emit = defineEmits([
 const sortOptions = [
   { value: "name", label: "Name" },
   { value: "extension", label: "Ext" },
+  { value: "created_at", label: "Created" },
 ];
 
 const sortKey = ref("name");
 const sortDirection = ref("asc");
-const collator = new Intl.Collator(undefined, {
-  numeric: true,
-  sensitivity: "base",
-});
-
-const sortedFiles = computed(() => {
-  const direction = sortDirection.value === "asc" ? 1 : -1;
-  return [...props.files].sort((left, right) => {
-    const primary = getSortValue(left.display_name, sortKey.value);
-    const secondary = getSortValue(right.display_name, sortKey.value);
-    const primaryResult = collator.compare(primary, secondary);
-    if (primaryResult !== 0) return primaryResult * direction;
-
-    return (
-      collator.compare(left.display_name || "", right.display_name || "") *
-      direction
-    );
-  });
-});
+const sortedFiles = computed(() =>
+  sortFiles(props.files, sortKey.value, sortDirection.value),
+);
 
 const toggleSortDirection = () => {
   sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
@@ -313,11 +299,6 @@ const handleDragStart = (event, file) => {
   event.dataTransfer.effectAllowed = "move";
   event.dataTransfer.setData("text/plain", file.key);
   emit("drag-start", file);
-};
-
-const getSortValue = (name = "", key) => {
-  if (key === "extension") return getFileExt(name).toLowerCase();
-  return name;
 };
 
 const getFileName = (name) => {
@@ -365,7 +346,8 @@ const getFileExt = (name) => {
 .sort-toggle {
   height: 34px;
   position: relative;
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   padding: 2px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -378,7 +360,7 @@ const getFileExt = (name) => {
   top: 2px;
   bottom: 2px;
   left: 2px;
-  width: calc(50% - 2px);
+  width: calc((100% - 4px) / 3);
   border-radius: calc(var(--radius-sm) - 2px);
   background: var(--color-primary);
   transition: transform 0.18s ease;
@@ -387,6 +369,10 @@ const getFileExt = (name) => {
 
 .sort-toggle.is-extension .sort-toggle-indicator {
   transform: translateX(100%);
+}
+
+.sort-toggle.is-created_at .sort-toggle-indicator {
+  transform: translateX(200%);
 }
 
 .sort-toggle-btn {

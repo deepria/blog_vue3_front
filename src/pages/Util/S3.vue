@@ -343,7 +343,7 @@ const fileViewers = ref([]);
 const viewersLoading = ref(false);
 const friendsLoading = ref(false);
 const sharingFriendId = ref(null);
-const selectedDirectoryId = ref("all");
+const selectedDirectoryId = ref("unassigned");
 const organization = ref({
   directories: [],
   file_locations: {},

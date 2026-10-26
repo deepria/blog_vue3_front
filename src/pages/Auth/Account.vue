@@ -56,6 +56,34 @@
       </div>
     </div>
 
+    <section class="preferences-section" aria-labelledby="preferences-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="preferences-title">Preferences</h2>
+          <p>These settings follow your account across devices.</p>
+        </div>
+      </div>
+      <div class="preference-row">
+        <div>
+          <label id="gallery-setting-label">Main page image slideshow</label>
+          <p>Show images from your Dashboard folder on the main page.</p>
+        </div>
+        <a-switch
+          :checked="settings.dashboardGalleryEnabled"
+          :loading="settings.loading || settings.saving"
+          :disabled="!settings.loaded || settings.loading || settings.saving"
+          aria-labelledby="gallery-setting-label"
+          @change="saveGalleryPreference"
+        />
+      </div>
+      <div v-if="settingsError" class="settings-error" role="alert">
+        <span>{{ settingsError }}</span>
+        <a-button v-if="!settings.loaded" size="small" @click="loadPreferences">
+          Retry
+        </a-button>
+      </div>
+    </section>
+
     <section class="friends-section">
       <div class="section-heading">
         <div>
@@ -210,8 +238,11 @@ import { BulbFilled, BulbOutlined } from "@ant-design/icons-vue";
 import { authApi } from "@/features/auth/api/authApi";
 import { friendApi } from "@/features/friend/api/friendApi";
 import PageShell from "@/shared/ui/PageShell.vue";
+import { useSettingsStore } from "@/features/settings/store/settingsStore";
 
 const app = useAppStore();
+const settings = useSettingsStore();
+const settingsError = ref("");
 const { modal } = App.useApp();
 const router = useRouter();
 const friendEmail = ref("");
@@ -231,6 +262,26 @@ const providers = [
 
 function connected(provider) {
   return app.providers.includes(provider);
+}
+
+async function loadPreferences() {
+  settingsError.value = "";
+  try {
+    await settings.loadSettings();
+  } catch (error) {
+    settingsError.value = error.userMessage || "Unable to load preferences.";
+  }
+}
+
+async function saveGalleryPreference(enabled) {
+  settingsError.value = "";
+  try {
+    if (await settings.saveDashboardGallery(enabled)) {
+      message.success("Preferences saved.");
+    }
+  } catch (error) {
+    settingsError.value = error.userMessage || "Unable to save preferences.";
+  }
 }
 
 function connect(provider) {
@@ -332,6 +383,7 @@ function initial(name = "") {
 }
 
 onMounted(loadFriends);
+onMounted(loadPreferences);
 </script>
 
 <style scoped>
@@ -386,7 +438,8 @@ span {
   gap: 12px;
 }
 
-.friends-section {
+.friends-section,
+.preferences-section {
   display: grid;
   gap: 20px;
   padding: 20px;
@@ -394,6 +447,24 @@ span {
   border-radius: var(--radius-xl);
   background: var(--color-bg-surface);
   box-shadow: var(--shadow-sm);
+}
+
+.preference-row,
+.settings-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.preference-row label {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.preference-row p {
+  margin-top: 6px;
+  font-size: var(--font-size-caption);
 }
 
 .section-heading {
