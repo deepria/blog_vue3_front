@@ -1,7 +1,7 @@
 <template>
   <nav class="navigation-mobile">
     <router-link
-      v-for="item in navigationItems"
+      v-for="item in mobileItems"
       :key="item.to"
       :to="item.to"
       class="nav-item"
@@ -17,84 +17,55 @@
 
 <script setup>
 import { navigationItems } from "@/shared/navigation/items";
+const mobileItems = navigationItems.filter((item) => item.to !== "/account");
 </script>
 
 <style scoped>
 .navigation-mobile {
   position: fixed;
-  bottom: calc(14px + var(--safe-bottom));
-  left: 50%;
-  transform: translateX(-50%);
-  height: 64px;
-  background-color: var(--color-bg-surface);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: var(--glass-border);
-  border-radius: 18px;
-  display: flex;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--mobile-nav-height) + var(--safe-bottom));
+  padding: 7px 12px calc(7px + var(--safe-bottom));
+  background: var(--color-bg-surface);
+  border-top: 1px solid var(--color-border);
+  z-index: 1000;
   justify-content: space-around;
   align-items: center;
-  z-index: 1000;
-  box-shadow: var(--shadow-lg);
-  padding: 0 var(--space-2);
-  width: calc(100% - 32px);
-  max-width: 400px;
 }
-
 .nav-item {
-  display: flex;
+  min-height: 50px;
   flex: 1;
+  min-width: 0;
+  display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  gap: 5px;
+  position: relative;
   color: var(--color-text-secondary);
   text-decoration: none;
-  transition: all 0.2s ease;
-  position: relative;
-  height: 48px;
   border-radius: var(--radius-md);
-  gap: 4px;
 }
-
 .icon-wrapper {
   font-size: 20px;
-  transition:
-    color 0.2s ease,
-    transform 0.2s ease;
   display: flex;
-  align-items: center;
-  justify-content: center;
 }
-
 .label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  opacity: 0.8;
-  transition: all 0.2s ease;
+  font-size: 11px;
+  font-weight: 550;
 }
-
 .nav-item.active {
-  color: var(--color-primary-strong);
-  background-color: var(--color-primary-soft);
-}
-
-.nav-item.active .icon-wrapper {
   color: var(--color-primary);
-  transform: translateY(-1px);
+  background: var(--color-primary-soft);
 }
-
-.nav-item.active .label {
-  opacity: 1;
-}
-
-.nav-item:hover:not(.active) {
-  color: var(--color-text-primary);
-}
-
-@media (max-width: 380px) {
-  .navigation-mobile {
-    width: calc(100% - 16px);
-  }
+.nav-item.active::before {
+  position: absolute;
+  top: -7px;
+  content: "";
+  width: 17px;
+  height: 2px;
+  background: var(--color-primary);
 }
 </style>

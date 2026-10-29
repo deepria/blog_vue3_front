@@ -1,9 +1,9 @@
 <template>
   <PageShell
     class="account-page"
-    title="Account"
-    eyebrow="Profile"
-    description="Manage your identity, sign-in providers, and friends."
+    title="설정"
+    eyebrow="Your workspace"
+    description="작업 공간의 분위기와 계정, 공유 설정을 관리하세요."
   >
     <template #actions>
       <a-button
@@ -28,8 +28,10 @@
         <h1>{{ app.user?.name }}</h1>
         <p>{{ app.user?.email }}</p>
       </div>
-      <a-button class="logout-button" @click="logout">Logout</a-button>
+      <a-button class="logout-button" @click="logout">로그아웃</a-button>
     </div>
+
+    <AppearanceSettings />
 
     <div class="provider-list">
       <div
@@ -40,7 +42,7 @@
         <div>
           <strong>{{ provider.label }}</strong>
           <span>{{
-            connected(provider.id) ? "Connected" : "Not connected"
+            connected(provider.id) ? "연결됨" : "연결되지 않음"
           }}</span>
         </div>
         <a-button
@@ -48,10 +50,10 @@
           :disabled="app.providers.length <= 1"
           @click="disconnect(provider.id)"
         >
-          Disconnect
+          연결 해제
         </a-button>
         <a-button v-else type="primary" @click="connect(provider.id)">
-          Connect
+          연결
         </a-button>
       </div>
     </div>
@@ -59,14 +61,14 @@
     <section class="preferences-section" aria-labelledby="preferences-title">
       <div class="section-heading">
         <div>
-          <h2 id="preferences-title">Preferences</h2>
-          <p>These settings follow your account across devices.</p>
+          <h2 id="preferences-title">계정 환경설정</h2>
+          <p>아래 설정은 계정에 저장되어 기기 간에 공유됩니다.</p>
         </div>
       </div>
       <div class="preference-row">
         <div>
-          <label id="gallery-setting-label">Main page image slideshow</label>
-          <p>Show images from your Dashboard folder on the main page.</p>
+          <label id="gallery-setting-label">홈 이미지 슬라이드쇼</label>
+          <p>Dashboard 폴더의 이미지를 홈에 표시합니다.</p>
         </div>
         <a-switch
           :checked="settings.dashboardGalleryEnabled"
@@ -79,7 +81,7 @@
       <div v-if="settingsError" class="settings-error" role="alert">
         <span>{{ settingsError }}</span>
         <a-button v-if="!settings.loaded" size="small" @click="loadPreferences">
-          Retry
+          다시 시도
         </a-button>
       </div>
     </section>
@@ -87,8 +89,8 @@
     <section class="friends-section">
       <div class="section-heading">
         <div>
-          <h2>Friends</h2>
-          <p>Add friends to share files without entering their email again.</p>
+          <h2>친구</h2>
+          <p>친구를 추가하면 파일을 간편하게 공유할 수 있습니다.</p>
         </div>
         <span class="friend-count">{{ friends.length }}</span>
       </div>
@@ -97,7 +99,7 @@
         <a-input
           v-model:value="friendEmail"
           type="email"
-          placeholder="Friend's registered email"
+          placeholder="친구가 가입한 이메일 주소"
           :disabled="sendingRequest"
           @press-enter="sendFriendRequest"
         />
@@ -107,14 +109,14 @@
           :disabled="!friendEmail.trim()"
           @click="sendFriendRequest"
         >
-          Send request
+          친구 요청
         </a-button>
       </div>
 
-      <div v-if="friendsLoading" class="friend-empty">Loading friends...</div>
+      <div v-if="friendsLoading" class="friend-empty">친구를 불러오는 중입니다.</div>
       <template v-else>
         <div v-if="incomingRequests.length" class="friend-group">
-          <h3>Received requests</h3>
+          <h3>받은 요청</h3>
           <div class="friend-list">
             <div
               v-for="request in incomingRequests"
@@ -141,14 +143,14 @@
                   size="small"
                   @click="dismissFriendRequest(request.request_id)"
                 >
-                  Decline
+                  거절
                 </a-button>
                 <a-button
                   size="small"
                   type="primary"
                   @click="acceptFriendRequest(request.request_id)"
                 >
-                  Accept
+                  수락
                 </a-button>
               </div>
             </div>
@@ -156,7 +158,7 @@
         </div>
 
         <div v-if="outgoingRequests.length" class="friend-group">
-          <h3>Sent requests</h3>
+          <h3>보낸 요청</h3>
           <div class="friend-list">
             <div
               v-for="request in outgoingRequests"
@@ -182,14 +184,14 @@
                 size="small"
                 @click="dismissFriendRequest(request.request_id)"
               >
-                Cancel
+                취소
               </a-button>
             </div>
           </div>
         </div>
 
         <div class="friend-group">
-          <h3>Your friends</h3>
+          <h3>내 친구</h3>
           <div v-if="friends.length" class="friend-list">
             <div
               v-for="friend in friends"
@@ -216,12 +218,12 @@
                 danger
                 @click="confirmRemoveFriend(friend)"
               >
-                Remove
+                삭제
               </a-button>
             </div>
           </div>
           <div v-else class="friend-empty">
-            No friends yet. Send a request using their registered email.
+            아직 친구가 없습니다. 가입한 이메일로 친구를 초대해 보세요.
           </div>
         </div>
       </template>
@@ -237,6 +239,7 @@ import { computed, onMounted, ref } from "vue";
 import { BulbFilled, BulbOutlined } from "@ant-design/icons-vue";
 import { authApi } from "@/features/auth/api/authApi";
 import { friendApi } from "@/features/friend/api/friendApi";
+import AppearanceSettings from "@/features/appearance/components/AppearanceSettings.vue";
 import PageShell from "@/shared/ui/PageShell.vue";
 import { useSettingsStore } from "@/features/settings/store/settingsStore";
 

@@ -406,7 +406,8 @@ watch(
 
 :deep(pre) {
   position: relative;
-  background-color: #0f172a !important;
+  background-color: var(--color-bg-panel) !important;
+  color: var(--color-text-primary);
   border-radius: var(--radius-md) !important;
   border: 1px solid var(--color-border) !important;
   margin: var(--space-3) 0 !important;

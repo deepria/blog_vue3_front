@@ -18,27 +18,25 @@ import { theme } from "ant-design-vue";
 import { computed, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 import "@/assets/styles/global.css";
+import "@/app/styles/appearance.css";
+import { getAppearance } from "@/features/appearance/lib/themes";
 
 const route = useRoute();
 const app = useAppStore();
 const isDarkMode = computed(() => app.theme === "dark");
 
+const appearance = computed(() => getAppearance(app.design, app.theme));
 const antTheme = computed(() => ({
   algorithm: isDarkMode.value ? theme.darkAlgorithm : theme.defaultAlgorithm,
-  token: {
-    colorPrimary: isDarkMode.value ? "#60a5fa" : "#2563eb",
-    borderRadius: 8,
-    colorBgBase: isDarkMode.value ? "#0b1020" : "#f6f7fb",
-    colorBgContainer: isDarkMode.value ? "#111827" : "#ffffff",
-    colorBgElevated: isDarkMode.value ? "#111827" : "#ffffff",
-    colorBorder: isDarkMode.value ? "rgba(255, 255, 255, 0.1)" : "#e5e7eb",
-    colorTextBase: isDarkMode.value ? "#f9fafb" : "#111827",
-    fontFamily: "'Inter', sans-serif",
-  },
+  token: appearance.value.ant,
 }));
 
 watchEffect(() => {
   document.documentElement.dataset.theme = app.theme;
+  document.documentElement.dataset.design = app.design;
+  for (const [key, value] of Object.entries(appearance.value.vars)) {
+    document.documentElement.style.setProperty(`--${key}`, value);
+  }
   document.documentElement.style.colorScheme = app.theme;
 });
 </script>

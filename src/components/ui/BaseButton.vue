@@ -146,7 +146,7 @@ defineEmits(['click']);
 
 .variant-danger {
   background-color: var(--color-danger);
-  color: #fff;
+  color: var(--text-danger-inverse, #fff);
   box-shadow: var(--shadow-sm);
 }
 .variant-danger:hover:not(:disabled) {

@@ -98,7 +98,7 @@ const messageCountLabel = computed(() => {
 });
 
 function checkMobile() {
-  isMobile.value = window.innerWidth <= 768;
+  isMobile.value = window.innerWidth <= 1024;
 }
 
 async function handleSendMessage() {

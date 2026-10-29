@@ -427,7 +427,7 @@ onBeforeUnmount(() => {
 .primary-icon-button {
   border-color: var(--color-primary);
   background: var(--color-primary);
-  color: white;
+  color: var(--text-inverse);
 }
 
 .primary-icon-button:disabled {

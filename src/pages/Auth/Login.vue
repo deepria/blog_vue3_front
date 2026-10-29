@@ -1,7 +1,7 @@
 <template>
   <section class="login-page">
     <div class="login-copy">
-      <div class="brand-mark">D</div>
+      <div class="brand-mark" aria-hidden="true">✳</div>
       <h1>Deepria Cloud</h1>
       <p>Your memos, tasks, files, and AI workspace in one quiet place.</p>
     </div>

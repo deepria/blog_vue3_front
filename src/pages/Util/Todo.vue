@@ -570,6 +570,7 @@ onMounted(() => {
 }
 
 .icon-btn-danger {
+  color: var(--text-danger-inverse, white);
   background-color: var(--color-danger);
 }
 

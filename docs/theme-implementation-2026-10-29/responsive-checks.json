@@ -1,0 +1,277 @@
+{
+  "errors": [],
+  "results": [
+    {
+      "design": "editorial",
+      "width": 360,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 360,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 360,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 430,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 430,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 430,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 768,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 768,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 768,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 1024,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 1024,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 1024,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 1280,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 1280,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 1280,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 360,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 360,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 360,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 430,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 430,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 430,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 768,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 768,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 768,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 1024,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 1024,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 1024,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 1280,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 1280,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 1280,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 360,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 360,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 360,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 430,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 430,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 430,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 768,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 768,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 768,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 1024,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 1024,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 1024,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 1280,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 1280,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 1280,
+      "screen": "chat",
+      "overflow": false
+    }
+  ],
+  "keyboardRadioVerified": true,
+  "loginThemeVerified": true
+}

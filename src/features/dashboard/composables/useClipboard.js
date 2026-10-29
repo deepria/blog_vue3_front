@@ -1,37 +1,32 @@
-import { ref } from 'vue';
-import { clipboardApi } from '@/features/dashboard/api/clipboardApi';
-import { useAsync } from '@/shared/composables/useAsync';
+import { ref } from "vue";
+import { clipboardApi } from "@/features/dashboard/api/clipboardApi";
+import { useAsync } from "@/shared/composables/useAsync";
 
 export function useClipboard() {
-  const {
-    loading: clipboardLoading,
-    execute: executeFetch
-  } = useAsync(clipboardApi.fetchClipboard, { initialState: { text: '' } });
+  const { loading: clipboardLoading, execute: executeFetch } = useAsync(
+    clipboardApi.fetchClipboard,
+    { initialState: { text: "" } },
+  );
 
-  const {
-    loading: clipboardSaving,
-    execute: executeSave
-  } = useAsync(clipboardApi.saveClipboard, {
-    showErrorMsg: true,
-    errorMsg: "Failed to save clipboard"
-  });
+  const { loading: clipboardSaving, execute: executeSave } = useAsync(
+    clipboardApi.saveClipboard,
+    {
+      showErrorMsg: true,
+      errorMsg: "Failed to save clipboard",
+    },
+  );
 
   // Local state to bind to UI immediately
-  const clipboardText = ref('');
+  const clipboardText = ref("");
 
   const fetchClipboard = async () => {
-    try {
-      const resp = await executeFetch() || {};
-      clipboardText.value = resp.text || '';
-    } catch {
-      console.warn("Clipboard not found or initialized");
-      clipboardText.value = '';
-    }
+    const resp = (await executeFetch()) || {};
+    clipboardText.value = resp.text || "";
   };
 
   const saveClipboard = async (text) => {
+    // Never replace edits made while this request was in flight.
     await executeSave(text);
-    clipboardText.value = text;
   };
 
   return {
@@ -39,6 +34,6 @@ export function useClipboard() {
     clipboardLoading,
     clipboardSaving,
     fetchClipboard,
-    saveClipboard
+    saveClipboard,
   };
 }

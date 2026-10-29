@@ -1,205 +1,278 @@
 <template>
-  <div class="navigation-pc">
-    <div class="sidebar">
-      <div class="logo-area">
-        <div class="brand-mark">D</div>
-        <div>
-          <h1>Deepria Cloud</h1>
-          <p>Personal workspace</p>
-        </div>
-      </div>
-
-      <nav class="nav-menu">
-        <router-link
-          v-for="item in navigationItems"
-          :key="item.to"
-          :to="item.to"
-          class="nav-item"
-          active-class="active"
-        >
-          <component :is="item.icon" class="nav-icon" />
-          <span class="nav-label">{{ item.label }}</span>
-        </router-link>
-      </nav>
-
-      <div class="footer-area">
-        <button
-          class="theme-toggle"
-          type="button"
-          :aria-pressed="isDarkMode"
-          @click="app.toggleTheme"
-        >
-          <component :is="isDarkMode ? BulbFilled : BulbOutlined" />
-          {{ isDarkMode ? "Dark mode" : "Light mode" }}
-        </button>
-        <div v-if="app.user" class="user-area">
-          <span class="user-kicker">Signed in</span>
-          <span class="user-name">{{ app.user.name }}</span>
-          <a-button size="small" @click="logout">Logout</a-button>
-        </div>
-      </div>
+  <aside class="navigation-pc">
+    <router-link to="/" class="brand"
+      ><span class="brand-symbol" aria-hidden="true">✳</span
+      ><span
+        >deepria<small>cloud</small><em>YOUR PERSONAL SPACE</em></span
+      ></router-link
+    >
+    <p class="nav-caption">MY WORKSPACE <span>01</span></p>
+    <nav class="nav-menu" aria-label="작업 공간">
+      <router-link
+        v-for="item in workspaceItems"
+        :key="item.to"
+        :to="item.to"
+        class="nav-item"
+        active-class="active"
+        ><component :is="item.icon" /><span>{{ item.label }}</span
+        ><i></i
+      ></router-link>
+    </nav>
+    <div class="sidebar-note">
+      <span aria-hidden="true">✳</span>
+      <p>생각을 모으고,<br />가능성을 펼치는 곳.</p>
+      <small>A little space for big ideas.</small>
     </div>
-  </div>
+    <footer class="footer-area">
+      <router-link to="/account" class="settings-link"
+        ><SettingOutlined /><span>설정</span
+        ><span class="current-design">{{ designName }}</span></router-link
+      ><button
+        class="theme-toggle"
+        type="button"
+        :aria-pressed="isDarkMode"
+        @click="app.toggleTheme"
+      >
+        <component :is="isDarkMode ? BulbFilled : BulbOutlined" /><span>{{
+          isDarkMode ? "다크 모드" : "라이트 모드"
+        }}</span>
+      </button>
+      <div v-if="app.user" class="user-area">
+        <span class="user-avatar">{{ initial }}</span
+        ><router-link to="/account"
+          ><strong>{{ app.user.name }}</strong
+          ><small>Personal workspace</small></router-link
+        ><button type="button" aria-label="로그아웃" @click="logout">
+          <LogoutOutlined />
+        </button>
+      </div>
+    </footer>
+  </aside>
 </template>
-
 <script setup>
-import { navigationItems } from "@/shared/navigation/items";
-import { useRouter } from "vue-router";
-import { useAppStore } from "@/store/app";
-import { BulbFilled, BulbOutlined } from "@ant-design/icons-vue";
 import { computed } from "vue";
-
-const router = useRouter();
+import { useRouter } from "vue-router";
+import {
+  BulbFilled,
+  BulbOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+} from "@ant-design/icons-vue";
+import { navigationItems } from "@/shared/navigation/items";
+import { designOptions } from "@/features/appearance/lib/themes";
+import { useAppStore } from "@/store/app";
 const app = useAppStore();
+const router = useRouter();
+const workspaceItems = navigationItems.filter((item) => item.to !== "/account");
 const isDarkMode = computed(() => app.theme === "dark");
-
+const initial = computed(() => (app.user?.name || "d").charAt(0));
+const designName = computed(
+  () => designOptions.find((option) => option.id === app.design)?.name,
+);
 async function logout() {
   await app.logout();
   router.push({ name: "Login" });
 }
 </script>
-
 <style scoped>
 .navigation-pc {
   position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
+  inset: 0 auto 0 0;
   width: var(--nav-width);
-  background-color: var(--color-bg-surface);
-  border-right: 1px solid var(--color-border);
+  height: 100dvh;
   z-index: 100;
+  background: var(--nav-bg);
+  color: var(--nav-ink);
+  padding: 34px 20px 22px;
+  border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
-
-.sidebar {
+.brand {
   display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 18px 14px;
+  gap: 9px;
+  align-items: center;
+  color: var(--nav-heading);
+  text-decoration: none;
+  font-size: 26px;
+  font-weight: 750;
+  letter-spacing: -1.3px;
+  line-height: 1;
 }
-
-.logo-area {
-  padding: 8px 8px 24px;
+.brand-symbol {
+  font-size: 38px;
+  color: var(--brand-color);
+}
+.brand small {
+  font-size: 13px;
+  letter-spacing: -0.6px;
+  margin-left: 3px;
+  font-weight: 450;
+}
+.brand em {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 1.35px;
+  margin-top: 9px;
+  font-style: normal;
+  font-weight: 500;
+}
+.nav-caption {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  color: var(--nav-ink);
+  opacity: 0.85;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  margin: 46px 10px 16px;
 }
-
-.brand-mark {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-primary);
-  color: var(--text-inverse);
-  font-weight: 800;
-}
-
-.logo-area h1 {
-  font-size: 15px;
-  font-weight: 760;
-  color: var(--color-text-primary);
-  margin: 0;
-  letter-spacing: 0;
-}
-
-.logo-area p {
-  margin: 2px 0 0;
-  color: var(--color-text-muted);
-  font-size: 12px;
-}
-
 .nav-menu {
-  flex: 1;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  display: grid;
+  gap: 5px;
 }
-
 .nav-item {
   display: flex;
+  gap: 13px;
   align-items: center;
-  gap: var(--space-3);
-  padding: 10px 12px;
+  min-height: 45px;
+  padding: 10px 13px;
+  color: var(--nav-ink);
   border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
+  font-size: 14px;
   text-decoration: none;
-  transition: all 0.15s ease;
-  font-weight: 650;
-  font-size: var(--font-size-body);
 }
-
-.nav-item:hover {
-  background-color: var(--color-bg-panel);
-  color: var(--color-text-primary);
+.nav-item > .anticon {
+  font-size: 18px;
 }
-
 .nav-item.active {
-  background-color: var(--color-primary-soft);
-  color: var(--color-primary-strong);
+  background: var(--nav-selected);
+  color: var(--nav-accent);
 }
-
-.nav-item.active .nav-icon {
-  color: var(--color-primary);
+.nav-item.active i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  margin-left: auto;
+  background: currentColor;
 }
-
-.nav-icon {
-  font-size: 16px;
-  transition: color 0.15s ease;
+.nav-item:hover {
+  background: var(--nav-selected);
+  color: var(--nav-accent);
 }
-
+.sidebar-note {
+  margin-top: auto;
+  padding: 56px 10px 28px;
+}
+.sidebar-note > span {
+  color: var(--art-color);
+  font-size: 38px;
+}
+.sidebar-note p {
+  color: var(--nav-heading);
+  font-size: 17px;
+  line-height: 1.7;
+  margin: 10px 0;
+}
+.sidebar-note small {
+  font-size: 10px;
+  color: var(--nav-ink);
+}
 .footer-area {
-  padding: 16px 0 0;
+  border-top: 1px solid var(--color-border);
+  padding-top: 12px;
 }
-
-.theme-toggle {
+.theme-toggle,
+.settings-link {
+  min-height: 40px;
   display: flex;
   align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
   width: 100%;
-  gap: var(--space-3);
-  margin-bottom: 10px;
-  padding: 10px 12px;
+  font: inherit;
+  font-size: 12px;
   border: 0;
   border-radius: var(--radius-md);
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--nav-ink);
+  text-decoration: none;
   cursor: pointer;
-  font: inherit;
-  font-size: var(--font-size-body);
-  font-weight: 650;
 }
-
-.theme-toggle:hover {
-  background-color: var(--color-bg-panel);
-  color: var(--color-text-primary);
+.theme-toggle:hover,
+.settings-link:hover {
+  background: var(--nav-selected);
+  color: var(--nav-accent);
 }
-
+.current-design {
+  margin-left: auto;
+  font-size: 9px;
+}
 .user-area {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-top: 15px;
+  margin-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+.user-avatar {
+  width: 31px;
+  height: 31px;
+  border-radius: 50%;
+  background: var(--brand-color);
+  color: var(--nav-bg);
   display: grid;
-  gap: 6px;
-  padding: 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-bg-panel);
+  place-items: center;
+  font-size: 18px;
+  font-family: Georgia, serif;
 }
-
-.user-kicker {
-  color: var(--color-text-muted);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
+.user-area > a {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  text-decoration: none;
+  color: var(--nav-heading);
 }
-
-.user-name {
+.user-area strong {
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--color-text-secondary);
-  font-size: 13px;
+  font-weight: 550;
+}
+.user-area small {
+  font-size: 9px;
+  color: var(--nav-ink);
+}
+.user-area button {
+  background: transparent;
+  border: 0;
+  color: var(--nav-ink);
+  cursor: pointer;
+  padding: 8px;
+  min-width: 32px;
+}
+[data-design="studio"] .nav-item {
+  font-weight: 650;
+}
+[data-design="studio"] .sidebar-note p {
+  font-weight: 750;
+}
+[data-design="console"] .brand {
+  font-family: ui-monospace, monospace;
+  font-size: 23px;
+}
+@media (max-height: 800px) {
+  .sidebar-note {
+    padding-top: 25px;
+    padding-bottom: 15px;
+  }
+  .sidebar-note p {
+    font-size: 15px;
+  }
+  .nav-caption {
+    margin-top: 30px;
+  }
 }
 </style>

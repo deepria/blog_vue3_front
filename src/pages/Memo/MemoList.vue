@@ -602,7 +602,7 @@ onMounted(async () => {
   padding: 0 14px;
   border-color: var(--color-primary);
   background: var(--color-primary);
-  color: white;
+  color: var(--text-inverse);
 }
 
 .page-section-enter-active,

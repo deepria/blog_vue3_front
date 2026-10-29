@@ -1,0 +1,277 @@
+/* Product-wide geometry. Color and Ant Design tokens share themes.js. */
+:root[data-design] {
+  --nav-width: 224px;
+  --header-height: 64px;
+  --mobile-nav-height: 66px;
+  --max-width: 1280px;
+}
+:root[data-design] body {
+  font-family: var(--font-family);
+  line-height: 1.6;
+}
+:root[data-design] .page-shell {
+  padding: 42px 40px 60px;
+}
+:root[data-design] .page-shell-header {
+  padding-bottom: 26px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid var(--color-border);
+}
+:root[data-design] .page-shell h1 {
+  font-weight: 580;
+  letter-spacing: -1.2px;
+}
+:root[data-design] .page-shell-eyebrow {
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+}
+:root[data-design] .page-shell-body {
+  gap: 24px;
+}
+:root[data-design] .editor-header {
+  top: var(--header-height);
+}
+:root[data-design] .editor-page {
+  min-height: calc(100dvh - var(--header-height));
+}
+:root[data-design] .editor-header {
+  box-shadow: none;
+}
+:root[data-design] .markdown-editor {
+  line-height: 1.9;
+}
+:root[data-design] .reader-preview-header {
+  background: var(--color-bg-panel);
+}
+:root[data-design] .preview-header h2 {
+  font-weight: 560;
+  letter-spacing: -0.7px;
+}
+:root[data-design] .memo-row.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+:root[data-design] .chat-workspace {
+  height: calc(100dvh - var(--header-height));
+  padding: 24px;
+  gap: 18px;
+}
+:root[data-design] .chat-workspace > .sidebar {
+  width: 240px;
+  flex-shrink: 0;
+}
+:root[data-design] .chat-container {
+  min-height: 0;
+}
+:root[data-design] .chat-header {
+  box-shadow: none;
+}
+:root[data-design] .login-page {
+  width: min(100%, 1100px);
+  gap: 64px;
+}
+:root[data-design] .login-copy h1 {
+  font-weight: 580;
+  letter-spacing: -2px;
+  line-height: 1.12;
+}
+:root[data-design] .login-copy .brand-mark {
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 50px;
+}
+:root[data-design] .login-panel {
+  box-shadow: none;
+  padding: 36px;
+}
+:root[data-design] .auth-error {
+  color: var(--color-danger);
+}
+:root[data-design="studio"] .page-shell h1,
+:root[data-design="studio"] .login-copy h1 {
+  font-weight: 850;
+  letter-spacing: -1.7px;
+}
+:root[data-design="studio"] .page-shell-header {
+  border-bottom: 2px solid var(--color-text-primary);
+}
+:root[data-design="studio"] .base-card,
+:root[data-design="studio"] .memo-list-panel,
+:root[data-design="studio"] .preview-panel {
+  box-shadow: none;
+}
+:root[data-design="studio"] .memo-row.selected {
+  border-left: 4px solid var(--color-primary);
+}
+:root[data-design="studio"] .login-panel {
+  border-color: var(--color-text-primary);
+}
+:root[data-design="console"] .page-shell-eyebrow,
+:root[data-design="console"] .editor-meta,
+:root[data-design="console"] .save-indicator {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  letter-spacing: 0.08em;
+}
+:root[data-design="console"] .page-shell h1 {
+  font-size: 30px;
+  letter-spacing: -0.6px;
+  font-weight: 500;
+}
+:root[data-design="console"] .page-shell-header {
+  padding-bottom: 20px;
+}
+:root[data-design="console"] .chat-header,
+:root[data-design="console"] .editor-header {
+  background: var(--color-bg-panel);
+}
+:root[data-design="console"] .base-card {
+  box-shadow: none;
+}
+:root[data-design] .ant-btn-primary {
+  color: var(--text-inverse);
+}
+@media (max-width: 1024px) {
+  :root[data-design] .chat-workspace {
+    height: calc(
+      100dvh - var(--header-height) - var(--mobile-nav-height) -
+        var(--safe-bottom)
+    );
+    padding: 0;
+    gap: 0;
+    flex-direction: column;
+  }
+  :root[data-design] .chat-workspace .mobile-header {
+    position: static;
+    height: 54px;
+    flex: 0 0 54px;
+    background: var(--color-bg-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: 0 16px;
+    backdrop-filter: none;
+  }
+  :root[data-design] .chat-container {
+    padding-top: 0;
+    border: 0;
+    border-radius: 0;
+  }
+  :root[data-design] .page-shell {
+    padding: 28px 24px 40px;
+  }
+}
+@media (max-width: 720px) {
+  :root[data-design] .page-shell {
+    padding: 26px 18px 32px;
+  }
+  :root[data-design] .page-shell h1 {
+    font-size: 28px;
+  }
+  :root[data-design] .page-shell-header {
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+  :root[data-design] .page-shell-body {
+    gap: 18px;
+  }
+  :root[data-design] .login-page {
+    padding: 32px 24px;
+    gap: 36px;
+  }
+  :root[data-design] .login-panel {
+    padding: 26px;
+  }
+  :root[data-design] .login-copy h1 {
+    font-size: 40px;
+  }
+  :root[data-design] .icon-btn-primary,
+  :root[data-design] .icon-btn-secondary {
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Shared document typography also covers real memo and assistant content. */
+:root[data-design] .markdown-viewer {
+  color: var(--color-text-primary);
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+:root[data-design] .markdown-viewer p {
+  color: var(--color-text-primary);
+  margin: 0 0 18px;
+  line-height: 1.9;
+}
+:root[data-design] .markdown-viewer h2 {
+  margin: 30px 0 16px;
+  font-weight: 580;
+  letter-spacing: -0.7px;
+}
+:root[data-design] .markdown-viewer h3 {
+  margin: 24px 0 12px;
+  font-weight: 600;
+}
+:root[data-design] .markdown-viewer blockquote {
+  border-left: 2px solid var(--color-primary);
+  margin: 20px 0;
+  padding: 4px 18px;
+  color: var(--color-text-secondary);
+}
+:root[data-design] .markdown-viewer blockquote p {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+:root[data-design] .markdown-viewer ul,
+:root[data-design] .markdown-viewer ol {
+  padding-left: 24px;
+  margin: 14px 0;
+}
+:root[data-design] .markdown-viewer pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-panel);
+  color: var(--color-text-primary);
+  margin: 20px 0;
+}
+:root[data-design] .markdown-viewer code {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.9em;
+  color: inherit;
+}
+:root[data-design] .markdown-viewer :not(pre) > code {
+  background: var(--color-bg-panel);
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+}
+:root[data-design] .markdown-viewer img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+:root[data-design] .markdown-viewer table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+:root[data-design] .markdown-viewer th,
+:root[data-design] .markdown-viewer td {
+  border: 1px solid var(--color-border);
+  padding: 8px 12px;
+}
+:root[data-design] .markdown-viewer input[type="checkbox"] {
+  accent-color: var(--color-primary);
+}
