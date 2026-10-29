@@ -1,0 +1,10 @@
+{
+  "origin": "https://deepria.cloud",
+  "buildInfo": {
+    "commit": "255379a3ccaad57abb03f7007cafe83848a5f0d8",
+    "dirty": false
+  },
+  "koreanLogin": true,
+  "anonymousMemoRedirect": true,
+  "errors": []
+}
