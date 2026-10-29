@@ -2,7 +2,8 @@
   <div class="quick-add-wrapper">
     <BaseInput
       :model-value="modelValue"
-      placeholder="Add new task..."
+      :disabled="disabled"
+      placeholder="새 할 일을 입력하세요."
       class="quick-input-flex"
       @update:model-value="$emit('update:modelValue', $event)"
       @enter="$emit('submit')"
@@ -11,6 +12,7 @@
         <button
           class="quick-add-btn"
           type="button"
+          :disabled="disabled"
           aria-label="작업 추가"
           @click="$emit('submit')"
         >
@@ -38,6 +40,7 @@
 import BaseInput from "@/shared/ui/BaseInput.vue";
 
 defineProps({
+  disabled: Boolean,
   modelValue: {
     type: String,
     default: "",

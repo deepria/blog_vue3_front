@@ -26,5 +26,7 @@ jobs:
         run: pnpm lint
       - name: Test
         run: pnpm test:unit
+      - name: Check Korean UI copy
+        run: pnpm audit:ko
       - name: Build
         run: pnpm build

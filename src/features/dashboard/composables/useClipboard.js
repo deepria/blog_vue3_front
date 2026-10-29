@@ -12,7 +12,7 @@ export function useClipboard() {
     clipboardApi.saveClipboard,
     {
       showErrorMsg: true,
-      errorMsg: "Failed to save clipboard",
+      errorMsg: "클립보드를 저장하지 못했습니다.",
     },
   );
 

@@ -15,6 +15,7 @@
             v-model="title"
             placeholder="제목 없는 메모"
             class="title-input"
+            aria-label="메모 제목"
             :disabled="loadingNote"
             @input="markDirty"
           />
@@ -23,14 +24,14 @@
       </div>
 
       <div class="toolbar-zone">
-        <span class="save-indicator" :class="saveStatusClass">{{
+        <span role="status" class="save-indicator" :class="saveStatusClass">{{
           saveStatusLabel
         }}</span>
         <button
           class="primary-icon-button"
           type="button"
           title="저장"
-          :disabled="saving || loadingNote || !canSave"
+          :disabled="saving || loadingNote || loadError || !canSave"
           @click="saveNow"
         >
           <LoadingOutlined v-if="saving" />
@@ -39,6 +40,22 @@
       </div>
     </header>
 
+    <div class="editor-mode-tabs" aria-label="메모 표시 방식">
+      <button
+        type="button"
+        :aria-pressed="mobileMode === 'edit'"
+        @click="mobileMode = 'edit'"
+      >
+        편집
+      </button>
+      <button
+        type="button"
+        :aria-pressed="mobileMode === 'preview'"
+        @click="mobileMode = 'preview'"
+      >
+        미리보기
+      </button>
+    </div>
     <main class="editor-main">
       <section v-if="loadError" class="editor-state">
         <ExclamationCircleOutlined />
@@ -46,7 +63,11 @@
         <BaseButton size="sm" @click="loadContent">다시 시도</BaseButton>
       </section>
 
-      <section v-else class="editor-split" :class="{ loading: loadingNote }">
+      <section
+        v-else
+        class="editor-split"
+        :class="[{ loading: loadingNote }, `mobile-mode-${mobileMode}`]"
+      >
         <div class="editor-surface">
           <div v-if="loadingNote" class="editor-loading">
             <BaseSkeleton height="26px" width="52%" />
@@ -57,6 +78,7 @@
             v-else
             v-model="content"
             class="markdown-editor"
+            aria-label="메모 본문"
             placeholder="여기에 메모를 작성하세요. Markdown을 그대로 사용할 수 있습니다."
             @input="handleContentUpdate(content)"
           ></textarea>
@@ -82,7 +104,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { onBeforeRouteLeave, useRouter } from "vue-router";
+import { onBeforeRouteLeave, onBeforeRouteUpdate, useRouter } from "vue-router";
 import { App, message } from "ant-design-vue";
 import {
   ArrowLeftOutlined,
@@ -90,6 +112,8 @@ import {
   LoadingOutlined,
   SaveOutlined,
 } from "@ant-design/icons-vue";
+import { createDraftSaver } from "@/features/memo/lib/draftSaver";
+import { useWorkProtection } from "@/shared/composables/useWorkProtection";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import BaseSkeleton from "@/shared/ui/BaseSkeleton.vue";
 import MarkdownViewer from "@/components/ui/MarkdownViewer.vue";
@@ -121,12 +145,18 @@ const editorReady = ref(false);
 const saveState = ref("saved");
 const lastSavedAt = ref("");
 const autoSaveTimer = ref(null);
+const mobileMode = ref("edit");
+let disposed = false;
+let loadVersion = 0;
+let changingId = false;
 
 const isDirty = computed(
   () =>
     title.value !== savedSnapshot.value.title ||
     content.value !== savedSnapshot.value.content,
 );
+
+useWorkProtection("메모 작성", () => isDirty.value || saving.value);
 
 const canSave = computed(() =>
   Boolean(title.value.trim() || content.value.trim()),
@@ -136,8 +166,8 @@ const editorMeta = computed(() => {
   const text = content.value.replace(/[#*_>`\-[\]()]/g, " ").trim();
   const wordCount = text ? text.split(/\s+/).length : 0;
   if (lastSavedAt.value)
-    return `${wordCount} words · 마지막 저장 ${lastSavedAt.value}`;
-  return `${wordCount} words`;
+    return `${wordCount}단어 · 마지막 저장 ${lastSavedAt.value}`;
+  return `${wordCount}단어`;
 });
 
 const previewTitle = computed(() => title.value.trim() || "제목 없는 메모");
@@ -179,6 +209,8 @@ const scheduleAutoSave = () => {
   clearAutoSaveTimer();
   if (
     !editorReady.value ||
+    loadError.value ||
+    disposed ||
     loadingNote.value ||
     saving.value ||
     !isDirty.value ||
@@ -204,9 +236,11 @@ const toggleTaskCheckbox = (targetIndex) => {
 
 const loadContent = async () => {
   clearAutoSaveTimer();
+  const version = ++loadVersion;
   editorReady.value = false;
   loadError.value = false;
   currentId.value = props.id || "";
+  loadingNote.value = false;
 
   if (!currentId.value) {
     title.value = "";
@@ -220,52 +254,86 @@ const loadContent = async () => {
   loadingNote.value = true;
   try {
     const note = await getNote(currentId.value);
+    if (version !== loadVersion || disposed) return;
     title.value = note?.title || "";
     content.value = note?.content || "";
     const updatedAt = parseMemoDate(note?.updatedAt);
     lastSavedAt.value = updatedAt ? formatMemoTime(updatedAt) : "";
     snapshotCurrent();
   } catch {
+    if (version !== loadVersion || disposed) return;
     loadError.value = true;
     saveState.value = "failed";
   } finally {
-    loadingNote.value = false;
-    editorReady.value = true;
+    if (version === loadVersion && !disposed) {
+      loadingNote.value = false;
+      editorReady.value = !loadError.value;
+    }
   }
 };
 
-const saveNow = async ({ silent = false } = {}) => {
+const saver = createDraftSaver({
+  read: () => ({ title: title.value, content: content.value }),
+  persist: async (draft) => {
+    const saved = await saveNote({
+      id: currentId.value,
+      title: draft.title.trim() || "제목 없는 메모",
+      content: draft.content,
+    });
+    if (!saved?.id && !currentId.value)
+      throw new Error("메모 식별자를 확인하지 못했습니다.");
+    currentId.value = saved.id || currentId.value;
+    return saved;
+  },
+  acknowledge: (draft) => {
+    savedSnapshot.value = { ...draft };
+    lastSavedAt.value = formatMemoTime(new Date());
+  },
+});
+let savePromise = null;
+const saveNow = ({ silent = false } = {}) => {
   clearAutoSaveTimer();
-  if (saving.value || loadingNote.value || !canSave.value) return null;
-
-  const nextTitle = title.value.trim() || "제목 없는 메모";
+  if (savePromise) return savePromise;
+  if (
+    loadingNote.value ||
+    loadError.value ||
+    !editorReady.value ||
+    !isDirty.value ||
+    !canSave.value
+  )
+    return Promise.resolve(null);
   saving.value = true;
   saveState.value = "saving";
-  try {
-    const savedMemo = await saveNote({
-      id: currentId.value,
-      title: nextTitle,
-      content: content.value,
-    });
-
-    currentId.value = savedMemo?.id || currentId.value;
-    title.value = savedMemo?.title || nextTitle;
-    content.value = savedMemo?.content ?? content.value;
-    lastSavedAt.value = formatMemoTime(new Date());
-    snapshotCurrent();
-
-    if (!props.id && currentId.value) {
-      await router.replace(`/memo/edit/${currentId.value}`);
+  savePromise = (async () => {
+    try {
+      const saved = await saver.save();
+      saveState.value = "saved";
+      // Update a new memo's URL only after the queue drains. The watcher must
+      // not reload the just-created note over the live draft.
+      if (!props.id && currentId.value && !disposed) {
+        changingId = true;
+        try {
+          await router.replace(
+            `/memo/edit/${encodeURIComponent(currentId.value)}`,
+          );
+        } finally {
+          changingId = false;
+        }
+      }
+      if (!silent) message.success("저장했습니다.");
+      return saved;
+    } catch {
+      saveState.value = "failed";
+      if (!silent)
+        message.error("저장하지 못했습니다. 입력한 내용은 유지됩니다.");
+      return null;
+    } finally {
+      saving.value = false;
+      savePromise = null;
+      if (saveState.value !== "failed" && !disposed) scheduleAutoSave();
     }
-    if (!silent) message.success("저장했습니다.");
-    return savedMemo;
-  } catch {
-    saveState.value = "failed";
-    if (!silent) message.error("저장하지 못했습니다.");
-    return null;
-  } finally {
-    saving.value = false;
-  }
+  })();
+  return savePromise;
 };
 
 const confirmLeave = () =>
@@ -282,39 +350,37 @@ const confirmLeave = () =>
     });
   });
 
-const goBack = async () => {
-  if (isDirty.value && canSave.value) {
-    await saveNow({ silent: true });
-  }
-  if (isDirty.value) {
-    const shouldLeave = await confirmLeave();
-    if (!shouldLeave) return;
-  }
-  router.push("/memo");
-};
+const goBack = () => router.push("/memo");
 
 watch([title, content], scheduleAutoSave);
 
 watch(
   () => props.id,
   (nextId, previousId) => {
-    if (nextId !== previousId) loadContent();
+    if (nextId !== previousId && nextId !== currentId.value) loadContent();
   },
 );
 
-onBeforeRouteLeave(async () => {
-  if (isDirty.value && canSave.value) {
-    await saveNow({ silent: true });
-  }
+const prepareToLeave = async () => {
+  if (changingId) return true;
+  if (isDirty.value && canSave.value) await saveNow({ silent: true });
   if (!isDirty.value) return true;
-  return await confirmLeave();
-});
+  const leave = await confirmLeave();
+  if (leave) clearAutoSaveTimer();
+  return leave;
+};
+onBeforeRouteLeave(prepareToLeave);
+onBeforeRouteUpdate(
+  (to, from) => to.params.id === from.params.id || prepareToLeave(),
+);
 
 onMounted(() => {
   loadContent();
 });
 
 onBeforeUnmount(() => {
+  disposed = true;
+  loadVersion += 1;
   clearAutoSaveTimer();
 });
 </script>
@@ -606,6 +672,47 @@ onBeforeUnmount(() => {
 
   .reader-preview {
     min-height: 420px;
+  }
+}
+.editor-mode-tabs {
+  display: none;
+}
+@media (max-width: 980px) {
+  .editor-mode-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+  }
+  .editor-mode-tabs button {
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text-secondary);
+    padding: 10px 20px;
+    min-height: 44px;
+    font: inherit;
+    cursor: pointer;
+  }
+  .editor-mode-tabs button[aria-pressed="true"] {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    border-color: var(--color-border);
+  }
+  .mobile-mode-edit .reader-preview,
+  .mobile-mode-preview .editor-surface {
+    display: none;
+  }
+  .editor-split {
+    min-height: 0;
+  }
+  .editor-surface,
+  .reader-preview {
+    min-height: calc(100dvh - 280px);
+  }
+  .markdown-editor {
+    min-height: calc(100dvh - 280px);
   }
 }
 </style>

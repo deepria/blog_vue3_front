@@ -1,6 +1,9 @@
 import { ref } from "vue";
+import { applyWhenIdle, blockingWork } from "./lib/workProtection.js";
 import { registerSW } from "virtual:pwa-register";
 
+export const pwaReloadRequired = ref(false);
+let updateRequested = false;
 export const pwaUpdateAvailable = ref(false);
 export const pwaOfflineReady = ref(false);
 
@@ -12,6 +15,13 @@ export function registerPwa() {
     onNeedRefresh() {
       pwaUpdateAvailable.value = true;
     },
+    onNeedReload() {
+      pwaReloadRequired.value = true;
+      pwaUpdateAvailable.value = true;
+      // Another tab can activate a waiting worker. Never reload this tab's draft.
+      if (updateRequested && !blockingWork.value.length)
+        window.location.reload();
+    },
     onOfflineReady() {
       pwaOfflineReady.value = true;
     },
@@ -22,6 +32,11 @@ export function registerPwa() {
 }
 
 export async function applyPwaUpdate() {
-  if (!updateServiceWorker) return;
-  await updateServiceWorker(true);
+  if (!updateServiceWorker && !pwaReloadRequired.value) return false;
+  if (pwaReloadRequired.value)
+    return applyWhenIdle(() => window.location.reload());
+  return applyWhenIdle(async () => {
+    updateRequested = true;
+    await updateServiceWorker?.(true);
+  });
 }

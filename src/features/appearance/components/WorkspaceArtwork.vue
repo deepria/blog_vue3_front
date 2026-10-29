@@ -5,10 +5,10 @@
     ><span class="art-orbit orbit-two"></span
     ><span class="art-hill hill-back"></span
     ><span class="art-hill hill-front"></span
-    ><span class="studio-type">Make<br />room.</span
+    ><span class="studio-type">생각의<br />여백.</span
     ><span class="console-type"
-      >SYSTEM / PERSONAL<br />SPACE FOR POSSIBILITY<br />─────────────────<br />THINK
-      → CAPTURE → CREATE</span
+      >작업 공간 / 나의 기록<br />가능성을 펼치는 공간<br />─────────────────<br />생각
+      → 기록 → 완성</span
     >
   </div>
 </template>
@@ -94,10 +94,8 @@
   top: 55px;
   left: 30px;
   color: #292c24;
-  font:
-    900 104px/0.84 Arial,
-    sans-serif;
-  letter-spacing: -8px;
+  font: 850 78px/1.1 var(--font-family);
+  letter-spacing: -4px;
   transform: rotate(-7deg);
 }
 [data-design="console"] .workspace-artwork {
@@ -156,7 +154,7 @@
     min-height: 255px;
   }
   [data-design="studio"] .studio-type {
-    font-size: 92px;
+    font-size: 64px;
     top: 45px;
   }
 }

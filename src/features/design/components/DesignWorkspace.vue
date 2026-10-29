@@ -14,10 +14,10 @@
         ><span class="brand-symbol" aria-hidden="true">✳</span
         ><span
           >deepria<span class="brand-suffix"> cloud</span
-          ><small>YOUR PERSONAL SPACE</small></span
+          ><small>나만의 작업 공간</small></span
         ></a
       >
-      <div class="workspace-label">MY WORKSPACE <span>01</span></div>
+      <div class="workspace-label">내 작업 공간 <span>01</span></div>
       <nav class="main-nav" aria-label="작업 공간">
         <button
           v-for="item in navItems"
@@ -37,11 +37,11 @@
       <div class="sidebar-note">
         <span class="note-orbit" aria-hidden="true">✳</span>
         <p>생각을 모으고,<br />가능성을 펼치는 곳.</p>
-        <small>A little space for big ideas.</small>
+        <small>작은 여백에서 시작하는 가능성.</small>
       </div>
       <div class="sidebar-profile">
         <span class="avatar">d.</span>
-        <div><strong>deepria</strong><small>Personal workspace</small></div>
+        <div><strong>deepria</strong><small>개인 작업 공간</small></div>
         <span aria-hidden="true">⌘</span>
       </div>
     </aside>
@@ -62,15 +62,15 @@
         <div class="intro-row">
           <span class="date-label"
             ><span class="tiny-dot"></span>2026년 10월 29일 목요일</span
-          ><span class="edition-label">PERSONAL EDITION — 001</span>
+          ><span class="edition-label">나의 작업 공간 — 001</span>
         </div>
         <section class="home-heading">
           <div>
             <p class="section-kicker">
               {{
                 direction === "console"
-                  ? "WORKSPACE / OVERVIEW"
-                  : "A SPACE TO MAKE IT YOURS"
+                  ? "작업 공간 / 오늘의 기록"
+                  : "나의 생각을 위한 공간"
               }}
             </p>
             <h1>
@@ -97,7 +97,7 @@
           <section class="capture-panel" aria-labelledby="capture-title">
             <div class="panel-heading">
               <div>
-                <span class="panel-index">01 / CAPTURE</span>
+                <span class="panel-index">01 / 빠른 기록</span>
                 <h2 id="capture-title">생각을 잠시 놓아두세요.</h2>
               </div>
               <span class="surface-icon"><SnippetsOutlined /></span>
@@ -132,15 +132,13 @@
               <div class="art-hill hill-front"></div>
               <span class="art-grid"></span
               ><span class="art-number">D / 01</span
-              ><span class="studio-art-type">Make<br />room.</span
+              ><span class="studio-art-type">생각의<br />여백.</span
               ><span class="console-art-type"
-                >SYSTEM / PERSONAL<br />SPACE FOR POSSIBILITY<br />─────────────────<br />THINK
-                → CAPTURE → CREATE</span
+                >작업 공간 / 나의 기록<br />가능성을 펼치는 공간<br />─────────────────<br />생각 → 기록 → 완성</span
               >
             </div>
             <div class="visual-caption">
-              <span>조금의 여백, 새로운 시선.</span
-              ><span>DEEPRIA STUDIES ↗</span>
+              <span>조금의 여백, 새로운 시선.</span><span>나만의 시선 ↗</span>
             </div>
           </section>
         </div>
@@ -148,7 +146,7 @@
         <section class="recent-section" aria-labelledby="recent-title">
           <div class="recent-heading">
             <div>
-              <span class="panel-index">02 / CONTINUE</span>
+              <span class="panel-index">02 / 이어서 작업하기</span>
               <h2 id="recent-title">이어서 생각하기</h2>
             </div>
             <button @click="$emit('navigate', 'memo')">
@@ -163,7 +161,7 @@
               @click="openNote(index)"
             >
               <span class="note-type"
-                ><FileTextOutlined /> MEMO <span>↗</span></span
+                ><FileTextOutlined /> 메모 <span>↗</span></span
               >
               <h3>{{ note.title }}</h3>
               <p>{{ note.description }}</p>
@@ -175,7 +173,7 @@
         </section>
         <footer class="page-signoff">
           <span>조금씩 쌓이는, 나다운 하루.</span
-          ><span>DESIGNED FOR YOUR EVERYDAY.</span>
+          ><span>나의 일상을 담는 공간.</span>
         </footer>
       </main>
 
@@ -194,7 +192,7 @@
               aria-label="샘플 메모 검색"
           /></label>
           <p class="library-label">
-            ALL NOTES <span>{{ filteredNotes.length }}</span>
+            전체 메모 <span>{{ filteredNotes.length }}</span>
           </p>
           <button
             v-for="note in filteredNotes"
@@ -231,7 +229,7 @@
           </header>
           <div class="document-body">
             <div class="document-eyebrow">
-              PERSONAL NOTES <span>/ {{ selectedCategory }}</span>
+              나의 기록 <span>/ {{ selectedCategory }}</span>
             </div>
             <input
               v-if="editing"

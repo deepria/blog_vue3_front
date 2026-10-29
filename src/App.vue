@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <a-config-provider :theme="antTheme">
+    <a-config-provider :theme="antTheme" :locale="koKR">
       <a-app class="ant-app-container">
         <PwaStatus />
         <navigation v-if="!route.meta.public" />
@@ -15,6 +15,7 @@ import Navigation from "@/components/Navigation.vue";
 import PwaStatus from "@/components/PwaStatus.vue";
 import { useAppStore } from "@/store/app";
 import { theme } from "ant-design-vue";
+import koKR from "ant-design-vue/es/locale/ko_KR";
 import { computed, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 import "@/assets/styles/global.css";
@@ -38,6 +39,7 @@ watchEffect(() => {
     document.documentElement.style.setProperty(`--${key}`, value);
   }
   document.documentElement.style.colorScheme = app.theme;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", appearance.value.vars["color-bg-base"]);
 });
 </script>
 

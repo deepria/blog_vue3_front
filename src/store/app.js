@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { clearListState } from "@/shared/lib/listState";
 import { authApi } from "@/features/auth/api/authApi";
 import { useSettingsStore } from "@/features/settings/store/settingsStore";
 
@@ -43,6 +44,7 @@ export const useAppStore = defineStore("app", () => {
   };
 
   const setSession = (session) => {
+    if (user.value?.id !== session?.user?.id) clearListState();
     useSettingsStore().setUser(session?.user?.id || null);
     user.value = session?.user || null;
     providers.value = session?.providers || [];

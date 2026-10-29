@@ -1,11 +1,21 @@
 <template>
   <div class="chat-workspace">
     <div class="mobile-header" v-if="isMobile">
-      <a-button type="text" class="icon-button" aria-label="대화 목록 열기" @click="drawerVisible = true">
+      <a-button
+        type="text"
+        class="icon-button"
+        aria-label="대화 목록 열기"
+        @click="drawerVisible = true"
+      >
         <menu-outlined />
       </a-button>
       <span class="mobile-title">{{ currentSessionTitle }}</span>
-      <a-button type="text" class="icon-button" aria-label="새 대화" @click="createNewSession">
+      <a-button
+        type="text"
+        class="icon-button"
+        aria-label="새 대화"
+        @click="createNewSession"
+      >
         <plus-outlined />
       </a-button>
     </div>
@@ -50,10 +60,21 @@
           </div>
         </div>
         <div class="header-actions">
-          <button class="toolbar-button" type="button" title="대화 다시 시도" :disabled="!currentMessages.length || chatStore.loading" @click="retryLastMessage">
+          <button
+            class="toolbar-button"
+            type="button"
+            title="대화 다시 시도"
+            :disabled="!currentMessages.length || chatStore.loading"
+            @click="retryLastMessage"
+          >
             <reload-outlined />
           </button>
-          <button class="toolbar-button primary" type="button" title="새 대화" @click="createNewSession">
+          <button
+            class="toolbar-button primary"
+            type="button"
+            title="새 대화"
+            @click="createNewSession"
+          >
             <plus-outlined />
           </button>
         </div>
@@ -78,19 +99,30 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { MenuOutlined, MessageOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons-vue";
+import {
+  MenuOutlined,
+  MessageOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons-vue";
 import ChatComposer from "@/features/chat/components/ChatComposer.vue";
 import ChatMessageList from "@/features/chat/components/ChatMessageList.vue";
 import ChatSessionSidebar from "@/features/chat/components/ChatSessionSidebar.vue";
+import { useWorkProtection } from "@/shared/composables/useWorkProtection";
 import { useChatStore } from "@/features/chat/store/chatStore";
 
 const chatStore = useChatStore();
 const userInput = ref("");
+useWorkProtection("대화 작성", () => !!userInput.value.trim());
 const isMobile = ref(false);
 const drawerVisible = ref(false);
 
-const currentMessages = computed(() => chatStore.currentSession?.messages || []);
-const currentSessionTitle = computed(() => chatStore.currentSession?.title || "New Chat");
+const currentMessages = computed(
+  () => chatStore.currentSession?.messages || [],
+);
+const currentSessionTitle = computed(
+  () => chatStore.currentSession?.title || "새 대화",
+);
 const messageCountLabel = computed(() => {
   const count = currentMessages.value.length;
   if (!count) return "아직 메시지가 없습니다";
@@ -145,7 +177,11 @@ async function retryLastMessage() {
 
 onMounted(() => {
   chatStore.initialize();
-  if (chatStore.loading && chatStore.loadingSince && Date.now() - chatStore.loadingSince > 35000) {
+  if (
+    chatStore.loading &&
+    chatStore.loadingSince &&
+    Date.now() - chatStore.loadingSince > 35000
+  ) {
     chatStore.clearLoading();
   }
   checkMobile();
@@ -268,7 +304,10 @@ onUnmounted(() => {
   background: var(--color-bg-surface);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .toolbar-button:hover:not(:disabled),

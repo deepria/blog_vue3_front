@@ -1,8 +1,10 @@
 import axios from "axios";
+import { userMessage } from "../lib/userMessage.js";
 
 export const apiClient = axios.create({
   baseURL:
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) ||
+    (typeof import.meta !== "undefined" &&
+      import.meta.env?.VITE_API_BASE_URL) ||
     process.env.VITE_API_BASE_URL ||
     "",
   headers: {
@@ -43,18 +45,23 @@ export function normalizeHttpError(error) {
   const status = error?.response?.status ?? null;
   const apiError = error?.response?.data?.error;
   const isOffline =
-    typeof navigator !== "undefined" &&
-    !navigator.onLine &&
-    !error?.response;
-  const message =
-    (isOffline
-      ? "인터넷 연결이 없습니다. 연결 후 다시 시도해 주세요."
-      : apiError?.message ||
-        error?.message ||
-        "Request failed. Please try again.");
+    typeof navigator !== "undefined" && !navigator.onLine && !error?.response;
+  const code = isOffline
+    ? "offline"
+    : apiError?.code || error?.code || "request_failed";
+  const technicalMessage = apiError?.message || error?.message || "";
+  const message = userMessage({
+    status,
+    code,
+    technicalMessage,
+    userMessage: /[가-힣]/.test(technicalMessage)
+      ? technicalMessage
+      : undefined,
+  });
 
   return {
     ...error,
+    technicalMessage,
     status,
     code: isOffline
       ? "offline"
@@ -64,6 +71,6 @@ export function normalizeHttpError(error) {
   };
 }
 
-export function getErrorMessage(error, fallback = "Request failed.") {
-  return error?.userMessage || fallback;
+export function getErrorMessage(error, fallback) {
+  return userMessage(error, fallback);
 }

@@ -2,6 +2,11 @@
   <BaseCard class="upload-panel compact-upload" hoverable>
     <div
       class="upload-zone"
+      role="button"
+      tabindex="0"
+      aria-label="업로드할 파일 선택"
+      @keydown.enter.self="openFilePicker"
+      @keydown.space.self.prevent="openFilePicker"
       :class="{ 'is-dragging': isDragging }"
       @dragover.prevent="$emit('drag-state', true)"
       @dragleave.prevent="$emit('drag-state', false)"
@@ -10,21 +15,34 @@
     >
       <div class="upload-content">
         <div class="upload-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+            />
           </svg>
         </div>
-        <p class="upload-title"><strong>Choose file</strong> or drag here</p>
+        <p class="upload-title">
+          <strong>파일 선택</strong> 또는 이곳으로 끌어오세요
+        </p>
       </div>
       <input
         ref="inputRef"
         type="file"
-        style="display:none"
+        style="display: none"
         @click.stop
         @change="handleChange"
       />
     </div>
-
   </BaseCard>
 </template>
 
@@ -63,7 +81,10 @@ function handleChange(event) {
   text-align: center;
   cursor: pointer;
   background: var(--color-bg-panel);
-  transition: border-color 0.16s ease, background-color 0.16s ease, transform 0.16s ease;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    transform 0.16s ease;
 }
 
 .upload-zone.is-dragging {
@@ -133,5 +154,4 @@ function handleChange(event) {
     line-height: 1.2;
   }
 }
-
 </style>

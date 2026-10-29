@@ -1,16 +1,16 @@
 <template>
   <PageShell
     class="todo-page"
-    title="Tasks"
-    eyebrow="Plan"
-    description="Capture, group, prioritize, and save your active work list."
+    title="할 일"
+    eyebrow="작업 계획"
+    description="할 일을 기록하고 그룹과 우선순위로 정리하세요."
   >
     <template #actions>
       <div class="primary-actions">
         <button
           class="icon-btn-secondary"
           @click="handleRefresh"
-          title="Refresh"
+          title="새로고침"
         >
           <ReloadOutlined />
           <svg
@@ -51,7 +51,7 @@
         <button
           class="icon-btn-secondary settings-button"
           @click="openSettings"
-          title="Options"
+          title="작업 설정"
         >
           <SettingOutlined />
           <svg
@@ -93,8 +93,9 @@
         <button
           class="icon-btn-primary"
           :class="{ 'pulse-animation': hasUnsavedChanges }"
+          :disabled="saving || loading || !!error"
           @click="handleSave"
-          title="Save"
+          title="저장"
         >
           <SaveOutlined />
         </button>
@@ -102,7 +103,11 @@
     </template>
 
     <div class="quick-add-container">
-      <TodoQuickAdd v-model="quickAddText" @submit="handleQuickAdd" />
+      <TodoQuickAdd
+        :disabled="loading || !!error"
+        v-model="quickAddText"
+        @submit="handleQuickAdd"
+      />
       <div class="mobile-task-actions" aria-label="작업 도구">
         <button
           class="icon-btn-secondary"
@@ -173,6 +178,7 @@
         <button
           class="icon-btn-primary"
           :class="{ 'pulse-animation': hasUnsavedChanges }"
+          :disabled="saving || loading || !!error"
           type="button"
           title="저장"
           @click="handleSave"
@@ -198,8 +204,50 @@
       </div>
     </div>
 
+    <div class="task-state" role="status" v-if="loading">
+      할 일을 불러오는 중입니다.
+    </div>
+    <div class="task-state task-error" role="alert" v-if="error">
+      <span>{{ error }}</span
+      ><BaseButton variant="secondary" size="sm" @click="handleRefresh"
+        >다시 시도</BaseButton
+      >
+    </div>
+    <div class="task-toolbar">
+      <div class="task-filters" aria-label="할 일 필터">
+        <button
+          v-for="filter in filters"
+          :key="filter.id"
+          :aria-pressed="filterMode === filter.id"
+          @click="filterMode = filter.id"
+        >
+          {{ filter.label }}
+        </button>
+      </div>
+      <span role="status"
+        >{{
+          loading
+            ? "불러오는 중"
+            : error
+              ? "불러오기 실패"
+              : saving
+                ? "저장 중"
+                : hasUnsavedChanges
+                  ? "저장되지 않은 변경"
+                  : "저장됨"
+        }}
+        · {{ completedCount }}/{{ items.length }}개 완료</span
+      >
+    </div>
+    <p v-if="!loading && !error && !visibleItems.length" class="task-state">
+      {{
+        items.length
+          ? "조건에 맞는 할 일이 없습니다."
+          : "아직 할 일이 없습니다. 첫 작업을 추가해 보세요."
+      }}
+    </p>
     <TodoBoard
-      :items="sortedItems"
+      :items="visibleItems"
       :group-options="groupOptions"
       :priority-options="priorityOptions"
       @add="addItem('', $event, null)"
@@ -212,62 +260,63 @@
       v-model="showPopup"
       :title="
         settingsMode
-          ? 'Manage Groups & Priorities'
+          ? '그룹과 우선순위 관리'
           : isNewItem
-            ? 'New Task'
-            : 'Edit Task'
+            ? '새 할 일'
+            : '할 일 편집'
       "
     >
       <div class="edit-form">
-        <BaseInput
-          v-model="selectedItem.text"
-          label="Task Description"
-          placeholder="What needs to be done?"
-        />
+        <template v-if="!settingsMode"
+          ><BaseInput
+            v-model="selectedItem.text"
+            label="작업 내용"
+            placeholder="어떤 일을 해야 하나요?"
+          />
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Group</label>
-            <div class="select-wrapper">
-              <select v-model="selectedItem.groupKey" class="base-select">
-                <option v-for="g in groupOptions" :key="g.key" :value="g.key">
-                  {{ g.name }}
-                </option>
-              </select>
+          <div class="form-row">
+            <div class="form-group">
+              <label>그룹</label>
+              <div class="select-wrapper">
+                <select v-model="selectedItem.groupKey" class="base-select">
+                  <option v-for="g in groupOptions" :key="g.key" :value="g.key">
+                    {{ g.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>우선순위</label>
+              <div class="select-wrapper">
+                <select v-model="selectedItem.priorityKey" class="base-select">
+                  <option
+                    v-for="p in priorityOptions"
+                    :key="p.key"
+                    :value="p.key"
+                  >
+                    {{ p.name }}
+                  </option>
+                </select>
+              </div>
             </div>
           </div>
-          <div class="form-group">
-            <label>Priority</label>
-            <div class="select-wrapper">
-              <select v-model="selectedItem.priorityKey" class="base-select">
-                <option
-                  v-for="p in priorityOptions"
-                  :key="p.key"
-                  :value="p.key"
-                >
-                  {{ p.name }}
-                </option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="options-toggle" @click="settingsMode = !settingsMode">
-          <span>{{
-            settingsMode ? "Hide Options Manager" : "Manage Groups & Tags"
-          }}</span>
-        </div>
+        </template>
 
         <div v-if="settingsMode" class="options-manager">
           <div class="option-section">
-            <h4>Groups</h4>
+            <h4>그룹</h4>
             <div
               v-for="(g, idx) in groupOptions"
               :key="g.key"
               class="option-row"
             >
-              <input v-model="g.name" class="mini-input" />
-              <input type="color" v-model="g.color" class="color-picker" />
+              <input v-model="g.name" @input="markUnsaved" class="mini-input" />
+              <input
+                type="color"
+                v-model="g.color"
+                @input="markUnsaved"
+                class="color-picker"
+              />
               <button
                 class="icon-btn-danger"
                 @click="
@@ -282,7 +331,7 @@
               <input
                 v-model="newGroup.name"
                 class="mini-input"
-                placeholder="New Group"
+                placeholder="새 그룹 이름"
               />
               <input
                 type="color"
@@ -294,14 +343,19 @@
           </div>
 
           <div class="option-section">
-            <h4>Priorities</h4>
+            <h4>우선순위</h4>
             <div
               v-for="(p, idx) in priorityOptions"
               :key="p.key"
               class="option-row"
             >
-              <input v-model="p.name" class="mini-input" />
-              <input type="color" v-model="p.color" class="color-picker" />
+              <input v-model="p.name" @input="markUnsaved" class="mini-input" />
+              <input
+                type="color"
+                v-model="p.color"
+                @input="markUnsaved"
+                class="color-picker"
+              />
               <button
                 class="icon-btn-danger"
                 @click="
@@ -316,7 +370,7 @@
               <input
                 v-model="newPriority.name"
                 class="mini-input"
-                placeholder="New Priority"
+                placeholder="새 우선순위 이름"
               />
               <input
                 type="color"
@@ -330,10 +384,10 @@
       </div>
 
       <template #footer>
-        <BaseButton variant="secondary" @click="showPopup = false"
-          >Cancel</BaseButton
-        >
-        <BaseButton variant="primary" @click="confirmPopup">Done</BaseButton>
+        <BaseButton variant="secondary" @click="showPopup = false">{{
+          settingsMode ? "닫기" : "취소"
+        }}</BaseButton>
+        <BaseButton variant="primary" @click="confirmPopup">완료</BaseButton>
       </template>
     </BaseModal>
   </PageShell>
@@ -346,7 +400,9 @@ import {
   SettingOutlined,
 } from "@ant-design/icons-vue";
 import { message } from "ant-design-vue";
-import { onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
+import { onBeforeRouteLeave } from "vue-router";
+import { useWorkProtection } from "@/shared/composables/useWorkProtection";
 import TodoBoard from "@/features/todo/components/TodoBoard.vue";
 import TodoQuickAdd from "@/features/todo/components/TodoQuickAdd.vue";
 import { useTodos } from "@/features/todo/composables/useTodos";
@@ -357,6 +413,10 @@ import BaseModal from "@/shared/ui/BaseModal.vue";
 import PageShell from "@/shared/ui/PageShell.vue";
 
 const {
+  items,
+  loading,
+  saving,
+  error,
   groupOptions,
   priorityOptions,
   hasUnsavedChanges,
@@ -393,24 +453,53 @@ const {
   markUnsaved,
 });
 
+const filterMode = ref("all");
+const filters = [
+  { id: "all", label: "전체" },
+  { id: "active", label: "진행 중" },
+  { id: "done", label: "완료" },
+];
+const visibleItems = computed(() =>
+  sortedItems.value.filter(
+    (item) =>
+      filterMode.value === "all" ||
+      (filterMode.value === "done" ? item.completed : !item.completed),
+  ),
+);
+const completedCount = computed(
+  () => items.value.filter((item) => item.completed).length,
+);
+useWorkProtection(
+  "할 일 편집",
+  () =>
+    hasUnsavedChanges.value ||
+    saving.value ||
+    quickAddText.value.trim().length > 0 ||
+    showPopup.value,
+);
+onBeforeRouteLeave(
+  () =>
+    !hasUnsavedChanges.value ||
+    window.confirm(
+      "저장되지 않은 할 일이 있습니다. 변경사항을 버리고 나갈까요?",
+    ),
+);
 const handleQuickAdd = () => addQuickItem(addItem);
 
 async function handleRefresh() {
   if (
     hasUnsavedChanges.value &&
-    !confirm("You have unsaved changes. Discard them?")
+    !confirm("저장되지 않은 변경사항을 버리고 다시 불러올까요?")
   )
     return;
-  await fetchAll();
-  message.success("Refreshed");
+  if (await fetchAll()) message.success("새로고침했습니다.");
 }
 
 async function handleSave() {
   try {
-    await saveAll();
-    message.success("All changes saved");
+    if (await saveAll()) message.success("변경사항을 저장했습니다.");
   } catch {
-    message.error("Failed to save");
+    message.error("저장하지 못했습니다. 다시 시도해 주세요.");
   }
 }
 
@@ -626,5 +715,49 @@ onMounted(() => {
   .form-row {
     flex-direction: column;
   }
+}
+.task-state {
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.task-error {
+  color: var(--color-danger);
+}
+.task-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.task-toolbar > span {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.task-filters {
+  display: flex;
+  gap: 5px;
+}
+.task-filters button {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+.task-filters button[aria-pressed="true"] {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 </style>

@@ -2,7 +2,7 @@
   <section class="appearance-settings" aria-labelledby="appearance-title">
     <header>
       <div>
-        <p class="appearance-kicker">MAKE IT YOURS</p>
+        <p class="appearance-kicker">나에게 맞는 공간</p>
         <h2 id="appearance-title">작업 공간의 분위기</h2>
         <p>디자인과 밝기를 골라 나에게 맞는 공간을 만드세요.</p>
       </div>
@@ -27,7 +27,7 @@
           ><span class="mini-sidebar"><i>✳</i><b></b><b></b><b></b></span
           ><span class="mini-content"
             ><span class="mini-heading">{{
-              option.id === "console" ? "SPACE / 01" : "Make room."
+              option.id === "console" ? "공간 / 01" : "생각의 여백."
             }}</span
             ><span class="mini-panels"><i></i><i>✳</i></span
             ><span class="mini-lines"><i></i><i></i><i></i></span></span

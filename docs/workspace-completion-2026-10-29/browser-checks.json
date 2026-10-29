@@ -1,0 +1,900 @@
+{
+  "errors": [],
+  "checks": [
+    "slow-save-latest-input",
+    "failed-save-retry",
+    "new-memo-id-transition",
+    "mobile-editor-mode",
+    "todo-failure-preserves-draft",
+    "dialog-focus-tab-escape-return",
+    "file-retry-preserves-list",
+    "mobile-file-move",
+    "upload-close-and-update-protection"
+  ],
+  "results": [
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 360,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 360,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 360,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 360,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 360,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 360,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 360,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 768,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 768,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 768,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 768,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 768,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 768,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 768,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 1440,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 1440,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 1440,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 1440,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 1440,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 1440,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 1440,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 360,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 360,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 360,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 360,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 360,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 360,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 360,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 768,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 768,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 768,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 768,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 768,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 768,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 768,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 360,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 360,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 360,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 360,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 360,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 360,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 360,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 768,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 768,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 768,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 768,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 768,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 768,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 768,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 1440,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 1440,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 1440,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 1440,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 1440,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 1440,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 1440,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 360,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 360,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 360,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 360,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 360,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 360,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 360,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 768,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 768,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 768,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 768,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 768,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 768,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 768,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 360,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 360,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 360,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 360,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 360,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 360,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 360,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 768,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 768,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 768,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 768,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 768,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 768,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 768,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 1440,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 1440,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 1440,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 1440,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 1440,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 1440,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 1440,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 360,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 360,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 360,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 360,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 360,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 360,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 360,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 768,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 768,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 768,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 768,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 768,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 768,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 768,
+      "screen": "settings",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "editor",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "tasks",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "files",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "chat",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 1440,
+      "screen": "settings",
+      "overflow": false
+    }
+  ],
+  "fixtureOnly": true,
+  "serviceWorkerBypassed": true
+}

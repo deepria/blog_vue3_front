@@ -24,11 +24,6 @@ import router from "./router";
 import { message } from "ant-design-vue";
 import "ant-design-vue/dist/reset.css";
 
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faUser, faPen } from "@fortawesome/free-solid-svg-icons";
-import { faRotate } from "@fortawesome/free-solid-svg-icons";
-
 import "./assets/styles/global.css";
 import "./app/styles/reset.css";
 import { registerPwa } from "./shared/pwa";
@@ -44,9 +39,6 @@ message.config({
 
 app.use(pinia);
 app.use(router);
-
-library.add(faUser, faPen, faRotate);
-app.component("font-awesome-icon", FontAwesomeIcon);
 
 app.mount("#app");
 registerPwa();

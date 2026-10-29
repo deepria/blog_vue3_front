@@ -8,7 +8,7 @@ test("unwrapData returns nested data payload", () => {
   assert.deepEqual(unwrapData({ data: { data: { ok: true } } }), { ok: true });
 });
 
-test("normalizeHttpError keeps API message", () => {
+test("normalizeHttpError preserves technical details and provides a Korean user message", () => {
   const error = normalizeHttpError({
     response: {
       status: 401,
@@ -23,7 +23,8 @@ test("normalizeHttpError keeps API message", () => {
 
   assert.equal(error.status, 401);
   assert.equal(error.code, "unauthorized");
-  assert.equal(getErrorMessage(error), "invalid password");
+  assert.equal(error.technicalMessage, "invalid password");
+  assert.equal(getErrorMessage(error), "보호 키를 확인한 뒤 다시 시도해 주세요.");
 });
 
 test("network failures use the shared offline message", () => {

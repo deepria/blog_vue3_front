@@ -139,7 +139,7 @@ function handleEdit(item) {
 function getGroupName(key) {
   if (key === null || key === undefined) return "임시 작업";
   return (
-    props.groupOptions.find((group) => group.key === key)?.name || "Default"
+    props.groupOptions.find((group) => group.key === key)?.name || "기본 그룹"
   );
 }
 

@@ -3,10 +3,10 @@
     <router-link to="/" class="brand"
       ><span class="brand-symbol" aria-hidden="true">✳</span
       ><span
-        >deepria<small>cloud</small><em>YOUR PERSONAL SPACE</em></span
+        >deepria<small>cloud</small><em>나만의 작업 공간</em></span
       ></router-link
     >
-    <p class="nav-caption">MY WORKSPACE <span>01</span></p>
+    <p class="nav-caption">내 작업 공간 <span>01</span></p>
     <nav class="nav-menu" aria-label="작업 공간">
       <router-link
         v-for="item in workspaceItems"
@@ -21,7 +21,7 @@
     <div class="sidebar-note">
       <span aria-hidden="true">✳</span>
       <p>생각을 모으고,<br />가능성을 펼치는 곳.</p>
-      <small>A little space for big ideas.</small>
+      <small>작은 여백에서 시작하는 가능성.</small>
     </div>
     <footer class="footer-area">
       <router-link to="/account" class="settings-link"
@@ -41,7 +41,7 @@
         <span class="user-avatar">{{ initial }}</span
         ><router-link to="/account"
           ><strong>{{ app.user.name }}</strong
-          ><small>Personal workspace</small></router-link
+          ><small>개인 작업 공간</small></router-link
         ><button type="button" aria-label="로그아웃" @click="logout">
           <LogoutOutlined />
         </button>

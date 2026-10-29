@@ -1,0 +1,21 @@
+{
+  "errors": [],
+  "checks": [
+    "slow-save-latest-input",
+    "failed-save-retry",
+    "new-memo-id-transition",
+    "mobile-editor-mode",
+    "todo-failure-preserves-draft",
+    "dialog-focus-tab-escape-return",
+    "file-retry-preserves-list",
+    "mobile-file-move",
+    "upload-close-and-update-protection",
+    "memo-list-state-restored",
+    "initial-file-error-is-not-empty",
+    "korean-composition-enter-does-not-send",
+    "reduced-motion"
+  ],
+  "results": [],
+  "fixtureOnly": true,
+  "serviceWorkerBypassed": true
+}

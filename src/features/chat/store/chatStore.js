@@ -14,7 +14,9 @@ export const useChatStore = defineStore("chat", () => {
   const initialized = ref(false);
 
   const currentSession = computed(
-    () => sessions.value.find((session) => session.id === currentSessionId.value) || null,
+    () =>
+      sessions.value.find((session) => session.id === currentSessionId.value) ||
+      null,
   );
   const sortedSessions = computed(() =>
     [...sessions.value]
@@ -40,7 +42,7 @@ export const useChatStore = defineStore("chat", () => {
   function createSession() {
     const session = {
       id: crypto.randomUUID(),
-      title: "New Chat",
+      title: "새 대화",
       interactionId: null,
       messages: [],
       createdAt: Date.now(),
@@ -65,7 +67,10 @@ export const useChatStore = defineStore("chat", () => {
     }
 
     const lastSessionId = localStorage.getItem(LAST_SESSION_KEY);
-    if (lastSessionId && sessions.value.some((session) => session.id === lastSessionId)) {
+    if (
+      lastSessionId &&
+      sessions.value.some((session) => session.id === lastSessionId)
+    ) {
       currentSessionId.value = lastSessionId;
     } else if (sessions.value.length > 0) {
       currentSessionId.value = sessions.value[0].id;
@@ -132,8 +137,12 @@ export const useChatStore = defineStore("chat", () => {
       timestamp: Date.now(),
     });
     session.lastModified = Date.now();
-    if (session.messages.length === 1 && session.title === "New Chat") {
-      session.title = content.length > 30 ? `${content.slice(0, 30)}...` : content;
+    if (
+      session.messages.length === 1 &&
+      ["새 대화", "New Chat"].includes(session.title)
+    ) {
+      session.title =
+        content.length > 30 ? `${content.slice(0, 30)}...` : content;
     }
 
     await requestAssistantReply(session, content);

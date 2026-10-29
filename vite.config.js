@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { fileURLToPath, URL } from "node:url";
 
 import { defineConfig } from "vite";
@@ -11,6 +12,35 @@ import { AntDesignVueResolver } from "unplugin-vue-components/resolvers";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    {
+      name: "build-revision",
+      apply: "build",
+      generateBundle() {
+        let commit =
+          process.env.AWS_COMMIT_ID || process.env.GITHUB_SHA || "unknown";
+        let dirty = false;
+        try {
+          if (commit === "unknown")
+            commit = execFileSync("git", ["rev-parse", "HEAD"], {
+              encoding: "utf8",
+            }).trim();
+          dirty = Boolean(
+            execFileSync(
+              "git",
+              ["status", "--porcelain", "--untracked-files=no"],
+              { encoding: "utf8" },
+            ).trim(),
+          );
+        } catch {
+          /* Source archives may not contain git metadata. */
+        }
+        this.emitFile({
+          type: "asset",
+          fileName: "build-info.json",
+          source: JSON.stringify({ commit, dirty }),
+        });
+      },
+    },
     vue(),
     vueDevTools(),
     VitePWA({

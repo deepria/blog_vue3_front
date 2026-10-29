@@ -2,7 +2,7 @@
   <div class="design-lab">
     <header class="lab-toolbar">
       <div class="lab-label">
-        <strong>Deepria Design Study</strong
+        <strong>Deepria 디자인 비교</strong
         ><span>01 / 시각 방향 탐색 · 샘플 데이터</span>
       </div>
       <div class="lab-controls">
@@ -57,9 +57,9 @@ import DesignWorkspace from "@/features/design/components/DesignWorkspace.vue";
 const route = useRoute();
 const router = useRouter();
 const directions = [
-  { id: "editorial", label: "A · Editorial", short: "A · 편집" },
-  { id: "studio", label: "B · Studio", short: "B · 그래픽" },
-  { id: "console", label: "C · Console", short: "C · 콘솔" },
+  { id: "editorial", label: "A · 편집 디자인", short: "A · 편집" },
+  { id: "studio", label: "B · 그래픽 스튜디오", short: "B · 그래픽" },
+  { id: "console", label: "C · 작업 콘솔", short: "C · 콘솔" },
 ];
 const direction = computed(() =>
   directions.some((option) => option.id === route.query.direction)

@@ -4,7 +4,14 @@ const EMPTY_ITEM = () => ({ text: "", groupKey: null, priorityKey: null });
 const EMPTY_GROUP = () => ({ name: "", color: "#666666" });
 const EMPTY_PRIORITY = () => ({ name: "", color: "#ef4444" });
 
-export function useTodoEditor({ groupOptions, priorityOptions, nextGroupKey, nextPriorityKey, markUnsaved }) {
+export function useTodoEditor({
+  groupOptions,
+  priorityOptions,
+  nextGroupKey,
+  nextPriorityKey,
+  markUnsaved,
+}) {
+  let editingTarget = null;
   const quickAddText = ref("");
   const showPopup = ref(false);
   const isNewItem = ref(false);
@@ -21,7 +28,9 @@ export function useTodoEditor({ groupOptions, priorityOptions, nextGroupKey, nex
   }
 
   function openEditModal(item) {
-    selectedItem.value = item;
+    editingTarget = item;
+    selectedItem.value = { ...item };
+    settingsMode.value = false;
     isNewItem.value = false;
     showPopup.value = true;
   }
@@ -38,8 +47,16 @@ export function useTodoEditor({ groupOptions, priorityOptions, nextGroupKey, nex
   }
 
   function confirmPopup() {
+    if (!settingsMode.value && editingTarget) {
+      const changed = ["text", "groupKey", "priorityKey"].some(
+        (key) => selectedItem.value[key] !== editingTarget[key],
+      );
+      if (changed) {
+        Object.assign(editingTarget, selectedItem.value);
+        markUnsaved();
+      }
+    }
     showPopup.value = false;
-    markUnsaved();
   }
 
   function addGroup() {
@@ -51,7 +68,10 @@ export function useTodoEditor({ groupOptions, priorityOptions, nextGroupKey, nex
 
   function addPriority() {
     if (!newPriority.value.name.trim()) return;
-    priorityOptions.value.push({ key: nextPriorityKey.value, ...newPriority.value });
+    priorityOptions.value.push({
+      key: nextPriorityKey.value,
+      ...newPriority.value,
+    });
     newPriority.value = EMPTY_PRIORITY();
     markUnsaved();
   }

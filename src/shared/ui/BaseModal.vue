@@ -2,6 +2,8 @@
   <LegacyBaseModal
     :model-value="modelValue"
     :title="title"
+    :wide="wide"
+    :close-disabled="closeDisabled"
     @update:model-value="$emit('update:modelValue', $event)"
     @close="$emit('close')"
   >
@@ -19,6 +21,8 @@
 import LegacyBaseModal from "@/components/base/BaseModal.vue";
 
 defineProps({
+  closeDisabled: Boolean,
+  wide: Boolean,
   modelValue: {
     type: Boolean,
     default: false,

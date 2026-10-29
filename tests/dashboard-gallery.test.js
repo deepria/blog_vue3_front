@@ -1,3 +1,4 @@
+import { createServer as createHttpServer } from "node:http";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
@@ -13,7 +14,7 @@ test("disabled gallery skips file requests and ignores work after disable or unm
     resolve: {
       alias: { "@": fileURLToPath(new URL("../src", import.meta.url)) },
     },
-    server: { middlewareMode: true },
+    server: { middlewareMode: true, hmr: { server: createHttpServer() } },
     appType: "custom",
   });
   const savedStorage = Object.getOwnPropertyDescriptor(

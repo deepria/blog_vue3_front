@@ -3,18 +3,18 @@
     <div class="login-copy">
       <div class="brand-mark" aria-hidden="true">✳</div>
       <h1>Deepria Cloud</h1>
-      <p>Your memos, tasks, files, and AI workspace in one quiet place.</p>
+      <p>메모와 할 일, 파일과 AI를 나만의 작업 공간에서 이어가세요.</p>
     </div>
     <div class="login-panel">
       <p v-if="errorMessage" class="auth-error">{{ errorMessage }}</p>
       <p v-if="statusMessage" class="auth-status">{{ statusMessage }}</p>
-      <h2>Sign in</h2>
+      <h2>로그인</h2>
       <div class="provider-actions">
         <a-button size="large" block @click="login('google')">
-          Continue with Google
+          Google로 계속하기
         </a-button>
         <a-button size="large" block @click="login('github')">
-          Continue with GitHub
+          GitHub으로 계속하기
         </a-button>
       </div>
     </div>
@@ -35,7 +35,7 @@ const statusMessage = ref("");
 
 const errorMessage = computed(() => {
   if (route.query.error === "access_denied") {
-    return "This account is not allowed to access the service.";
+    return "이 계정으로 서비스를 이용할 수 없습니다.";
   }
   return "";
 });
@@ -59,20 +59,22 @@ function isAndroidWebView() {
 }
 
 function hasMobileAuthBridge() {
-  return Boolean(window.Android?.openExternalAuth || window.ReactNativeWebView?.postMessage);
+  return Boolean(
+    window.Android?.openExternalAuth || window.ReactNativeWebView?.postMessage,
+  );
 }
 
 function openExternalAuth(url) {
   if (window.Android?.openExternalAuth) {
     window.Android.openExternalAuth(url);
-    statusMessage.value = "Continue in the browser, then return to the app.";
+    statusMessage.value = "브라우저에서 로그인한 뒤 앱으로 돌아와 주세요.";
     return;
   }
   if (window.ReactNativeWebView?.postMessage) {
     window.ReactNativeWebView.postMessage(
       JSON.stringify({ type: "openExternalAuth", url }),
     );
-    statusMessage.value = "Continue in the browser, then return to the app.";
+    statusMessage.value = "브라우저에서 로그인한 뒤 앱으로 돌아와 주세요.";
     return;
   }
   window.location.assign(url);
@@ -80,12 +82,14 @@ function openExternalAuth(url) {
 
 async function completeMobileLogin(code) {
   if (!code) return;
-  statusMessage.value = "Completing sign in...";
+  statusMessage.value = "로그인을 마무리하고 있습니다.";
   try {
     app.setSession(await authApi.completeMobileLogin(code));
     await router.replace("/");
   } catch (error) {
-    message.error(error.userMessage || "Unable to complete mobile sign in.");
+    message.error(
+      error.userMessage || "로그인을 완료하지 못했습니다. 다시 시도해 주세요.",
+    );
     statusMessage.value = "";
   }
 }

@@ -1,0 +1,841 @@
+{
+  "scope": "정확한 정적 문자열 치환 목록. 동적 문구와 그래픽 조판 변경은 결과 보고서에 별도 기록.",
+  "count": 167,
+  "changes": [
+    {
+      "file": "src/components/NavigationPC.vue",
+      "english": "YOUR PERSONAL SPACE",
+      "korean": "나만의 작업 공간"
+    },
+    {
+      "file": "src/components/NavigationPC.vue",
+      "english": "MY WORKSPACE",
+      "korean": "내 작업 공간"
+    },
+    {
+      "file": "src/components/NavigationPC.vue",
+      "english": "Personal workspace",
+      "korean": "개인 작업 공간"
+    },
+    {
+      "file": "src/components/NavigationPC.vue",
+      "english": "A little space for big ideas.",
+      "korean": "작은 여백에서 시작하는 가능성."
+    },
+    {
+      "file": "src/pages/Index.vue",
+      "english": "A SPACE TO MAKE IT YOURS",
+      "korean": "나의 생각을 위한 공간"
+    },
+    {
+      "file": "src/pages/Index.vue",
+      "english": "01 / CAPTURE",
+      "korean": "01 / 빠른 기록"
+    },
+    {
+      "file": "src/pages/Index.vue",
+      "english": "02 / CONTINUE",
+      "korean": "02 / 이어서 작업하기"
+    },
+    {
+      "file": "src/pages/Index.vue",
+      "english": "DEEPRIA STUDIES ↗",
+      "korean": "나만의 시선 ↗"
+    },
+    {
+      "file": "src/pages/Index.vue",
+      "english": "DESIGNED FOR YOUR EVERYDAY.",
+      "korean": "나의 일상을 담는 공간."
+    },
+    {
+      "file": "src/pages/Index.vue",
+      "english": "MEMO",
+      "korean": "메모"
+    },
+    {
+      "file": "src/pages/Chat.vue",
+      "english": "New Chat",
+      "korean": "새 대화"
+    },
+    {
+      "file": "src/pages/Design/DesignPreview.vue",
+      "english": "Deepria Design Study",
+      "korean": "Deepria 디자인 비교"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Tasks",
+      "korean": "할 일"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Plan",
+      "korean": "작업 계획"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Capture, group, prioritize, and save your active work list.",
+      "korean": "할 일을 기록하고 그룹과 우선순위로 정리하세요."
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Refresh",
+      "korean": "새로고침"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Options",
+      "korean": "작업 설정"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Save",
+      "korean": "저장"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Task Description",
+      "korean": "작업 내용"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "What needs to be done?",
+      "korean": "어떤 일을 해야 하나요?"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Group",
+      "korean": "그룹"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Priority",
+      "korean": "우선순위"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Groups",
+      "korean": "그룹"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Priorities",
+      "korean": "우선순위"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "New Group",
+      "korean": "새 그룹 이름"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "New Priority",
+      "korean": "새 우선순위 이름"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Cancel",
+      "korean": "취소"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Done",
+      "korean": "완료"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Edit Task",
+      "korean": "할 일 편집"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "New Task",
+      "korean": "새 할 일"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Manage Groups & Priorities",
+      "korean": "그룹과 우선순위 관리"
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "Failed to save",
+      "korean": "저장하지 못했습니다. 다시 시도해 주세요."
+    },
+    {
+      "file": "src/pages/Util/Todo.vue",
+      "english": "You have unsaved changes. Discard them?",
+      "korean": "저장되지 않은 변경사항을 버리고 다시 불러올까요?"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Refresh",
+      "korean": "새로고침"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Cancel",
+      "korean": "취소"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Confirm",
+      "korean": "확인"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "File Storage",
+      "korean": "파일"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Vault",
+      "korean": "파일 보관함"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "My files",
+      "korean": "내 파일"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Shared with me",
+      "korean": "공유받은 파일"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Storage view",
+      "korean": "파일 보기"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Upload Settings",
+      "korean": "업로드 설정"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "File Name (Optional)",
+      "korean": "파일 이름 (선택)"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Leave empty to use original name",
+      "korean": "비워두면 원래 파일 이름을 사용합니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Protection Key (Optional)",
+      "korean": "보호 키 (선택)"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Set a password for this file",
+      "korean": "파일에 사용할 보호 키를 입력하세요."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Start Upload",
+      "korean": "업로드 시작"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Choose a friend",
+      "korean": "친구 선택"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Search by name or email",
+      "korean": "이름이나 이메일로 검색"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Loading friends...",
+      "korean": "친구를 불러오는 중입니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Add friends from your Account page before sharing.",
+      "korean": "설정에서 친구를 추가한 뒤 파일을 공유할 수 있습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Manage friends",
+      "korean": "친구 관리"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "No friends match your search.",
+      "korean": "검색 결과가 없습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Shared",
+      "korean": "공유됨"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Share",
+      "korean": "공유"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "People with access",
+      "korean": "접근 가능한 사용자"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Loading...",
+      "korean": "불러오는 중입니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Only you can access this file.",
+      "korean": "현재 나만 접근할 수 있습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Remove",
+      "korean": "삭제"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Security Check",
+      "korean": "보호 키 확인"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Enter the password for this file:",
+      "korean": "이 파일의 보호 키를 입력하세요."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Password",
+      "korean": "보호 키"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Preview",
+      "korean": "미리보기"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Loading preview...",
+      "korean": "미리보기를 불러오는 중입니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "No files uploaded yet",
+      "korean": "아직 업로드한 파일이 없습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "No files have been shared with you",
+      "korean": "아직 공유받은 파일이 없습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Could not load sharing settings",
+      "korean": "공유 설정을 불러오지 못했습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Could not share file",
+      "korean": "파일을 공유하지 못했습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Could not remove access",
+      "korean": "접근 권한을 해제하지 못했습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "File shared",
+      "korean": "파일을 공유했습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Access removed",
+      "korean": "접근 권한을 해제했습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Folder added",
+      "korean": "폴더를 추가했습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "New folder",
+      "korean": "새 폴더"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Delete Folder",
+      "korean": "폴더 삭제"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Delete File",
+      "korean": "파일 삭제"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Delete",
+      "korean": "삭제"
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Folder deleted",
+      "korean": "폴더를 삭제했습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Moved to folder",
+      "korean": "폴더로 이동했습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Moved to unassigned",
+      "korean": "미분류로 이동했습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Upload complete",
+      "korean": "업로드했습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Upload failed",
+      "korean": "업로드하지 못했습니다. 다시 시도해 주세요."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Deleted",
+      "korean": "삭제했습니다."
+    },
+    {
+      "file": "src/pages/Util/S3.vue",
+      "english": "Preview failed",
+      "korean": "미리보기를 불러오지 못했습니다."
+    },
+    {
+      "file": "src/pages/Auth/Login.vue",
+      "english": "Your memos, tasks, files, and AI workspace in one quiet place.",
+      "korean": "메모와 할 일, 파일과 AI를 나만의 작업 공간에서 이어가세요."
+    },
+    {
+      "file": "src/pages/Auth/Login.vue",
+      "english": "Sign in",
+      "korean": "로그인"
+    },
+    {
+      "file": "src/pages/Auth/Login.vue",
+      "english": "Continue with Google",
+      "korean": "Google로 계속하기"
+    },
+    {
+      "file": "src/pages/Auth/Login.vue",
+      "english": "Continue with GitHub",
+      "korean": "GitHub으로 계속하기"
+    },
+    {
+      "file": "src/pages/Auth/Login.vue",
+      "english": "This account is not allowed to access the service.",
+      "korean": "이 계정으로 서비스를 이용할 수 없습니다."
+    },
+    {
+      "file": "src/pages/Auth/Login.vue",
+      "english": "Continue in the browser, then return to the app.",
+      "korean": "브라우저에서 로그인한 뒤 앱으로 돌아와 주세요."
+    },
+    {
+      "file": "src/pages/Auth/Login.vue",
+      "english": "Completing sign in...",
+      "korean": "로그인을 마무리하고 있습니다."
+    },
+    {
+      "file": "src/pages/Auth/Login.vue",
+      "english": "Unable to complete mobile sign in.",
+      "korean": "로그인을 완료하지 못했습니다. 다시 시도해 주세요."
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Cancel",
+      "korean": "취소"
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Remove",
+      "korean": "삭제"
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Your workspace",
+      "korean": "나의 작업 공간"
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Turn dark mode off",
+      "korean": "라이트 모드로 전환"
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Turn dark mode on",
+      "korean": "다크 모드로 전환"
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Unable to load preferences.",
+      "korean": "환경설정을 불러오지 못했습니다."
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Preferences saved.",
+      "korean": "환경설정을 저장했습니다."
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Unable to save preferences.",
+      "korean": "환경설정을 저장하지 못했습니다."
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Unable to disconnect provider.",
+      "korean": "로그인 서비스 연결을 해제하지 못했습니다."
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Unable to load friends.",
+      "korean": "친구 목록을 불러오지 못했습니다."
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Friend request sent.",
+      "korean": "친구 요청을 보냈습니다."
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Unable to send friend request.",
+      "korean": "친구 요청을 보내지 못했습니다."
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Friend request accepted.",
+      "korean": "친구 요청을 수락했습니다."
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Unable to accept friend request.",
+      "korean": "친구 요청을 수락하지 못했습니다."
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Friend request removed.",
+      "korean": "친구 요청을 취소했습니다."
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Unable to remove friend request.",
+      "korean": "친구 요청을 취소하지 못했습니다."
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Remove friend",
+      "korean": "친구 삭제"
+    },
+    {
+      "file": "src/pages/Auth/Account.vue",
+      "english": "Friend removed.",
+      "korean": "친구를 삭제했습니다."
+    },
+    {
+      "file": "src/pages/Memo/MemoList.vue",
+      "english": "Knowledge",
+      "korean": "나의 기록"
+    },
+    {
+      "file": "src/shared/composables/useDownload.js",
+      "english": "Download URL is missing",
+      "korean": "다운로드 주소를 확인하지 못했습니다."
+    },
+    {
+      "file": "src/shared/composables/useDownload.js",
+      "english": "Failed to read file blob",
+      "korean": "파일을 읽지 못했습니다."
+    },
+    {
+      "file": "src/shared/composables/useAsync.js",
+      "english": "Operation successful",
+      "korean": "완료했습니다."
+    },
+    {
+      "file": "src/shared/composables/useAsync.js",
+      "english": "An error occurred",
+      "korean": "오류가 발생했습니다. 다시 시도해 주세요."
+    },
+    {
+      "file": "src/features/dashboard/composables/useClipboard.js",
+      "english": "Failed to save clipboard",
+      "korean": "클립보드를 저장하지 못했습니다."
+    },
+    {
+      "file": "src/features/todo/components/TodoQuickAdd.vue",
+      "english": "Add new task...",
+      "korean": "새 할 일을 입력하세요."
+    },
+    {
+      "file": "src/features/todo/components/TodoBoard.vue",
+      "english": "Default",
+      "korean": "기본 그룹"
+    },
+    {
+      "file": "src/features/storage/components/StorageUploadPanel.vue",
+      "english": "Choose file",
+      "korean": "파일 선택"
+    },
+    {
+      "file": "src/features/storage/components/StorageUploadPanel.vue",
+      "english": "or drag here",
+      "korean": "또는 이곳으로 끌어오세요"
+    },
+    {
+      "file": "src/features/storage/components/StorageDirectoryTree.vue",
+      "english": "Delete",
+      "korean": "삭제"
+    },
+    {
+      "file": "src/features/storage/components/StorageDirectoryTree.vue",
+      "english": "Folders",
+      "korean": "폴더"
+    },
+    {
+      "file": "src/features/storage/components/StorageDirectoryTree.vue",
+      "english": "Add folder",
+      "korean": "폴더 추가"
+    },
+    {
+      "file": "src/features/storage/components/StorageDirectoryTree.vue",
+      "english": "All files",
+      "korean": "전체 파일"
+    },
+    {
+      "file": "src/features/storage/components/StorageDirectoryTree.vue",
+      "english": "Unassigned",
+      "korean": "미분류"
+    },
+    {
+      "file": "src/features/storage/components/StorageDirectoryTree.vue",
+      "english": "No folders yet",
+      "korean": "아직 폴더가 없습니다."
+    },
+    {
+      "file": "src/features/storage/components/StorageDirectoryTree.vue",
+      "english": "Rename",
+      "korean": "이름 변경"
+    },
+    {
+      "file": "src/features/storage/components/StorageDirectoryTree.vue",
+      "english": "Rename folder",
+      "korean": "폴더 이름 변경"
+    },
+    {
+      "file": "src/features/storage/components/StorageDirectoryTree.vue",
+      "english": "Delete folder",
+      "korean": "폴더 삭제"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "Share",
+      "korean": "공유"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "Preview",
+      "korean": "미리보기"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "No files uploaded yet",
+      "korean": "아직 업로드한 파일이 없습니다."
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "Delete",
+      "korean": "삭제"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "File Library",
+      "korean": "파일 목록"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "File sort controls",
+      "korean": "파일 정렬 도구"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "Sort files by",
+      "korean": "파일 정렬 기준"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "Ascending",
+      "korean": "오름차순"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "Descending",
+      "korean": "내림차순"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "Sort ascending",
+      "korean": "오름차순 정렬"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "Sort descending",
+      "korean": "내림차순 정렬"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "Protected",
+      "korean": "보호된 파일"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "Download",
+      "korean": "다운로드"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "Name",
+      "korean": "이름"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "Ext",
+      "korean": "확장자"
+    },
+    {
+      "file": "src/features/storage/components/StorageFileList.vue",
+      "english": "Created",
+      "korean": "업로드 날짜"
+    },
+    {
+      "file": "src/features/appearance/components/AppearanceSettings.vue",
+      "english": "MAKE IT YOURS",
+      "korean": "나에게 맞는 공간"
+    },
+    {
+      "file": "src/features/appearance/components/AppearanceSettings.vue",
+      "english": "Make room.",
+      "korean": "생각의 여백."
+    },
+    {
+      "file": "src/features/appearance/components/WorkspaceArtwork.vue",
+      "english": "SYSTEM / PERSONAL",
+      "korean": "작업 공간 / 나의 기록"
+    },
+    {
+      "file": "src/features/appearance/components/WorkspaceArtwork.vue",
+      "english": "SPACE FOR POSSIBILITY",
+      "korean": "가능성을 펼치는 공간"
+    },
+    {
+      "file": "src/features/chat/components/ChatSessionSidebar.vue",
+      "english": "New Chat",
+      "korean": "새 대화"
+    },
+    {
+      "file": "src/features/chat/components/ChatMessageList.vue",
+      "english": "Assistant",
+      "korean": "AI 도우미"
+    },
+    {
+      "file": "src/features/chat/store/chatStore.js",
+      "english": "New Chat",
+      "korean": "새 대화"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "YOUR PERSONAL SPACE",
+      "korean": "나만의 작업 공간"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "MY WORKSPACE",
+      "korean": "내 작업 공간"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "Personal workspace",
+      "korean": "개인 작업 공간"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "A little space for big ideas.",
+      "korean": "작은 여백에서 시작하는 가능성."
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "A SPACE TO MAKE IT YOURS",
+      "korean": "나의 생각을 위한 공간"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "01 / CAPTURE",
+      "korean": "01 / 빠른 기록"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "02 / CONTINUE",
+      "korean": "02 / 이어서 작업하기"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "DEEPRIA STUDIES ↗",
+      "korean": "나만의 시선 ↗"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "DESIGNED FOR YOUR EVERYDAY.",
+      "korean": "나의 일상을 담는 공간."
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "MEMO",
+      "korean": "메모"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "SYSTEM / PERSONAL",
+      "korean": "작업 공간 / 나의 기록"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "SPACE FOR POSSIBILITY",
+      "korean": "가능성을 펼치는 공간"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "WORKSPACE / OVERVIEW",
+      "korean": "작업 공간 / 오늘의 기록"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "ALL NOTES",
+      "korean": "전체 메모"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "PERSONAL NOTES",
+      "korean": "나의 기록"
+    },
+    {
+      "file": "src/features/design/components/DesignWorkspace.vue",
+      "english": "PERSONAL EDITION — 001",
+      "korean": "나의 작업 공간 — 001"
+    }
+  ]
+}

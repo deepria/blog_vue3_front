@@ -2,7 +2,7 @@
   <PageShell
     class="account-page"
     title="설정"
-    eyebrow="Your workspace"
+    eyebrow="나의 작업 공간"
     description="작업 공간의 분위기와 계정, 공유 설정을 관리하세요."
   >
     <template #actions>
@@ -41,9 +41,7 @@
       >
         <div>
           <strong>{{ provider.label }}</strong>
-          <span>{{
-            connected(provider.id) ? "연결됨" : "연결되지 않음"
-          }}</span>
+          <span>{{ connected(provider.id) ? "연결됨" : "연결되지 않음" }}</span>
         </div>
         <a-button
           v-if="connected(provider.id)"
@@ -68,7 +66,7 @@
       <div class="preference-row">
         <div>
           <label id="gallery-setting-label">홈 이미지 슬라이드쇼</label>
-          <p>Dashboard 폴더의 이미지를 홈에 표시합니다.</p>
+          <p>대시보드 폴더의 이미지를 홈에 표시합니다.</p>
         </div>
         <a-switch
           :checked="settings.dashboardGalleryEnabled"
@@ -113,7 +111,9 @@
         </a-button>
       </div>
 
-      <div v-if="friendsLoading" class="friend-empty">친구를 불러오는 중입니다.</div>
+      <div v-if="friendsLoading" class="friend-empty">
+        친구를 불러오는 중입니다.
+      </div>
       <template v-else>
         <div v-if="incomingRequests.length" class="friend-group">
           <h3>받은 요청</h3>
@@ -256,7 +256,7 @@ const incomingRequests = ref([]);
 const outgoingRequests = ref([]);
 const isDarkMode = computed(() => app.theme === "dark");
 const themeToggleTitle = computed(() =>
-  isDarkMode.value ? "Turn dark mode off" : "Turn dark mode on",
+  isDarkMode.value ? "라이트 모드로 전환" : "다크 모드로 전환",
 );
 const providers = [
   { id: "google", label: "Google" },
@@ -272,7 +272,8 @@ async function loadPreferences() {
   try {
     await settings.loadSettings();
   } catch (error) {
-    settingsError.value = error.userMessage || "Unable to load preferences.";
+    settingsError.value =
+      error.userMessage || "환경설정을 불러오지 못했습니다.";
   }
 }
 
@@ -280,10 +281,11 @@ async function saveGalleryPreference(enabled) {
   settingsError.value = "";
   try {
     if (await settings.saveDashboardGallery(enabled)) {
-      message.success("Preferences saved.");
+      message.success("환경설정을 저장했습니다.");
     }
   } catch (error) {
-    settingsError.value = error.userMessage || "Unable to save preferences.";
+    settingsError.value =
+      error.userMessage || "환경설정을 저장하지 못했습니다.";
   }
 }
 
@@ -295,7 +297,9 @@ async function disconnect(provider) {
   try {
     app.setSession(await authApi.disconnect(provider));
   } catch (error) {
-    message.error(error.userMessage || "Unable to disconnect provider.");
+    message.error(
+      error.userMessage || "로그인 서비스 연결을 해제하지 못했습니다.",
+    );
   }
 }
 
@@ -312,7 +316,7 @@ async function loadFriends() {
     incomingRequests.value = data?.incoming_requests || [];
     outgoingRequests.value = data?.outgoing_requests || [];
   } catch (error) {
-    message.error(error.userMessage || "Unable to load friends.");
+    message.error(error.userMessage || "친구 목록을 불러오지 못했습니다.");
   } finally {
     friendsLoading.value = false;
   }
@@ -326,9 +330,9 @@ async function sendFriendRequest() {
     const request = await friendApi.sendRequest(email);
     outgoingRequests.value.unshift(request);
     friendEmail.value = "";
-    message.success("Friend request sent.");
+    message.success("친구 요청을 보냈습니다.");
   } catch (error) {
-    message.error(error.userMessage || "Unable to send friend request.");
+    message.error(error.userMessage || "친구 요청을 보내지 못했습니다.");
   } finally {
     sendingRequest.value = false;
   }
@@ -342,9 +346,9 @@ async function acceptFriendRequest(requestId) {
     );
     friends.value.push(friend);
     friends.value.sort((left, right) => left.name.localeCompare(right.name));
-    message.success("Friend request accepted.");
+    message.success("친구 요청을 수락했습니다.");
   } catch (error) {
-    message.error(error.userMessage || "Unable to accept friend request.");
+    message.error(error.userMessage || "친구 요청을 수락하지 못했습니다.");
   }
 }
 
@@ -357,26 +361,26 @@ async function dismissFriendRequest(requestId) {
     outgoingRequests.value = outgoingRequests.value.filter(
       (request) => request.request_id !== requestId,
     );
-    message.success("Friend request removed.");
+    message.success("친구 요청을 취소했습니다.");
   } catch (error) {
-    message.error(error.userMessage || "Unable to remove friend request.");
+    message.error(error.userMessage || "친구 요청을 취소하지 못했습니다.");
   }
 }
 
 function confirmRemoveFriend(friend) {
   modal.confirm({
-    title: "Remove friend",
-    content: `Remove ${friend.name} from your friends? Existing file access will remain until you remove it from the file.`,
-    okText: "Remove",
+    title: "친구 삭제",
+    content: `${friend.name} 님을 친구 목록에서 삭제할까요? 기존 파일 접근 권한은 각 파일에서 별도로 해제해야 합니다.`,
+    okText: "삭제",
     okType: "danger",
-    cancelText: "Cancel",
+    cancelText: "취소",
     centered: true,
     onOk: async () => {
       await friendApi.removeFriend(friend.user_id);
       friends.value = friends.value.filter(
         (item) => item.user_id !== friend.user_id,
       );
-      message.success("Friend removed.");
+      message.success("친구를 삭제했습니다.");
     },
   });
 }

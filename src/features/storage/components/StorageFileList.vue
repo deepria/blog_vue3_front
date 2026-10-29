@@ -3,19 +3,19 @@
     <template #header>
       <div class="panel-header">
         <div>
-          <h3 class="panel-title">File Library</h3>
+          <h3 class="panel-title">파일 목록</h3>
           <p class="panel-subtitle">
             {{
-              loading ? "Loading files..." : `${files.length} files available`
+              loading ? "파일을 불러오는 중입니다." : `파일 ${files.length}개`
             }}
           </p>
         </div>
-        <div class="sort-controls" aria-label="File sort controls">
+        <div class="sort-controls" aria-label="파일 정렬 도구">
           <div
             class="sort-toggle"
             :class="`is-${sortKey}`"
             role="group"
-            aria-label="Sort files by"
+            aria-label="파일 정렬 기준"
           >
             <span class="sort-toggle-indicator" aria-hidden="true"></span>
             <button
@@ -33,9 +33,9 @@
           <button
             class="icon-btn-secondary sort-direction-btn"
             type="button"
-            :title="sortDirection === 'asc' ? 'Ascending' : 'Descending'"
+            :title="sortDirection === 'asc' ? '오름차순' : '내림차순'"
             :aria-label="
-              sortDirection === 'asc' ? 'Sort ascending' : 'Sort descending'
+              sortDirection === 'asc' ? '오름차순 정렬' : '내림차순 정렬'
             "
             @click="toggleSortDirection"
           >
@@ -111,7 +111,7 @@
                 <span
                   v-if="file.has_password"
                   class="lock-indicator"
-                  title="Protected"
+                  title="보호된 파일"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -136,15 +136,25 @@
                   </svg>
                 </span>
                 <span v-if="file.isShared" class="shared-indicator">
-                  {{ file.owner_name }} shared
+                  {{ file.owner_name }} 님이 공유함
                 </span>
               </div>
               <div class="file-actions">
                 <button
+                  v-if="!file.isShared"
+                  type="button"
+                  class="icon-btn-secondary mini-btn"
+                  title="폴더 이동"
+                  :aria-label="`${file.display_name} 폴더 이동`"
+                  @click.stop="$emit('move', file)"
+                >
+                  ↗
+                </button>
+                <button
                   class="icon-btn-secondary mini-btn"
                   @click.stop="$emit('preview', file)"
-                  title="Preview"
-                  :aria-label="`Preview ${file.display_name}`"
+                  title="미리보기"
+                  :aria-label="`${file.display_name} 미리보기`"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -166,8 +176,8 @@
                 <button
                   class="icon-btn-secondary mini-btn"
                   @click.stop="$emit('download', file)"
-                  title="Download"
-                  :aria-label="`Download ${file.display_name}`"
+                  title="다운로드"
+                  :aria-label="`${file.display_name} 다운로드`"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -189,8 +199,8 @@
                   v-if="!file.isShared"
                   class="icon-btn-secondary mini-btn"
                   @click.stop="$emit('share', file)"
-                  title="Share"
-                  :aria-label="`Share ${file.display_name}`"
+                  title="공유"
+                  :aria-label="`${file.display_name} 공유`"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -214,8 +224,8 @@
                   v-if="!file.isShared"
                   class="icon-btn-secondary mini-btn delete-btn"
                   @click.stop="$emit('delete', file)"
-                  title="Delete"
-                  :aria-label="`Delete ${file.display_name}`"
+                  title="삭제"
+                  :aria-label="`${file.display_name} 삭제`"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -246,9 +256,11 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import BaseCard from "@/shared/ui/BaseCard.vue";
 import BaseSkeleton from "@/shared/ui/BaseSkeleton.vue";
+import { useAppStore } from "@/store/app";
+import { readListState, writeListState } from "@/shared/lib/listState";
 import { sortFiles } from "@/features/storage/lib/filePresentation";
 
 const props = defineProps({
@@ -262,11 +274,12 @@ const props = defineProps({
   },
   emptyText: {
     type: String,
-    default: "No files uploaded yet",
+    default: "아직 업로드한 파일이 없습니다.",
   },
 });
 
 const emit = defineEmits([
+  "move",
   "preview",
   "download",
   "share",
@@ -276,13 +289,25 @@ const emit = defineEmits([
 ]);
 
 const sortOptions = [
-  { value: "name", label: "Name" },
-  { value: "extension", label: "Ext" },
-  { value: "created_at", label: "Created" },
+  { value: "name", label: "이름" },
+  { value: "extension", label: "확장자" },
+  { value: "created_at", label: "업로드 날짜" },
 ];
 
-const sortKey = ref("created_at");
-const sortDirection = ref("desc");
+const owner = useAppStore().user?.id;
+const previousSort = readListState(owner, "file-sort");
+const sortKey = ref(
+  ["name", "extension", "created_at"].includes(previousSort.key)
+    ? previousSort.key
+    : "created_at",
+);
+const sortDirection = ref(previousSort.direction === "asc" ? "asc" : "desc");
+watch([sortKey, sortDirection], () =>
+  writeListState(owner, "file-sort", {
+    key: sortKey.value,
+    direction: sortDirection.value,
+  }),
+);
 const sortedFiles = computed(() =>
   sortFiles(props.files, sortKey.value, sortDirection.value),
 );
@@ -432,6 +457,7 @@ const getFileExt = (name) => {
 .file-list-move,
 .file-list-enter-active,
 .file-list-leave-active {
+  pointer-events: none;
   transition:
     transform 0.18s ease,
     opacity 0.14s ease;
@@ -444,6 +470,7 @@ const getFileExt = (name) => {
 }
 
 .file-list-leave-active {
+  pointer-events: none;
   position: absolute;
   width: 100%;
 }
@@ -572,8 +599,16 @@ const getFileExt = (name) => {
     padding-right: 8px;
   }
 
+  .file-details {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .file-name {
+    width: 100%;
+  }
   .file-actions {
-    width: auto;
+    width: 100%;
     justify-content: flex-end;
   }
 
@@ -582,8 +617,8 @@ const getFileExt = (name) => {
   }
 
   .mini-btn {
-    width: 28px;
-    height: 28px;
+    width: 44px;
+    height: 44px;
   }
 }
 </style>

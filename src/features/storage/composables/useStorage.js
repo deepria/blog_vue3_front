@@ -14,6 +14,8 @@ export function useStorage() {
   const loading = ref(false);
   const sharedLoading = ref(false);
   const uploadProgress = ref(0);
+  const error = ref("");
+  const sharedError = ref("");
 
   const previewableFiles = computed(() =>
     files.value.map((file) =>
@@ -28,8 +30,12 @@ export function useStorage() {
 
   async function loadFiles() {
     loading.value = true;
+    error.value = "";
     try {
       files.value = await storageApi.listFiles();
+    } catch (cause) {
+      error.value = "파일을 불러오지 못했습니다. 다시 시도해 주세요.";
+      throw cause;
     } finally {
       loading.value = false;
     }
@@ -37,8 +43,13 @@ export function useStorage() {
 
   async function loadSharedFiles() {
     sharedLoading.value = true;
+    sharedError.value = "";
     try {
       sharedFiles.value = await storageApi.listSharedFiles();
+    } catch (cause) {
+      sharedError.value =
+        "공유받은 파일을 불러오지 못했습니다. 다시 시도해 주세요.";
+      throw cause;
     } finally {
       sharedLoading.value = false;
     }
@@ -66,7 +77,7 @@ export function useStorage() {
 
     if (!response.ok) {
       throw {
-        userMessage: `Upload failed (${response.status})`,
+        userMessage: `업로드하지 못했습니다. (${response.status})`,
         status: response.status,
       };
     }
@@ -118,7 +129,7 @@ export function useStorage() {
 
           if (!response.ok) {
             throw {
-              userMessage: `Upload failed (${response.status})`,
+              userMessage: `업로드하지 못했습니다. (${response.status})`,
               status: response.status,
             };
           }
@@ -127,7 +138,7 @@ export function useStorage() {
           if (!etag) {
             throw {
               userMessage:
-                "Upload failed: S3 CORS must expose the ETag header.",
+                "파일 전송을 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.",
               status: "missing_etag",
             };
           }
@@ -192,6 +203,8 @@ export function useStorage() {
 
   return {
     files,
+    error,
+    sharedError,
     sharedFiles,
     loading,
     sharedLoading,

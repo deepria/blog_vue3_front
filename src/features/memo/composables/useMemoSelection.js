@@ -1,9 +1,16 @@
 import { nextTick, ref, watch } from "vue";
 
-export function useMemoSelection({ filteredNotes, getNote, deleteNote, notify, confirm }) {
+export function useMemoSelection({
+  filteredNotes,
+  getNote,
+  deleteNote,
+  notify,
+  confirm,
+}) {
   const selectedId = ref("");
   const selectedNote = ref(null);
   const previewContent = ref("");
+  const previewError = ref(false);
   const isMobileListOpen = ref(false);
 
   async function selectMemo(note) {
@@ -11,12 +18,15 @@ export function useMemoSelection({ filteredNotes, getNote, deleteNote, notify, c
     selectedId.value = note.id;
     selectedNote.value = note;
     previewContent.value = "";
+    previewError.value = false;
     try {
       const fullNote = await getNote(note.id);
       if (selectedId.value !== note.id) return;
       selectedNote.value = fullNote;
       previewContent.value = fullNote?.content || "";
     } catch {
+      if (selectedId.value !== note.id) return;
+      previewError.value = true;
       notify.error("메모 내용을 불러오지 못했습니다.");
     }
   }
@@ -30,7 +40,10 @@ export function useMemoSelection({ filteredNotes, getNote, deleteNote, notify, c
       previewContent.value = "";
       return;
     }
-    if (!selectedId.value || !filteredNotes.value.some((note) => note.id === selectedId.value)) {
+    if (
+      !selectedId.value ||
+      !filteredNotes.value.some((note) => note.id === selectedId.value)
+    ) {
       await selectMemo(first);
     }
   }
@@ -66,6 +79,7 @@ export function useMemoSelection({ filteredNotes, getNote, deleteNote, notify, c
     selectedId,
     selectedNote,
     previewContent,
+    previewError,
     isMobileListOpen,
     selectMemo,
     selectFirstMemo,

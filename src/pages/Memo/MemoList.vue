@@ -2,7 +2,7 @@
   <PageShell
     class="memo-list-page"
     title="메모"
-    eyebrow="Knowledge"
+    eyebrow="나의 기록"
     :description="summaryText"
   >
     <template #actions>
@@ -129,11 +129,14 @@
                 >
               </div>
 
-              <div v-else class="memo-list">
-                <button
+              <div v-else ref="listScroll" class="memo-list">
+                <div
                   v-for="note in filteredNotes"
                   :key="note.id"
-                  type="button"
+                  role="button"
+                  tabindex="0"
+                  @keydown.enter.self="selectMemo(note)"
+                  @keydown.space.self.prevent="selectMemo(note)"
                   class="memo-row"
                   :class="{ selected: selectedId === note.id }"
                   @click="selectMemo(note)"
@@ -145,12 +148,16 @@
                       formatDate(note.updatedAt || note.updated_at)
                     }}</small>
                   </span>
-                  <DeleteOutlined
-                    class="delete-icon"
+                  <button
+                    type="button"
+                    class="delete-icon memo-delete"
+                    :aria-label="`${note.title || '제목 없는 메모'} 삭제`"
                     title="삭제"
                     @click.stop="confirmDelete(note)"
-                  />
-                </button>
+                  >
+                    <DeleteOutlined />
+                  </button>
+                </div>
               </div>
             </div>
           </aside>
@@ -174,6 +181,15 @@
               <BaseSkeleton height="18px" width="74%" />
             </div>
 
+            <div v-else-if="previewError" class="state-panel" role="alert">
+              <strong>메모 내용을 불러오지 못했습니다.</strong
+              ><BaseButton
+                variant="secondary"
+                size="sm"
+                @click="selectMemo(selectedNote)"
+                >다시 시도</BaseButton
+              >
+            </div>
             <template v-else-if="selectedNote">
               <header class="preview-header">
                 <div>
@@ -207,7 +223,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { App, message } from "ant-design-vue";
 import {
@@ -220,6 +236,8 @@ import {
   PlusOutlined,
   ReloadOutlined,
 } from "@ant-design/icons-vue";
+import { readListState, writeListState } from "@/shared/lib/listState";
+import { useAppStore } from "@/store/app";
 import { useMemo } from "@/features/memo/composables/useMemo";
 import { useMemoSelection } from "@/features/memo/composables/useMemoSelection";
 import BaseButton from "@/shared/ui/BaseButton.vue";
@@ -229,6 +247,9 @@ import MarkdownViewer from "@/components/ui/MarkdownViewer.vue";
 import PageShell from "@/shared/ui/PageShell.vue";
 
 const router = useRouter();
+const app = useAppStore();
+const previousList = readListState(app.user?.id, "memos");
+const listScroll = ref(null);
 const { modal } = App.useApp();
 
 const {
@@ -244,11 +265,14 @@ const {
   deleteNote,
 } = useMemo();
 
-const contentVisible = ref(false);
+searchQuery.value = previousList.query || "";
+sortMode.value = previousList.sort || "recent";
+const contentVisible = ref(true);
 const {
   selectedId,
   selectedNote,
   previewContent,
+  previewError,
   isMobileListOpen,
   selectMemo,
   selectFirstMemo,
@@ -260,6 +284,17 @@ const {
   notify: message,
   confirm: modal.confirm,
 });
+
+selectedId.value = previousList.selected || "";
+onBeforeUnmount(() =>
+  writeListState(app.user?.id, "memos", {
+    query: searchQuery.value,
+    sort: sortMode.value,
+    selected: selectedId.value,
+    scroll: listScroll.value?.scrollTop || 0,
+    pageY: window.scrollY,
+  }),
+);
 
 const summaryText = computed(() => {
   if (loading.value) return "메모를 불러오는 중입니다.";
@@ -308,12 +343,21 @@ const handleRefresh = async () => {
 onMounted(async () => {
   try {
     await loadNotes();
-    await selectFirstMemo();
+    const previous = filteredNotes.value.find(
+      (note) => note.id === previousList.selected,
+    );
+    if (previous) await selectMemo(previous);
+    else await selectFirstMemo();
   } catch {
     // error state is rendered by the page.
   } finally {
     requestAnimationFrame(() => {
       contentVisible.value = true;
+      nextTick(() => {
+        if (listScroll.value)
+          listScroll.value.scrollTop = previousList.scroll || 0;
+        window.scrollTo(0, previousList.pageY || 0);
+      });
     });
   }
 });
@@ -727,5 +771,15 @@ onMounted(async () => {
   .memo-list-content .state-panel.compact {
     min-height: 220px;
   }
+}
+.memo-delete {
+  min-width: 32px;
+  min-height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 15px;
 }
 </style>

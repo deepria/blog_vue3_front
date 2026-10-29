@@ -9,7 +9,7 @@
         @focus="isFocused = true"
         @blur="isFocused = false"
         @update:value="$emit('update:modelValue', $event)"
-        @keydown.enter.exact.prevent="submit"
+        @keydown.enter.exact="handleEnter"
       />
       <button
         class="send-btn"
@@ -44,6 +44,11 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue", "send"]);
 const isFocused = ref(false);
 
+function handleEnter(event) {
+  if (event.isComposing || event.keyCode === 229) return;
+  event.preventDefault();
+  submit();
+}
 function submit() {
   if (!props.modelValue.trim() || props.loading) return;
   emit("send");
@@ -52,7 +57,8 @@ function submit() {
 
 <style scoped>
 .composer-area {
-  padding: 14px clamp(14px, 3vw, 28px) calc(14px + env(safe-area-inset-bottom, 0px));
+  padding: 14px clamp(14px, 3vw, 28px)
+    calc(14px + env(safe-area-inset-bottom, 0px));
   background: var(--color-bg-surface);
   border-top: 1px solid var(--color-border);
 }
@@ -68,7 +74,10 @@ function submit() {
   border-radius: var(--radius-lg);
   background: var(--color-bg-panel);
   box-shadow: var(--shadow-sm);
-  transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background-color 0.16s ease;
 }
 
 .composer-shell.focused {
@@ -103,7 +112,10 @@ function submit() {
   background-color: var(--color-primary);
   color: var(--text-inverse);
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
   flex-shrink: 0;
 }
 

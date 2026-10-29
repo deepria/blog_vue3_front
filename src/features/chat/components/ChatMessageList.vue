@@ -25,7 +25,11 @@
     <article
       v-for="(msg, index) in messages"
       :key="`${msg.timestamp || index}-${index}`"
-      :class="['message-row', msg.role === 'user' ? 'user' : 'assistant', { error: msg.isError }]"
+      :class="[
+        'message-row',
+        msg.role === 'user' ? 'user' : 'assistant',
+        { error: msg.isError },
+      ]"
     >
       <div class="message-avatar" aria-hidden="true">
         <user-outlined v-if="msg.role === 'user'" />
@@ -34,7 +38,7 @@
 
       <div class="message-stack">
         <div class="message-meta">
-          <span>{{ msg.role === "user" ? "나" : "Assistant" }}</span>
+          <span>{{ msg.role === "user" ? "나" : "AI 도우미" }}</span>
           <time v-if="msg.timestamp">{{ formatTime(msg.timestamp) }}</time>
         </div>
 
@@ -71,7 +75,7 @@
       </div>
       <div class="message-stack">
         <div class="message-meta">
-          <span>Assistant</span>
+          <span>AI 도우미</span>
           <time>응답 생성 중</time>
         </div>
         <div class="message-content loading-content">
@@ -113,7 +117,7 @@ const starterPrompts = [
   {
     title: "긴 글 요약",
     description: "핵심만 뽑아 구조화",
-    text: "아래 내용을 핵심 bullet로 요약하고, 마지막에 다음 액션을 제안해줘.\n\n",
+    text: "아래 내용을 핵심 항목으로 요약하고, 마지막에 다음 액션을 제안해줘.\n\n",
   },
   {
     title: "코드 리뷰",
@@ -233,7 +237,10 @@ watch(
   color: var(--color-text-primary);
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .prompt-card:hover {
@@ -335,7 +342,11 @@ watch(
 
 .message-row.error .message-content {
   border-color: rgba(220, 38, 38, 0.38);
-  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-bg-surface));
+  background: color-mix(
+    in srgb,
+    var(--color-danger) 8%,
+    var(--color-bg-surface)
+  );
 }
 
 .message-actions {
@@ -343,7 +354,9 @@ watch(
   gap: 4px;
   opacity: 0;
   transform: translateY(-2px);
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .message-row:hover .message-actions,
@@ -396,12 +409,24 @@ watch(
   animation: pulse 1.3s infinite ease-in-out both;
 }
 
-.loading-content span:nth-child(1) { animation-delay: -0.26s; }
-.loading-content span:nth-child(2) { animation-delay: -0.13s; }
+.loading-content span:nth-child(1) {
+  animation-delay: -0.26s;
+}
+.loading-content span:nth-child(2) {
+  animation-delay: -0.13s;
+}
 
 @keyframes pulse {
-  0%, 80%, 100% { opacity: 0.32; transform: scale(0.72); }
-  40% { opacity: 1; transform: scale(1); }
+  0%,
+  80%,
+  100% {
+    opacity: 0.32;
+    transform: scale(0.72);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 :deep(pre) {

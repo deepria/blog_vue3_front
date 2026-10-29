@@ -1,0 +1,9 @@
+{
+  "localPreview": "http://127.0.0.1:4176",
+  "serviceWorkerBypassed": false,
+  "offlineShell": true,
+  "deferredUpdate": true,
+  "manualUpdateReload": true,
+  "offlineAfterUpdate": true,
+  "errors": []
+}

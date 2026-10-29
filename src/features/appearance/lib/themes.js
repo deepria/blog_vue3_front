@@ -169,7 +169,7 @@ export function getAppearance(design, mode) {
         ? [3, 5, 6, 8]
         : [5, 8, 14, 18];
   const font =
-    '"Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    '"Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
   const vars = {
     "color-bg-base": p.base,
     "color-bg-surface": p.surface,

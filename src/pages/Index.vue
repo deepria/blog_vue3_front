@@ -2,11 +2,11 @@
   <section class="home-page">
     <div class="home-meta">
       <span><i></i>{{ today }}</span
-      ><span class="edition">PERSONAL EDITION / {{ accountName }}</span>
+      ><span class="edition">나의 작업 공간 / {{ accountName }}</span>
     </div>
     <header class="home-heading">
       <div>
-        <p class="eyebrow">A SPACE TO MAKE IT YOURS</p>
+        <p class="eyebrow">나의 생각을 위한 공간</p>
         <h1>
           좋은 생각이<br /><span>머무는 곳.</span><i aria-hidden="true">✳</i>
         </h1>
@@ -23,7 +23,7 @@
       <section class="clipboard-shell" aria-labelledby="clipboard-title">
         <header class="capture-heading">
           <div>
-            <p class="eyebrow">01 / CAPTURE</p>
+            <p class="eyebrow">01 / 빠른 기록</p>
             <h2 id="clipboard-title">생각을 잠시 놓아두세요.</h2>
           </div>
           <SnippetsOutlined />
@@ -94,14 +94,14 @@
             activeSlide ? activeSlide.name : "조금의 여백, 새로운 시선."
           }}</span
           ><router-link v-if="activeSlide" to="/s3">내 파일 보기 ↗</router-link
-          ><span v-else>DEEPRIA STUDIES ↗</span>
+          ><span v-else>나만의 시선 ↗</span>
         </footer>
       </section>
     </div>
     <section class="recent-section" aria-labelledby="recent-title">
       <header class="recent-heading">
         <div>
-          <p class="eyebrow">02 / CONTINUE</p>
+          <p class="eyebrow">02 / 이어서 작업하기</p>
           <h2 id="recent-title">이어서 생각하기</h2>
         </div>
         <router-link to="/memo"
@@ -127,7 +127,7 @@
           :key="note.id"
           :to="`/memo/edit/${encodeURIComponent(note.id)}`"
           class="recent-note"
-          ><span class="note-type"><FileTextOutlined />MEMO<span>↗</span></span>
+          ><span class="note-type"><FileTextOutlined />메모<span>↗</span></span>
           <h3>{{ note.title || "제목 없는 메모" }}</h3>
           <span class="note-bottom"
             >{{ formatDate(note.updatedAt || note.updated_at)
@@ -138,7 +138,7 @@
     </section>
     <footer class="home-signoff">
       <span>조금씩 쌓이는, 나다운 하루.</span
-      ><span>DESIGNED FOR YOUR EVERYDAY.</span>
+      ><span>나의 일상을 담는 공간.</span>
     </footer>
   </section>
 </template>
@@ -159,6 +159,7 @@ import { useClipboard } from "@/features/dashboard/composables/useClipboard";
 import { useDashboardGallery } from "@/features/dashboard/composables/useDashboardGallery";
 import { memoApi } from "@/features/memo/api/memoApi";
 import { normalizeMemoTimestamp } from "@/features/memo/lib/memoModel";
+import { useWorkProtection } from "@/shared/composables/useWorkProtection";
 import { useAppStore } from "@/store/app";
 const app = useAppStore();
 const { activeSlide } = useDashboardGallery();
@@ -196,6 +197,10 @@ const accountName = computed(
 );
 const isDirty = computed(
   () => hasLoaded.value && clipboardText.value !== savedText.value,
+);
+useWorkProtection(
+  "클립보드 편집",
+  () => isDirty.value || clipboardSaving.value,
 );
 const saveStatus = computed(() =>
   clipboardLoading.value

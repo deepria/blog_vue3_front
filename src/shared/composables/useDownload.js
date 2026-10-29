@@ -8,7 +8,8 @@ function blobToBase64(blob) {
       const result = String(reader.result || "");
       resolve(result.split(",")[1] || "");
     };
-    reader.onerror = () => reject(reader.error || new Error("Failed to read file blob"));
+    reader.onerror = () =>
+      reject(reader.error || new Error("파일을 읽지 못했습니다."));
     reader.readAsDataURL(blob);
   });
 }
@@ -63,7 +64,7 @@ async function handoffToNative(blob, filename) {
 export function useDownload() {
   async function downloadFromUrl(url, filename) {
     if (!url) {
-      throw { userMessage: "Download URL is missing" };
+      throw { userMessage: "다운로드 주소를 확인하지 못했습니다." };
     }
 
     assertOnline();
@@ -76,7 +77,7 @@ export function useDownload() {
     const response = await fetchOnline(url);
     if (!response.ok) {
       throw {
-        userMessage: `Download failed (${response.status})`,
+        userMessage: `다운로드하지 못했습니다. (${response.status})`,
         status: response.status,
       };
     }

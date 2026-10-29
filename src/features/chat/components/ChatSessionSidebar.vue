@@ -12,15 +12,25 @@
     </div>
 
     <div class="session-list">
-      <p v-if="!groupedSessions.length" class="empty-sessions">검색 결과가 없습니다.</p>
+      <p v-if="!groupedSessions.length" class="empty-sessions">
+        검색 결과가 없습니다.
+      </p>
 
-      <section v-for="group in groupedSessions" :key="group.label" class="session-group">
+      <section
+        v-for="group in groupedSessions"
+        :key="group.label"
+        class="session-group"
+      >
         <h2>{{ group.label }}</h2>
 
         <div
           v-for="session in group.items"
           :key="session.id"
           class="session-item"
+          role="button"
+          tabindex="0"
+          @keydown.enter.self="$emit('select', session.id)"
+          @keydown.space.self.prevent="$emit('select', session.id)"
           :class="{ active: currentSessionId === session.id }"
           @click="$emit('select', session.id)"
         >
@@ -36,14 +46,20 @@
               @keydown.esc.prevent="cancelRename"
             />
             <template v-else>
-              <span class="session-title">{{ session.title || "New Chat" }}</span>
+              <span class="session-title">{{
+                session.title || "새 대화"
+              }}</span>
               <small>{{ getPreview(session) }}</small>
             </template>
           </div>
 
           <div class="session-actions">
             <template v-if="editingId === session.id">
-              <button type="button" title="저장" @click.stop="commitRename(session.id)">
+              <button
+                type="button"
+                title="저장"
+                @click.stop="commitRename(session.id)"
+              >
                 <check-outlined />
               </button>
               <button type="button" title="취소" @click.stop="cancelRename">
@@ -51,10 +67,18 @@
               </button>
             </template>
             <template v-else>
-              <button type="button" title="이름 변경" @click.stop="startRename(session)">
+              <button
+                type="button"
+                title="이름 변경"
+                @click.stop="startRename(session)"
+              >
                 <edit-outlined />
               </button>
-              <button type="button" title="삭제" @click.stop="confirmDelete(session.id)">
+              <button
+                type="button"
+                title="삭제"
+                @click.stop="confirmDelete(session.id)"
+              >
                 <delete-outlined />
               </button>
             </template>
@@ -108,18 +132,31 @@ const filteredSessions = computed(() => {
 const groupedSessions = computed(() => {
   const groups = new Map();
   filteredSessions.value.forEach((session) => {
-    const label = getDateGroup(session.lastModified || session.createdAt || Date.now());
+    const label = getDateGroup(
+      session.lastModified || session.createdAt || Date.now(),
+    );
     if (!groups.has(label)) groups.set(label, []);
     groups.get(label).push(session);
   });
-  return Array.from(groups.entries()).map(([label, items]) => ({ label, items }));
+  return Array.from(groups.entries()).map(([label, items]) => ({
+    label,
+    items,
+  }));
 });
 
 function getDateGroup(timestamp) {
   const date = new Date(timestamp);
   const today = new Date();
-  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-  const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const startOfToday = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  ).getTime();
+  const startOfDate = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+  ).getTime();
   const diffDays = Math.floor((startOfToday - startOfDate) / 86400000);
 
   if (diffDays <= 0) return "오늘";
@@ -136,7 +173,7 @@ function getPreview(session) {
 
 function startRename(session) {
   editingId.value = session.id;
-  editingTitle.value = session.title || "New Chat";
+  editingTitle.value = session.title || "새 대화";
 }
 
 function commitRename(id) {
@@ -243,7 +280,10 @@ function confirmDelete(id) {
   background: transparent;
   color: var(--color-text-secondary);
   border: 1px solid transparent;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .session-item.active {

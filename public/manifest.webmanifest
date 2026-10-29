@@ -1,15 +1,15 @@
 {
   "name": "Deepria Cloud",
   "short_name": "Deepria",
-  "description": "Memos, tasks, files, and AI in one personal cloud workspace.",
+  "description": "메모와 할 일, 파일과 AI를 나만의 클라우드 작업 공간에서 이어가세요.",
   "lang": "ko",
   "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0b1020",
-  "theme_color": "#0b1020",
+  "background_color": "#f5f4f0",
+  "theme_color": "#f5f4f0",
   "icons": [
     {
       "src": "/pwa-192x192.png",

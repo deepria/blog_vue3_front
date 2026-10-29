@@ -1,0 +1,42 @@
+{
+  "errors": [],
+  "results": [
+    {
+      "design": "editorial",
+      "width": 390,
+      "screen": "populated-chat",
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "width": 1440,
+      "screen": "populated-chat",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 390,
+      "screen": "populated-chat",
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "width": 1440,
+      "screen": "populated-chat",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 390,
+      "screen": "populated-chat",
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "width": 1440,
+      "screen": "populated-chat",
+      "overflow": false
+    }
+  ],
+  "syntheticData": true
+}

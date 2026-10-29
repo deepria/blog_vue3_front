@@ -1,10 +1,11 @@
-import { ref } from 'vue';
-import { message } from 'ant-design-vue';
+import { ref } from "vue";
+import { message } from "ant-design-vue";
+import { getErrorMessage } from "../api/http.js";
 
 /**
  * A highly reusable composable for managing async API calls.
  * Automatically tracks `loading` state, handles `try/catch`, and provides consistent UI error messages via Ant Design.
- * 
+ *
  * @param {Function} asyncFn - The async API function to execute
  * @param {Object} options - Configuration options
  * @param {any} options.initialState - Initial value for the `data` ref (default: null)
@@ -17,9 +18,9 @@ export function useAsync(asyncFn, options = {}) {
   const {
     initialState = null,
     showSuccessMsg = false,
-    successMsg = "Operation successful",
+    successMsg = "완료했습니다.",
     showErrorMsg = true,
-    errorMsg = "An error occurred",
+    errorMsg = "오류가 발생했습니다. 다시 시도해 주세요.",
   } = options;
 
   const data = ref(initialState);
@@ -29,21 +30,21 @@ export function useAsync(asyncFn, options = {}) {
   const execute = async (...args) => {
     loading.value = true;
     error.value = null;
-    
+
     try {
       const result = await asyncFn(...args);
       data.value = result;
-      
+
       if (showSuccessMsg) {
         message.success(successMsg);
       }
-      
+
       return result;
     } catch (e) {
       error.value = e;
       if (showErrorMsg) {
         // Try to stringify backend error or fallback
-        const errMsg = e?.userMessage || e?.message || errorMsg;
+        const errMsg = getErrorMessage(e, errorMsg);
         message.error(errMsg);
       }
       throw e;

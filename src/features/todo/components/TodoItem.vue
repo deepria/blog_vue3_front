@@ -1,6 +1,10 @@
 <template>
   <div
     class="task-item"
+    role="button"
+    tabindex="0"
+    @keydown.enter.self="$emit('edit', item)"
+    @keydown.space.self.prevent="$emit('edit', item)"
     :class="{ 'is-completed': item.completed }"
     @click="$emit('edit', item)"
   >
@@ -11,7 +15,12 @@
       :style="{ backgroundColor: priorityColor }"
     ></div>
 
-    <button class="delete-btn" @click.stop="$emit('delete', item.id)">
+    <button
+      type="button"
+      class="delete-btn"
+      :aria-label="`${item.text || '할 일'} 삭제`"
+      @click.stop="$emit('delete', item.id)"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="18"
@@ -30,7 +39,11 @@
       </svg>
     </button>
 
-    <div
+    <button
+      type="button"
+      role="checkbox"
+      :aria-checked="item.completed"
+      :aria-label="`${item.text || '할 일'} 완료 여부`"
       class="custom-checkbox"
       :class="{ checked: item.completed }"
       :style="{
@@ -54,7 +67,7 @@
       >
         <polyline points="20 6 9 17 4 12"></polyline>
       </svg>
-    </div>
+    </button>
 
     <div class="task-content">
       <span class="task-text">{{ item.text }}</span>
