@@ -18,17 +18,45 @@
 - 백그라운드 대용량 업로드
 - Android 네이티브 프로젝트의 삭제 또는 Play Store 출시 정책 변경
 
+## 현재 진행 상황 (2026-08-26)
+
+현재 상태: **PWA 기반 구현과 운영 배포, Android Chrome 설치·인증·주요 기능 QA 완료. 교차 브라우저·오프라인·업데이트 QA 진행 필요.**
+
+완료된 내용:
+
+- `vite-plugin-pwa`와 Workbox 기반 service worker를 적용했다.
+- 앱 셸을 precache하고, 화면 이동은 network-first + 앱 셸 fallback으로 구성했다.
+- `/api/**`와 S3 presigned 요청은 service worker에서 캐시하지 않는다.
+- 연결 상태, 오프라인 요청 오류, 새 버전 적용 안내 UX를 추가했다.
+- Android 앱의 기존 꽃 런처 이미지를 192x192, 512x512, maskable 512x512 PWA 아이콘으로 적용했다.
+- 운영 `manifest.webmanifest`와 `sw.js`가 각각 올바른 MIME 타입으로 응답함을 확인했다.
+- Amplify SPA rewrite에서 `webmanifest`를 정적 확장자로 제외했다.
+- 운영 직접 진입 경로 `/memo`, `/memo/edit/:id`, `/chat`가 `200 text/html`로 응답함을 확인했다.
+- API CORS가 `https://deepria.cloud`를 origin으로 반환하고 credentials를 허용함을 확인했다.
+- Android Chrome에서 꽃 아이콘으로 설치되고 주소창 없는 standalone 창으로 실행됨을 확인했다.
+- Android Chrome PWA에서 Google/GitHub 인증, 로그아웃, 재실행 후 세션 복구가 통과했다.
+- 메모, 할 일, 채팅, 계정, 파일 업로드·다운로드 기능 QA가 통과했다.
+- `pnpm run lint`, `pnpm run test:unit`(9개), `pnpm run build`가 통과했다.
+
+다음 작업:
+
+1. 비행기 모드의 앱 셸·오프라인 안내와 새 버전 업데이트 적용을 검증한다.
+2. Samsung Internet에서 설치와 standalone 실행 및 핵심 기능을 반복 검증한다.
+3. 운영 로그에서 CORS/OAuth/S3 오류가 없는지 확인한다.
+4. 위 검증이 모두 통과한 뒤 WebView 전용 인증·다운로드 브리지 제거 여부를 결정한다.
+
 ## 사전 확인 사항
 
 구현에 앞서 배포 담당자 또는 인프라 접근 권한이 있는 담당자가 아래를 확인해야 한다.
 
-- [ ] 프론트엔드 운영 Origin: `https://deepria.cloud`
-- [ ] API 운영 Origin: 현재 코드상 `https://api.deepria.cloud`가 전제됨
-- [ ] API 환경 변수 `ALLOWED_ORIGINS`에 프론트엔드 Origin이 정확히 포함됨
-- [ ] API의 쿠키 설정이 운영에서 `Secure`이고, 프론트엔드/API 조합에서 로그인 세션이 유지됨
-- [ ] Google 및 GitHub OAuth의 허용 redirect URI가 현재 API callback URL과 일치함
-- [ ] AWS Amplify가 Vue Router의 직접 진입 경로(`/memo`, `/memo/edit/:id`, `/chat` 등)를 `index.html`로 rewrite함
-- [ ] S3 CORS가 브라우저 기반 presigned 업로드/다운로드를 허용하며 ETag를 노출함
+- [x] 프론트엔드 운영 Origin: `https://deepria.cloud`
+- [x] API 운영 Origin: `https://api.deepria.cloud`
+- [x] API CORS 응답이 프론트엔드 Origin `https://deepria.cloud`와 정확히 일치함
+- [ ] API 인증 쿠키의 `Secure` 속성을 응답 헤더 또는 운영 설정에서 직접 확인함
+- [x] 프론트엔드/API 조합에서 앱 재실행 후 로그인 세션이 유지됨
+- [x] Google 및 GitHub OAuth callback과 원래 PWA 복귀가 정상 작동함
+- [x] AWS Amplify가 Vue Router의 직접 진입 경로(`/memo`, `/memo/edit/:id`, `/chat` 등)를 `index.html`로 rewrite함
+- [x] S3 CORS가 브라우저 기반 presigned 업로드/다운로드를 허용하며 multipart ETag를 노출함
 
 위 조건이 충족되지 않으면 PWA 자체는 설치되어도 로그인·새로고침·파일 기능이 실패할 수 있다.
 
@@ -38,13 +66,13 @@
 
 예상: 0.5~1일
 
-- [ ] `vite-plugin-pwa`를 개발 의존성으로 추가한다.
-- [ ] `vite.config.js`에 VitePWA 플러그인을 추가한다.
-- [ ] `public/manifest.webmanifest`를 생성하거나 플러그인 manifest 설정을 사용한다.
-- [ ] `index.html`에 manifest, theme-color, Apple touch icon 메타 정보를 추가한다.
-- [ ] 192x192 및 512x512 이상의 maskable 아이콘을 준비한다.
-- [ ] 앱 표시명, 짧은 이름, `start_url`, `display: standalone`, 색상을 확정한다.
-- [ ] `main.js`에서 service worker 등록과 업데이트 감지 UX를 구현한다.
+- [x] `vite-plugin-pwa`를 개발 의존성으로 추가한다.
+- [x] `vite.config.js`에 VitePWA 플러그인을 추가한다.
+- [x] `public/manifest.webmanifest`를 생성한다.
+- [x] `index.html`에 manifest, theme-color, Apple touch icon 메타 정보를 추가한다.
+- [x] Android 앱의 꽃 이미지를 사용한 192x192, 512x512, maskable 아이콘을 준비한다.
+- [x] 앱 표시명 `Deepria Cloud`, 짧은 이름 `Deepria`, `start_url: /`, `display: standalone`, 색상을 확정한다.
+- [x] `main.js`에서 service worker 등록과 업데이트 감지 UX를 구현한다.
 
 권장 초기 캐시 정책:
 
@@ -57,20 +85,20 @@
 
 예상: 0.5~1일
 
-- [ ] 인터넷이 없고 캐시되지 않은 화면을 열었을 때 보여줄 `offline.html` 또는 Vue 화면을 만든다.
-- [ ] `online`/`offline` 이벤트로 연결 상태 안내를 제공한다.
-- [ ] 새 service worker가 대기 상태이면 사용자가 새 버전을 적용할 수 있게 안내한다.
-- [ ] 로그인·파일 업로드·채팅 요청이 오프라인일 때 오류 메시지를 일관되게 표시한다.
+- [x] 오프라인 화면 이동 시 캐시된 Vue 앱 셸과 전역 상태 안내를 표시한다.
+- [x] `online`/`offline` 이벤트로 연결 상태 안내를 제공한다.
+- [x] 새 service worker가 대기 상태이면 사용자가 새 버전을 적용할 수 있게 안내한다.
+- [x] 로그인·파일 업로드·다운로드·채팅 요청이 오프라인일 때 오류 메시지를 일관되게 표시한다.
 
 ### 3. 배포 및 브라우저 기반 인증 검증
 
 예상: 1일
 
-- [ ] 스테이징 또는 운영 배포에서 manifest와 service worker의 응답 헤더/경로를 확인한다.
-- [ ] 일반 Android 브라우저에서 Google 로그인을 실행하고 원래 URL로 복귀하는지 확인한다.
-- [ ] GitHub 로그인도 같은 방식으로 확인한다.
-- [ ] 새로고침 및 앱 재실행 후 `/api/auth/me`로 세션이 복구되는지 확인한다.
-- [ ] 인증 실패 시 CORS 응답의 `Access-Control-Allow-Origin`이 요청 Origin과 정확히 일치하는지 점검한다.
+- [x] 운영 배포에서 manifest와 service worker의 응답 헤더/경로를 확인한다.
+- [x] Android Chrome PWA에서 Google 로그인을 실행하고 원래 URL로 복귀하는지 확인한다.
+- [x] GitHub 로그인도 같은 방식으로 확인한다.
+- [x] 새로고침 및 앱 재실행 후 `/api/auth/me`로 세션이 복구되는지 확인한다.
+- [x] 인증 실패 응답에서 `Access-Control-Allow-Origin: https://deepria.cloud`와 credentials 허용을 확인한다.
 
 ### 4. WebView 전용 프론트엔드 코드 제거
 
@@ -89,13 +117,14 @@
 
 예상: 1~2일
 
-- [ ] Android Chrome에서 설치 프롬프트 또는 메뉴의 "앱 설치"가 보인다.
-- [ ] 설치 후 주소창 없이 standalone 창으로 열린다.
+- [x] Android Chrome에서 설치 메뉴의 "앱 설치"가 보인다.
+- [x] 꽃 아이콘으로 설치되고 주소창 없이 standalone 창으로 열린다.
 - [ ] Samsung Internet에서도 설치 및 실행된다.
-- [ ] 설치된 앱의 첫 실행, 재실행, 업데이트 후 실행을 확인한다.
-- [ ] Google/GitHub 로그인, 로그아웃, 세션 만료 후 refresh를 확인한다.
-- [ ] 파일 선택, 소형 파일 업로드, multipart 업로드, 다운로드를 확인한다.
-- [ ] 메모, 할 일, 채팅, 계정, 직접 URL 접근 및 새로고침을 확인한다.
+- [x] 설치된 앱의 첫 실행과 재실행을 확인한다.
+- [ ] 새 service worker 업데이트 적용 후 실행을 확인한다.
+- [x] Google/GitHub 로그인, 로그아웃, 세션 복구를 확인한다.
+- [x] 파일 선택, 소형 파일 업로드, multipart 업로드, 다운로드를 확인한다.
+- [x] 메모, 할 일, 채팅, 계정, 직접 URL 접근 및 새로고침을 확인한다.
 - [ ] 비행기 모드에서 캐시된 앱 셸과 오프라인 안내가 표시되는지 확인한다.
 - [ ] 실제 운영 로그에서 CORS/OAuth/파일 오류가 없는지 확인한다.
 
