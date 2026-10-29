@@ -5,6 +5,12 @@ import { useAppStore } from "@/store/app";
 
 // 라우트 정의
 const routes = [
+    ...(import.meta.env.DEV ? [{
+        path: "/design-preview",
+        name: "DesignPreview",
+        component: () => import("@/pages/Design/DesignPreview.vue"),
+        meta: { public: true },
+    }] : []),
     {
         path: "/login",
         name: "Login",

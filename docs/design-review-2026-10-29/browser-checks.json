@@ -1,0 +1,242 @@
+{
+  "errors": [],
+  "apiRequests": [],
+  "results": [
+    {
+      "file": "editorial-home-desktop.png",
+      "overflow": false
+    },
+    {
+      "file": "editorial-home-mobile.png",
+      "overflow": false
+    },
+    {
+      "file": "studio-home-desktop.png",
+      "overflow": false
+    },
+    {
+      "file": "studio-home-mobile.png",
+      "overflow": false
+    },
+    {
+      "file": "console-home-desktop.png",
+      "overflow": false
+    },
+    {
+      "file": "console-home-mobile.png",
+      "overflow": false
+    },
+    {
+      "file": "editorial-home-light-desktop.png",
+      "overflow": false
+    },
+    {
+      "file": "editorial-home-light-mobile.png",
+      "overflow": false
+    },
+    {
+      "file": "editorial-home-dark-desktop.png",
+      "overflow": false
+    },
+    {
+      "file": "editorial-home-dark-mobile.png",
+      "overflow": false
+    },
+    {
+      "file": "editorial-memo-light-desktop.png",
+      "overflow": false
+    },
+    {
+      "file": "editorial-memo-light-mobile.png",
+      "overflow": false
+    },
+    {
+      "file": "editorial-memo-dark-desktop.png",
+      "overflow": false
+    },
+    {
+      "file": "editorial-memo-dark-mobile.png",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "direction": "editorial",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "direction": "editorial",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "direction": "studio",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "direction": "studio",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "direction": "console",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "direction": "console",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 430,
+      "direction": "editorial",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 430,
+      "direction": "editorial",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 430,
+      "direction": "studio",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 430,
+      "direction": "studio",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 430,
+      "direction": "console",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 430,
+      "direction": "console",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "direction": "editorial",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "direction": "editorial",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "direction": "studio",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "direction": "studio",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "direction": "console",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "direction": "console",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "direction": "editorial",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "direction": "editorial",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "direction": "studio",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "direction": "studio",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "direction": "console",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "direction": "console",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "direction": "editorial",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "direction": "editorial",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "direction": "studio",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "direction": "studio",
+      "screen": "memo",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "direction": "console",
+      "screen": "home",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "direction": "console",
+      "screen": "memo",
+      "overflow": false
+    }
+  ]
+}
