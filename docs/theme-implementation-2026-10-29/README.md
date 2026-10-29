@@ -60,4 +60,6 @@ API 연결 없이 시각 방향만 비교하려면 기존 [개발용 프리뷰](
 - [Ant Design 연결](../../src/App.vue)
 - [팔레트와 저장 검증](../../tests/appearance.test.js)
 
-작업 브랜치는 `codex/design-renewal-20261029`다. `main`과 `codex/backup-main-20261029`는 보존한다. 이번 작업은 코드와 빌드 산출물에 적용했으며 운영 서버 배포는 수행하지 않았다.
+구현 커밋 `e6f5a91`은 `codex/design-renewal-20261029`에서 작성한 뒤 main에 병합했고 원격 main으로 push했다. 2026년 10월 29일 원격 main의 동일 커밋을 확인했다. 원본 main은 로컬 `codex/backup-main-20261029`의 `88f9f78`에 보존되어 있다. 운영 배포 완료 여부는 별도 확인 대상이다.
+
+후속 작업은 [현행 리뉴얼 계획서](../ui-ux-improvement-plan-2026-10-29.md)에서 관리한다. 남아 있는 사용자 노출 영어의 한글화는 [한글화 실행 계획](../korean-localization-plan-2026-10-29.md)의 LOC-01~LOC-05로 등록했다.
