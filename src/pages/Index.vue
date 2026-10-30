@@ -6,13 +6,13 @@
     </div>
     <header class="home-heading">
       <div>
-        <p class="eyebrow">나의 생각을 위한 공간</p>
+        <p class="eyebrow">{{ homeCopy.eyebrow }}</p>
         <h1>
-          좋은 생각이<br /><span>머무는 곳.</span><i aria-hidden="true">✳</i>
+          {{ homeCopy.first }}<br /><span>{{ homeCopy.second }}</span
+          ><i aria-hidden="true">✳</i>
         </h1>
         <p class="home-description">
-          기록하고, 정리하고, 이어가세요.<br class="mobile-break" />
-          오늘의 가능성은 여기서 시작됩니다.
+          {{ homeCopy.description }}
         </p>
       </div>
       <router-link to="/memo/edit" class="new-memo"
@@ -162,6 +162,32 @@ import { normalizeMemoTimestamp } from "@/features/memo/lib/memoModel";
 import { useWorkProtection } from "@/shared/composables/useWorkProtection";
 import { useAppStore } from "@/store/app";
 const app = useAppStore();
+const homeCopy = computed(
+  () =>
+    ({
+      editorial: {
+        eyebrow: "나의 생각을 위한 공간",
+        first: "좋은 생각이",
+        second: "머무는 곳.",
+        description:
+          "기록하고, 정리하고, 이어가세요. 오늘의 가능성은 여기서 시작됩니다.",
+      },
+      studio: {
+        eyebrow: "생각에서 시작하는 새로운 장면",
+        first: "흩어진 생각을",
+        second: "대담하게.",
+        description:
+          "작은 아이디어도 크게 펼쳐보세요. 나만의 작업, 나만의 방식으로.",
+      },
+      console: {
+        eyebrow: "나의 작업 공간 / 오늘의 시작",
+        first: "오늘의 작업을",
+        second: "한눈에.",
+        description:
+          "기록과 파일, 할 일과 대화를 연결하고 지금 필요한 작업에 집중하세요.",
+      },
+    })[app.design],
+);
 const { activeSlide } = useDashboardGallery();
 const {
   clipboardText,

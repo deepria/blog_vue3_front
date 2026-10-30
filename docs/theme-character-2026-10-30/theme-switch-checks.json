@@ -1,0 +1,54 @@
+{
+  "checks": [
+    {
+      "design": "editorial",
+      "mode": "light",
+      "storedDesign": "editorial",
+      "storedMode": "light",
+      "heading": "\"Iowan Old Style\", \"Palatino Linotype\", \"Nanum Myeongjo\", AppleMyungjo, Batang, serif",
+      "navWidth": 236
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "storedDesign": "editorial",
+      "storedMode": "dark",
+      "heading": "\"Iowan Old Style\", \"Palatino Linotype\", \"Nanum Myeongjo\", AppleMyungjo, Batang, serif",
+      "navWidth": 236
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "storedDesign": "studio",
+      "storedMode": "light",
+      "heading": "\"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "navWidth": 248
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "storedDesign": "studio",
+      "storedMode": "dark",
+      "heading": "\"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "navWidth": 248
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "storedDesign": "console",
+      "storedMode": "light",
+      "heading": "\"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "navWidth": 208
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "storedDesign": "console",
+      "storedMode": "dark",
+      "heading": "\"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "navWidth": 208
+    }
+  ],
+  "errors": [],
+  "fixtureOnly": true
+}

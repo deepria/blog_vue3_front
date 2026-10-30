@@ -1,0 +1,616 @@
+/* Shared behavior, three distinct visual languages. Keep overrides scoped to
+   the design attribute so switching a theme never carries geometry forward. */
+:root[data-design][data-theme] .nav-index {
+  display: none;
+}
+:root[data-design][data-theme] .home-heading h1,
+:root[data-design][data-theme] .page-shell h1,
+:root[data-design][data-theme] .login-copy h1 {
+  font-family: var(--font-heading);
+}
+
+:root[data-design][data-theme] .home-description {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* A — a quiet, typeset journal: paper, serif titles and open composition. */
+:root[data-design="editorial"][data-theme] {
+  --nav-width: 236px;
+  --max-width: 1240px;
+}
+:root[data-design="editorial"][data-theme] .navigation-pc {
+  padding-top: 42px;
+}
+:root[data-design="editorial"][data-theme] .brand {
+  font-family: var(--font-heading);
+  font-weight: 500;
+}
+:root[data-design="editorial"][data-theme] .nav-menu {
+  gap: 9px;
+}
+:root[data-design="editorial"][data-theme] .navigation-pc .nav-item {
+  border-radius: 0;
+  padding-left: 17px;
+  border-left: 2px solid transparent;
+}
+:root[data-design="editorial"][data-theme] .navigation-pc .nav-item.active {
+  border-left-color: var(--color-primary);
+  background: transparent;
+}
+:root[data-design="editorial"][data-theme] .navigation-pc .nav-item.active i {
+  width: 18px;
+  height: 1px;
+  border-radius: 0;
+}
+:root[data-design="editorial"][data-theme] .app-topbar {
+  background: var(--color-bg-base);
+  border-bottom-style: double;
+  border-bottom-width: 3px;
+}
+:root[data-design="editorial"][data-theme] .home-page {
+  max-width: 1240px;
+  padding-top: 36px;
+}
+:root[data-design="editorial"][data-theme] .home-meta {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border-strong);
+}
+:root[data-design="editorial"][data-theme] .home-heading {
+  padding-top: 42px;
+  padding-bottom: 42px;
+}
+:root[data-design="editorial"][data-theme] .home-heading h1 {
+  font-size: clamp(42px, 4.5vw, 68px);
+  font-weight: 400;
+  letter-spacing: -2px;
+  line-height: 1.25;
+}
+:root[data-design="editorial"][data-theme] .home-heading h1 > i {
+  font-size: 32px;
+  vertical-align: middle;
+}
+:root[data-design="editorial"][data-theme] .home-description {
+  max-width: 390px;
+}
+:root[data-design="editorial"][data-theme] .new-memo {
+  border-radius: 100px;
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
+:root[data-design="editorial"][data-theme] .new-memo:hover {
+  background: var(--color-primary);
+  color: var(--text-inverse);
+}
+:root[data-design="editorial"][data-theme] .home-hero {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.85fr);
+  gap: 28px;
+}
+:root[data-design="editorial"][data-theme] .clipboard-shell {
+  box-shadow: 0 10px 32px #302d2906;
+}
+:root[data-design="editorial"][data-theme] .capture-heading h2,
+:root[data-design="editorial"][data-theme] .recent-heading h2,
+:root[data-design="editorial"][data-theme] .preview-header h2,
+:root[data-design="editorial"][data-theme] .recent-note h3,
+:root[data-design="editorial"][data-theme] .empty-copy h2 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  line-height: 1.5;
+}
+:root[data-design="editorial"][data-theme] .recent-section {
+  margin-top: 46px;
+}
+:root[data-design="editorial"][data-theme] .recent-grid {
+  gap: 28px;
+}
+:root[data-design="editorial"][data-theme] .recent-note {
+  border-top-color: var(--color-border-strong);
+  padding-top: 24px;
+}
+:root[data-design="editorial"][data-theme] .page-shell-header {
+  border-bottom: 3px double var(--color-border-strong);
+  padding-bottom: 30px;
+  margin-bottom: 30px;
+}
+:root[data-design="editorial"][data-theme] .page-shell h1 {
+  font-weight: 400;
+  font-size: clamp(28px, 3.2vw, 40px);
+  letter-spacing: -1px;
+}
+:root[data-design="editorial"][data-theme] .preview-body,
+:root[data-design="editorial"][data-theme] .reader-preview-body {
+  padding: 32px;
+}
+:root[data-design="editorial"][data-theme] .task-group .group-header {
+  border-bottom: 1px solid var(--color-border);
+}
+:root[data-design="editorial"][data-theme] .message-content {
+  line-height: 1.9;
+}
+:root[data-design="editorial"][data-theme] .navigation-mobile .nav-item {
+  background: transparent;
+}
+:root[data-design="editorial"][data-theme]
+  .navigation-mobile
+  .nav-item.active::before {
+  width: 24px;
+  height: 2px;
+}
+
+/* B — a graphic studio: poster hierarchy, lime accents and offset edges. */
+:root[data-design="studio"][data-theme] {
+  --nav-width: 248px;
+  --max-width: 1360px;
+}
+:root[data-design="studio"][data-theme] .navigation-pc {
+  border-right: 0;
+  padding: 30px 16px 22px;
+}
+:root[data-design="studio"][data-theme] .brand {
+  padding: 0 10px 26px;
+  border-bottom: 2px solid #d5ed7259;
+  letter-spacing: -1.5px;
+}
+:root[data-design="studio"][data-theme] .brand-symbol {
+  font-size: 48px;
+}
+:root[data-design="studio"][data-theme] .nav-caption {
+  margin-top: 28px;
+}
+:root[data-design="studio"][data-theme] .navigation-pc .nav-item {
+  min-height: 50px;
+  padding-inline: 16px;
+  border-radius: 0;
+  font-size: 15px;
+  font-weight: 750;
+}
+:root[data-design="studio"][data-theme] .navigation-pc .nav-item.active i {
+  width: 12px;
+  height: 12px;
+  border-radius: 0;
+  transform: rotate(-12deg);
+}
+:root[data-design="studio"][data-theme] .sidebar-note {
+  border-top: 1px solid #d5ed7240;
+  margin-top: auto;
+  padding-top: 26px;
+}
+:root[data-design="studio"][data-theme] .sidebar-note > span {
+  font-size: 62px;
+  line-height: 1;
+}
+:root[data-design="studio"][data-theme] .app-topbar {
+  border-bottom: 2px solid var(--color-text-primary);
+  background: var(--color-bg-surface);
+}
+:root[data-design="studio"][data-theme] .home-meta {
+  font-weight: 700;
+}
+:root[data-design="studio"][data-theme] .home-heading h1 {
+  font-size: clamp(44px, 5vw, 76px);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -3px;
+}
+:root[data-design="studio"][data-theme] .home-heading h1 > span {
+  color: var(--color-primary);
+}
+:root[data-design="studio"][data-theme] .home-heading h1 > i {
+  display: inline-block;
+  color: var(--color-primary);
+  font-size: 0.8em;
+  transform: rotate(-12deg);
+}
+:root[data-design="studio"][data-theme] .home-description {
+  max-width: 400px;
+  font-weight: 550;
+}
+:root[data-design="studio"][data-theme] .new-memo {
+  min-height: 50px;
+  border: 2px solid var(--color-text-primary);
+  box-shadow: var(--theme-shadow);
+  font-weight: 750;
+}
+:root[data-design="studio"][data-theme] .home-hero {
+  border: 2px solid var(--color-text-primary);
+  box-shadow: var(--theme-shadow);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+:root[data-design="studio"][data-theme] .home-visual {
+  grid-column: 1;
+  grid-row: 1;
+}
+:root[data-design="studio"][data-theme] .clipboard-shell {
+  grid-column: 2;
+  grid-row: 1;
+  border-right: 0;
+  border-left: 2px solid var(--color-text-primary);
+}
+:root[data-design="studio"][data-theme] .home-visual > footer {
+  background: var(--color-primary);
+  color: var(--text-inverse);
+  border-top: 2px solid var(--color-text-primary);
+  font-weight: 650;
+}
+:root[data-design="studio"][data-theme] .home-visual > footer a {
+  color: inherit;
+}
+:root[data-design="studio"][data-theme] .capture-heading h2,
+:root[data-design="studio"][data-theme] .recent-heading h2 {
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+:root[data-design="studio"][data-theme] .recent-grid {
+  gap: 12px;
+}
+:root[data-design="studio"][data-theme] .recent-note {
+  border: 2px solid var(--color-border-strong);
+  background: var(--color-bg-surface);
+  padding: 20px;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+:root[data-design="studio"][data-theme] .recent-note:hover {
+  border-color: var(--color-primary);
+  box-shadow: 3px 3px 0 var(--color-primary);
+}
+:root[data-design="studio"][data-theme] .recent-note h3 {
+  font-size: 19px;
+  font-weight: 800;
+}
+:root[data-design="studio"][data-theme] .page-shell h1 {
+  font-size: clamp(30px, 3.6vw, 44px);
+  font-weight: 900;
+}
+:root[data-design="studio"][data-theme] .page-shell-eyebrow {
+  display: inline-block;
+  padding: 4px 8px;
+  background: var(--color-text-primary);
+  color: var(--color-bg-base);
+  font-weight: 750;
+  letter-spacing: 0.05em;
+}
+:root[data-design="studio"][data-theme]
+  :is(
+    .memo-list-panel,
+    .preview-panel,
+    .task-group,
+    .appearance-settings,
+    .login-panel,
+    .chat-container
+  ) {
+  border: 2px solid var(--color-border-strong);
+  box-shadow: var(--theme-shadow);
+}
+:root[data-design="studio"][data-theme] .group-header,
+:root[data-design="studio"][data-theme] .chat-header {
+  background: var(--color-bg-panel);
+  border-bottom: 2px solid var(--color-border-strong);
+}
+:root[data-design="studio"][data-theme] .memo-row-copy strong,
+:root[data-design="studio"][data-theme] .group-header-name {
+  font-weight: 800;
+}
+:root[data-design="studio"][data-theme] .base-card {
+  border-color: var(--color-border-strong);
+}
+:root[data-design="studio"][data-theme] .navigation-mobile {
+  background: #242728;
+  border-top: 2px solid #d5ed72;
+}
+:root[data-design="studio"][data-theme] .navigation-mobile .nav-item {
+  color: #c0c7b9;
+  border-radius: 0;
+}
+:root[data-design="studio"][data-theme] .navigation-mobile .nav-item.active {
+  background: #d5ed72;
+  color: #242728;
+}
+:root[data-design="studio"][data-theme]
+  .navigation-mobile
+  .nav-item.active::before {
+  display: none;
+}
+
+/* C — a precise console: aligned rails, subtle grid and compact metadata. */
+:root[data-design="console"][data-theme] {
+  --nav-width: 208px;
+  --header-height: 56px;
+  --max-width: 1440px;
+}
+:root[data-design="console"][data-theme] .content-area {
+  background-image:
+    linear-gradient(var(--color-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-blend-mode: soft-light;
+  background-color: var(--color-bg-base);
+}
+:root[data-design="console"][data-theme] .navigation-pc {
+  padding: 24px 12px 18px;
+}
+:root[data-design="console"][data-theme] .brand {
+  font-size: 22px;
+  gap: 6px;
+  letter-spacing: -1px;
+}
+:root[data-design="console"][data-theme] .brand-symbol {
+  font-size: 28px;
+}
+:root[data-design="console"][data-theme] .nav-caption {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  margin: 32px 10px 12px;
+}
+:root[data-design="console"][data-theme] .nav-menu {
+  gap: 2px;
+}
+:root[data-design="console"][data-theme] .navigation-pc .nav-item {
+  gap: 9px;
+  min-height: 44px;
+  padding-inline: 9px;
+  border: 1px solid transparent;
+  font-size: 13px;
+}
+:root[data-design="console"][data-theme] .nav-index {
+  display: inline;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  opacity: 0.8;
+}
+:root[data-design="console"][data-theme] .navigation-pc .nav-item.active {
+  border-color: var(--color-border-strong);
+}
+:root[data-design="console"][data-theme] .sidebar-note {
+  border-top: 1px dashed var(--color-border);
+  padding: 20px 10px;
+}
+:root[data-design="console"][data-theme] .sidebar-note > span {
+  display: none;
+}
+:root[data-design="console"][data-theme] .sidebar-note p {
+  font-size: 13px;
+  line-height: 1.9;
+}
+:root[data-design="console"][data-theme] .app-topbar {
+  background: var(--color-bg-panel);
+  padding-inline: 28px;
+}
+:root[data-design="console"][data-theme] .desktop-breadcrumb,
+:root[data-design="console"][data-theme] .home-meta,
+:root[data-design="console"][data-theme] .eyebrow,
+:root[data-design="console"][data-theme] .note-bottom,
+:root[data-design="console"][data-theme] .message-meta,
+:root[data-design="console"][data-theme] .group-header-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+:root[data-design="console"][data-theme] .home-page,
+:root[data-design="console"][data-theme] .page-shell {
+  padding: 26px 28px 40px;
+}
+:root[data-design="console"][data-theme] .home-heading {
+  padding: 24px 0;
+  margin-bottom: 18px;
+}
+:root[data-design="console"][data-theme] .home-heading h1 {
+  font-size: clamp(32px, 3vw, 44px);
+  font-weight: 600;
+  letter-spacing: -1.2px;
+}
+:root[data-design="console"][data-theme] .home-heading h1 br {
+  display: none;
+}
+:root[data-design="console"][data-theme] .home-heading h1 > span {
+  margin-left: 0.25em;
+}
+:root[data-design="console"][data-theme] .home-heading h1 > i {
+  display: none;
+}
+:root[data-design="console"][data-theme] .home-description {
+  margin-top: 12px;
+  max-width: 500px;
+}
+:root[data-design="console"][data-theme] .new-memo {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border-strong);
+}
+:root[data-design="console"][data-theme] .home-hero {
+  gap: 12px;
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+}
+:root[data-design="console"][data-theme] .clipboard-shell {
+  padding: 20px 22px 16px;
+  border-top: 2px solid var(--color-primary);
+}
+:root[data-design="console"][data-theme] .capture-heading h2 {
+  font-size: 17px;
+  font-weight: 600;
+}
+:root[data-design="console"][data-theme] .clipboard-textarea {
+  min-height: 155px;
+  font-size: 14px;
+}
+:root[data-design="console"][data-theme] .home-visual > footer {
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+}
+:root[data-design="console"][data-theme] .recent-section {
+  margin-top: 26px;
+}
+:root[data-design="console"][data-theme] .recent-heading h2 {
+  font-size: 19px;
+}
+:root[data-design="console"][data-theme] .recent-grid {
+  grid-template-columns: 1fr;
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+:root[data-design="console"][data-theme] .recent-note {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr) minmax(180px, 0.7fr);
+  align-items: center;
+  gap: 20px;
+  padding: 16px 20px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+}
+:root[data-design="console"][data-theme] .recent-note:last-child {
+  border-bottom: 0;
+}
+:root[data-design="console"][data-theme] .recent-note:hover {
+  background: var(--color-bg-panel);
+}
+:root[data-design="console"][data-theme] .recent-note h3 {
+  font-size: 14px;
+  margin: 0;
+}
+:root[data-design="console"][data-theme] .note-type > span:last-child {
+  display: none;
+}
+:root[data-design="console"][data-theme] .page-shell-header {
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+}
+:root[data-design="console"][data-theme] .page-shell h1 {
+  font-size: 28px;
+  font-weight: 600;
+}
+:root[data-design="console"][data-theme] .page-shell-body {
+  gap: 14px;
+}
+:root[data-design="console"][data-theme] .memo-layout {
+  gap: 0;
+}
+:root[data-design="console"][data-theme] .memo-list-panel {
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+:root[data-design="console"][data-theme] .preview-panel {
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+:root[data-design="console"][data-theme] .memo-list {
+  gap: 0;
+  padding: 6px;
+}
+:root[data-design="console"][data-theme] .memo-row {
+  min-height: 62px;
+  border-radius: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+:root[data-design="console"][data-theme] .preview-header,
+:root[data-design="console"][data-theme] .group-header,
+:root[data-design="console"][data-theme] .base-card-header {
+  background: var(--color-bg-panel);
+}
+:root[data-design="console"][data-theme] .prompt-card {
+  border-style: dashed;
+}
+:root[data-design="console"][data-theme] .navigation-mobile {
+  background: var(--nav-bg);
+  border-top: 1px solid var(--color-border-strong);
+}
+:root[data-design="console"][data-theme] .navigation-mobile .nav-item {
+  border: 1px solid transparent;
+}
+:root[data-design="console"][data-theme] .navigation-mobile .nav-item.active {
+  border-color: var(--color-border-strong);
+  background: var(--color-primary-soft);
+}
+:root[data-design="console"][data-theme]
+  .navigation-mobile
+  .nav-item.active::before {
+  width: 5px;
+  height: 5px;
+  border-radius: 0;
+}
+
+@media (max-width: 1024px) {
+  :root[data-design="console"][data-theme] .app-topbar {
+    padding-inline: 18px;
+  }
+}
+@media (max-width: 720px) {
+  :root[data-design="editorial"][data-theme] .home-page,
+  :root[data-design="console"][data-theme] .home-page,
+  :root[data-design="console"][data-theme] .page-shell {
+    padding: 24px 18px 32px;
+  }
+  :root[data-design="editorial"][data-theme] .home-heading {
+    padding-block: 28px;
+  }
+  :root[data-design="editorial"][data-theme] .home-heading h1 {
+    font-size: 43px;
+  }
+  :root[data-design="editorial"][data-theme] .home-hero,
+  :root[data-design="studio"][data-theme] .home-hero,
+  :root[data-design="console"][data-theme] .home-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :root[data-design="editorial"][data-theme] .home-hero {
+    gap: 20px;
+  }
+  :root[data-design="editorial"][data-theme] .recent-grid {
+    gap: 0;
+  }
+  :root[data-design="editorial"][data-theme] .preview-body {
+    padding: 24px 20px;
+  }
+  :root[data-design="studio"][data-theme] .home-heading h1 {
+    font-size: clamp(39px, 10vw, 56px);
+    letter-spacing: -2px;
+  }
+  :root[data-design="studio"][data-theme] .clipboard-shell {
+    grid-column: auto;
+    grid-row: auto;
+    border-left: 0;
+  }
+  :root[data-design="studio"][data-theme] .home-visual {
+    grid-column: auto;
+    grid-row: auto;
+    border-top: 2px solid var(--color-text-primary);
+  }
+  :root[data-design="studio"][data-theme] .recent-grid {
+    gap: 12px;
+  }
+  :root[data-design="studio"][data-theme] .page-shell h1 {
+    font-size: 32px;
+  }
+  :root[data-design="console"][data-theme] .home-heading h1 {
+    font-size: 32px;
+  }
+  :root[data-design="console"][data-theme] .home-heading h1 br {
+    display: block;
+  }
+  :root[data-design="console"][data-theme] .home-heading h1 > span {
+    margin-left: 0;
+  }
+  :root[data-design="console"][data-theme] .recent-note {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    padding: 16px;
+  }
+  :root[data-design="console"][data-theme] .recent-note .note-type {
+    display: none;
+  }
+  :root[data-design="console"][data-theme] .page-shell-header {
+    padding: 16px;
+  }
+  :root[data-design="console"][data-theme] .page-shell h1 {
+    font-size: 26px;
+  }
+  :root[data-design="console"][data-theme] .memo-list-panel,
+  :root[data-design="console"][data-theme] .preview-panel {
+    border-radius: var(--radius-md);
+  }
+}

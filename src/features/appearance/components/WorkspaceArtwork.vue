@@ -5,7 +5,8 @@
     ><span class="art-orbit orbit-two"></span
     ><span class="art-hill hill-back"></span
     ><span class="art-hill hill-front"></span
-    ><span class="studio-type">생각의<br />여백.</span
+    ><span class="studio-type">생각을<br />펼치다.</span
+    ><span class="studio-star">✳</span><span class="studio-disc"></span
     ><span class="console-type"
       >작업 공간 / 나의 기록<br />가능성을 펼치는 공간<br />─────────────────<br />생각
       → 기록 → 완성</span
@@ -76,7 +77,9 @@
   left: 30%;
 }
 .studio-type,
-.console-type {
+.console-type,
+.studio-star,
+.studio-disc {
   display: none;
 }
 [data-design="studio"] .workspace-artwork {
@@ -92,11 +95,47 @@
   display: block;
   position: absolute;
   top: 55px;
-  left: 30px;
+  left: 26px;
+  z-index: 2;
   color: #292c24;
-  font: 850 78px/1.1 var(--font-family);
+  font: 900 clamp(58px, 5vw, 82px)/1.08 var(--font-family);
   letter-spacing: -4px;
-  transform: rotate(-7deg);
+  transform: rotate(-6deg);
+}
+[data-design="studio"] .studio-star {
+  display: block;
+  position: absolute;
+  right: -12px;
+  top: 0;
+  font-size: 150px;
+  line-height: 1;
+  color: #5142dc;
+  transform: rotate(12deg);
+}
+[data-design="studio"] .studio-disc {
+  display: block;
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  right: -35px;
+  bottom: -45px;
+  border: 22px solid #292c24;
+  border-radius: 50%;
+}
+[data-theme="dark"][data-design="editorial"] .workspace-artwork {
+  background: linear-gradient(145deg, #555448, #333e33 70%);
+}
+[data-theme="dark"][data-design="editorial"] .art-label {
+  color: #ebe5d1;
+}
+[data-theme="dark"][data-design="editorial"] .art-sun {
+  background: #d8c8a9;
+}
+[data-theme="dark"][data-design="editorial"] .hill-back {
+  background: linear-gradient(120deg, #68755f, #465b4c);
+}
+[data-theme="dark"][data-design="editorial"] .hill-front {
+  background: linear-gradient(125deg, #3b5545, #1c352d);
 }
 [data-design="console"] .workspace-artwork {
   background:

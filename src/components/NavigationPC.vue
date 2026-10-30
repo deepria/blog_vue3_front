@@ -9,19 +9,22 @@
     <p class="nav-caption">내 작업 공간 <span>01</span></p>
     <nav class="nav-menu" aria-label="작업 공간">
       <router-link
-        v-for="item in workspaceItems"
+        v-for="(item, index) in workspaceItems"
         :key="item.to"
         :to="item.to"
         class="nav-item"
         active-class="active"
+        ><span class="nav-index" aria-hidden="true">{{
+          String(index + 1).padStart(2, "0")
+        }}</span
         ><component :is="item.icon" /><span>{{ item.label }}</span
         ><i></i
       ></router-link>
     </nav>
     <div class="sidebar-note">
       <span aria-hidden="true">✳</span>
-      <p>생각을 모으고,<br />가능성을 펼치는 곳.</p>
-      <small>작은 여백에서 시작하는 가능성.</small>
+      <p>{{ sidebarCopy[0] }}<br />{{ sidebarCopy[1] }}</p>
+      <small>{{ sidebarCopy[2] }}</small>
     </div>
     <footer class="footer-area">
       <router-link to="/account" class="settings-link"
@@ -63,6 +66,22 @@ import { designOptions } from "@/features/appearance/lib/themes";
 import { useAppStore } from "@/store/app";
 const app = useAppStore();
 const router = useRouter();
+const sidebarCopy = computed(
+  () =>
+    ({
+      editorial: [
+        "생각을 모으고,",
+        "가능성을 펼치는 곳.",
+        "작은 여백에서 시작하는 가능성.",
+      ],
+      studio: [
+        "생각은 자유롭게,",
+        "표현은 대담하게.",
+        "나만의 다음 장면을 만드는 곳.",
+      ],
+      console: ["흐름을 연결하고,", "작업에 집중하세요.", "기록 · 정리 · 실행"],
+    })[app.design],
+);
 const workspaceItems = navigationItems.filter((item) => item.to !== "/account");
 const isDarkMode = computed(() => app.theme === "dark");
 const initial = computed(() => (app.user?.name || "d").charAt(0));

@@ -6,21 +6,21 @@ export const designOptions = [
     id: "editorial",
     code: "A",
     name: "편집 디자인",
-    description: "따뜻한 여백과 정교한 타이포그래피",
-    colors: ["#f5f4f0", "#3759d7", "#8d9b80"],
+    description: "종이의 온기, 명조 제목과 넉넉한 여백",
+    colors: ["#f7f3eb", "#8e4b36", "#8d9b80"],
   },
   {
     id: "studio",
     code: "B",
     name: "그래픽 스튜디오",
-    description: "선명한 대비와 대담한 그래픽",
+    description: "라임과 보라, 굵은 선과 포스터 같은 구성",
     colors: ["#242728", "#d5ed72", "#5142dc"],
   },
   {
     id: "console",
     code: "C",
     name: "작업 콘솔",
-    description: "정밀한 구성과 차분한 몰입감",
+    description: "정밀한 격자, 민트 포인트와 밀도 높은 패널",
     colors: ["#10171c", "#8cd8c3", "#2c3c43"],
   },
 ];
@@ -32,44 +32,44 @@ export const normalizeMode = (value) => (value === "dark" ? "dark" : "light");
 const palettes = {
   editorial: {
     light: {
-      base: "#f5f4f0",
-      surface: "#ffffff",
-      panel: "#eeeee8",
-      elevated: "#ffffff",
-      ink: "#252d29",
-      secondary: "#59635c",
-      muted: "#626b61",
-      border: "#dedfd8",
-      strong: "#b9c0b4",
-      primary: "#3759d7",
-      hover: "#2945b9",
-      soft: "#e9edff",
+      base: "#f7f3eb",
+      surface: "#fffdf8",
+      panel: "#eee7da",
+      elevated: "#fffdf8",
+      ink: "#302d29",
+      secondary: "#625a50",
+      muted: "#716557",
+      border: "#ddd3c3",
+      strong: "#a79984",
+      primary: "#8e4b36",
+      hover: "#703724",
+      soft: "#f2e4d9",
       inverse: "#ffffff",
-      sidebar: "#eeeee8",
-      navInk: "#59635c",
-      navSelected: "#ffffff",
-      navAccent: "#3759d7",
-      art: "#8d9b80",
+      sidebar: "#f0e9dc",
+      navInk: "#625a50",
+      navSelected: "#fffdf8",
+      navAccent: "#8e4b36",
+      art: "#7d8c70",
     },
     dark: {
-      base: "#151b19",
-      surface: "#1d2521",
-      panel: "#26302a",
-      elevated: "#29352d",
-      ink: "#eeefe6",
-      secondary: "#cad2c8",
-      muted: "#a3afa5",
-      border: "#354039",
-      strong: "#58695b",
-      primary: "#a8b9ff",
-      hover: "#c2ceff",
-      soft: "#2c3851",
-      inverse: "#18203a",
-      sidebar: "#19211c",
-      navInk: "#b7c2b8",
-      navSelected: "#29352d",
-      navAccent: "#a8b9ff",
-      art: "#9dad90",
+      base: "#1e1c19",
+      surface: "#28241f",
+      panel: "#332d26",
+      elevated: "#373027",
+      ink: "#f3ebde",
+      secondary: "#d5c9b7",
+      muted: "#b8a992",
+      border: "#484034",
+      strong: "#74654f",
+      primary: "#e5b49a",
+      hover: "#f0ccb7",
+      soft: "#47332a",
+      inverse: "#322017",
+      sidebar: "#24201b",
+      navInk: "#d5c9b7",
+      navSelected: "#373027",
+      navAccent: "#e5b49a",
+      art: "#a6b394",
     },
   },
   studio: {
@@ -164,12 +164,17 @@ export function getAppearance(design, mode) {
   const p = palettes[id][dark ? "dark" : "light"];
   const radius =
     id === "studio"
-      ? [2, 3, 4, 6]
+      ? [0, 2, 2, 2]
       : id === "console"
-        ? [3, 5, 6, 8]
-        : [5, 8, 14, 18];
+        ? [2, 3, 4, 4]
+        : [4, 6, 10, 14];
   const font =
     '"Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  const mono = '"SFMono-Regular", Consolas, "Liberation Mono", monospace';
+  const heading =
+    id === "editorial"
+      ? '"Iowan Old Style", "Palatino Linotype", "Nanum Myeongjo", "AppleMyungjo", "Batang", serif'
+      : font;
   const vars = {
     "color-bg-base": p.base,
     "color-bg-surface": p.surface,
@@ -206,6 +211,9 @@ export function getAppearance(design, mode) {
     "brand-color": id === "studio" ? "#d5ed72" : p.primary,
     "art-color": p.art,
     "font-family": font,
+    "font-heading": heading,
+    "font-mono": mono,
+    "theme-shadow": id === "studio" ? `4px 4px 0 ${p.strong}` : "none",
     "font-size-body": "15px",
     "font-size-hero": "34px",
     "radius-sm": `${radius[0]}px`,

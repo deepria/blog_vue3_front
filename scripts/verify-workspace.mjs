@@ -6,7 +6,19 @@ import { writeFile, mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 const base = process.env.REVIEW_BASE || "http://127.0.0.1:5175";
-const dir = process.cwd() + "/docs/workspace-completion-2026-10-29";
+const dir = path.resolve(
+  process.env.REVIEW_OUTPUT || "docs/workspace-completion-2026-10-29",
+);
+const widths = (process.env.REVIEW_WIDTHS || "360,768,1440")
+  .split(",")
+  .map(Number);
+assert.ok(
+  widths.length &&
+    widths.every(
+      (width) => Number.isInteger(width) && width >= 320 && width <= 3840,
+    ),
+  "REVIEW_WIDTHS must contain viewport widths from 320 to 3840",
+);
 await mkdir(dir, { recursive: true });
 const browser = await puppeteer.launch({
   executablePath:
@@ -421,7 +433,7 @@ if (process.env.REVIEW_SCOPE !== "interactions") {
     for (const mode of ["light", "dark"]) {
       await page.click(`input[name=workspace-design][value=${design}]`);
       await page.click(`input[name=workspace-mode][value=${mode}]`);
-      for (const width of [360, 768, 1440]) {
+      for (const width of widths) {
         await page.setViewport({ width, height: 1000 });
         for (const [name, path] of [
           ["home", "/"],
@@ -440,7 +452,8 @@ if (process.env.REVIEW_SCOPE !== "interactions") {
           if (
             (width === 360 &&
               (name === "home" || name === "files" || name === "editor")) ||
-            (width === 1440 && name === "home")
+            (width === 1440 &&
+              ["home", "memo", "tasks", "chat", "settings"].includes(name))
           )
             await page.screenshot({
               path: `${dir}/${design}-${mode}-${name}-${width === 360 ? "mobile" : "desktop"}.png`,

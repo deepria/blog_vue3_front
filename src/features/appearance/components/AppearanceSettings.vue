@@ -27,7 +27,11 @@
           ><span class="mini-sidebar"><i>✳</i><b></b><b></b><b></b></span
           ><span class="mini-content"
             ><span class="mini-heading">{{
-              option.id === "console" ? "공간 / 01" : "생각의 여백."
+              option.id === "console"
+                ? "작업 / 01"
+                : option.id === "studio"
+                  ? "대담하게."
+                  : "생각의 여백."
             }}</span
             ><span class="mini-panels"><i></i><i>✳</i></span
             ><span class="mini-lines"><i></i><i></i><i></i></span></span
@@ -151,10 +155,10 @@ fieldset {
   opacity: 0;
 }
 .theme-miniature {
-  --mini-bg: #f5f4f0;
-  --mini-side: #eeeee8;
-  --mini-ink: #252d29;
-  --mini-accent: #3759d7;
+  --mini-bg: #f7f3eb;
+  --mini-side: #f0e9dc;
+  --mini-ink: #302d29;
+  --mini-accent: #8e4b36;
   display: flex;
   height: 125px;
   background: var(--mini-bg);
@@ -305,6 +309,80 @@ fieldset {
   font-size: 12px;
   margin: 16px 0 0;
 }
+/* Each miniature follows its own geometry and the chosen brightness. */
+.option-editorial .theme-miniature {
+  border-radius: 7px;
+}
+.option-editorial .mini-heading {
+  font-family: "AppleMyungjo", "Batang", serif;
+  font-weight: 400;
+}
+.option-editorial .mini-panels i:last-child {
+  border-radius: 50% 50% 3px 3px;
+  background: #8d9b80;
+}
+.option-studio .theme-miniature {
+  border-radius: 0;
+  border: 2px solid #242728;
+}
+.option-studio .mini-heading {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  border-bottom: 2px solid currentColor;
+}
+.option-studio .mini-panels {
+  flex-direction: row-reverse;
+  gap: 0;
+}
+.option-studio .mini-panels i {
+  border-radius: 0;
+  border-color: #242728;
+}
+.option-studio .mini-panels i:last-child {
+  width: 48%;
+  color: #5142dc;
+  font-size: 34px;
+}
+.option-console .theme-miniature {
+  --mini-bg: #eaf0ee;
+  --mini-side: #dfe8e4;
+  --mini-ink: #203c34;
+  --mini-accent: #206753;
+  border-radius: 2px;
+}
+.option-console .mini-content {
+  background-image:
+    linear-gradient(#8fa99b30 1px, transparent 1px),
+    linear-gradient(90deg, #8fa99b30 1px, transparent 1px);
+  background-size: 10px 10px;
+}
+.option-console .mini-panels {
+  height: 30px;
+  margin-block: 8px;
+}
+.option-console .mini-lines {
+  flex-direction: column;
+}
+.option-console .mini-lines i {
+  width: 100%;
+}
+[data-theme="dark"] .option-editorial .theme-miniature {
+  --mini-bg: #1e1c19;
+  --mini-side: #332d26;
+  --mini-ink: #f3ebde;
+  --mini-accent: #e5b49a;
+}
+[data-theme="dark"] .option-studio .theme-miniature {
+  --mini-bg: #262630;
+  --mini-ink: #f4f0e8;
+}
+[data-theme="dark"] .option-console .theme-miniature {
+  --mini-bg: #10171c;
+  --mini-side: #0b1116;
+  --mini-ink: #e1edf0;
+  --mini-accent: #8cd8c3;
+}
 @media (max-width: 760px) {
   .appearance-settings {
     padding: 20px;
@@ -330,6 +408,9 @@ fieldset {
   }
   .mini-heading {
     font-size: 10px;
+  }
+  .option-studio .mini-heading {
+    font-size: 12px;
   }
   .mini-sidebar {
     padding: 10px 5px;

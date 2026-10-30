@@ -1,0 +1,78 @@
+{
+  "checks": [
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 360,
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "light",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 360,
+      "overflow": false
+    },
+    {
+      "design": "editorial",
+      "mode": "dark",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 360,
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "light",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 360,
+      "overflow": false
+    },
+    {
+      "design": "studio",
+      "mode": "dark",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 360,
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "light",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 360,
+      "overflow": false
+    },
+    {
+      "design": "console",
+      "mode": "dark",
+      "width": 390,
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "fixtureOnly": true
+}

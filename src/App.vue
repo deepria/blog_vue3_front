@@ -20,6 +20,7 @@ import { computed, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 import "@/assets/styles/global.css";
 import "@/app/styles/appearance.css";
+import "@/app/styles/theme-character.css";
 import { getAppearance } from "@/features/appearance/lib/themes";
 
 const route = useRoute();
@@ -39,7 +40,9 @@ watchEffect(() => {
     document.documentElement.style.setProperty(`--${key}`, value);
   }
   document.documentElement.style.colorScheme = app.theme;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", appearance.value.vars["color-bg-base"]);
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", appearance.value.vars["color-bg-base"]);
 });
 </script>
 
