@@ -228,13 +228,19 @@
         </div>
       </template>
     </section>
+    <section class="legal-section" aria-labelledby="legal-title">
+      <h2 id="legal-title">서비스 안내</h2>
+      <RouterLink class="legal-link" :to="{ name: 'PrivacyPolicy' }">
+        개인정보처리방침 <span aria-hidden="true">↗</span>
+      </RouterLink>
+    </section>
   </PageShell>
 </template>
 
 <script setup>
 import { App, message } from "ant-design-vue";
 import { useAppStore } from "@/store/app";
-import { useRouter } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import { computed, onMounted, ref } from "vue";
 import { BulbFilled, BulbOutlined } from "@ant-design/icons-vue";
 import { authApi } from "@/features/auth/api/authApi";
@@ -394,6 +400,34 @@ onMounted(loadPreferences);
 </script>
 
 <style scoped>
+.legal-section {
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-surface);
+}
+
+.legal-section h2 {
+  margin: 0 0 12px;
+  color: var(--color-text-primary);
+  font-size: 18px;
+}
+
+.legal-link {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.legal-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+}
+
 .account-page {
   display: block;
 }

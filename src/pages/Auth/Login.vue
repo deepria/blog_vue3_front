@@ -17,13 +17,25 @@
           GitHub으로 계속하기
         </a-button>
       </div>
+      <p class="privacy-link">
+        <RouterLink
+          :to="{
+            name: 'PrivacyPolicy',
+            query: route.query.returnTo
+              ? { returnTo: route.query.returnTo }
+              : {},
+          }"
+        >
+          개인정보처리방침
+        </RouterLink>
+      </p>
     </div>
   </section>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { RouterLink, useRoute, useRouter } from "vue-router";
 import { message } from "ant-design-vue";
 import { authApi } from "@/features/auth/api/authApi";
 import { useAppStore } from "@/store/app";
@@ -183,6 +195,22 @@ h2 {
 .provider-actions {
   display: grid;
   gap: 12px;
+}
+
+.privacy-link {
+  margin: 20px 0 0;
+  text-align: center;
+  font-size: 13px;
+}
+
+.privacy-link a {
+  color: var(--color-text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.privacy-link a:hover {
+  color: var(--color-primary);
 }
 
 .auth-error {
