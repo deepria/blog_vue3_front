@@ -59,7 +59,15 @@
         }}</span>
       </button>
       <div v-if="app.user" class="user-area">
-        <span class="user-avatar">{{ initial }}</span
+        <span class="user-avatar">
+          <img
+            v-if="app.user.avatar_url && !avatarFailed"
+            :src="app.user.avatar_url"
+            alt=""
+            referrerpolicy="no-referrer"
+            @error="avatarFailed = true"
+          />
+          <template v-else>{{ initial }}</template> </span
         ><router-link to="/account"
           ><strong>{{ app.user.name }}</strong
           ><small>개인 작업 공간</small></router-link
@@ -71,7 +79,7 @@
   </aside>
 </template>
 <script setup>
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import {
   MenuFoldOutlined,
@@ -87,6 +95,13 @@ import { useAppStore } from "@/store/app";
 const collapsed = defineModel("collapsed", { type: Boolean, default: false });
 const app = useAppStore();
 const router = useRouter();
+const avatarFailed = ref(false);
+watch(
+  () => [app.user?.id, app.user?.avatar_url],
+  () => {
+    avatarFailed.value = false;
+  },
+);
 const sidebarCopy = computed(
   () =>
     ({
@@ -305,6 +320,8 @@ async function logout() {
 .user-avatar {
   width: 31px;
   height: 31px;
+  flex-shrink: 0;
+  overflow: hidden;
   border-radius: 50%;
   background: var(--brand-color);
   color: var(--nav-bg);
@@ -312,6 +329,12 @@ async function logout() {
   place-items: center;
   font-size: 18px;
   font-family: Georgia, serif;
+}
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .user-area > a {
   display: grid;
