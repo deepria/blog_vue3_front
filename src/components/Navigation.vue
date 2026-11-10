@@ -1,6 +1,9 @@
 <template>
-  <div class="app-layout">
-    <NavigationPC class="nav-pc" />
+  <div
+    class="app-layout"
+    :style="navCollapsed ? { '--nav-width': '68px' } : undefined"
+  >
+    <NavigationPC v-model:collapsed="navCollapsed" class="nav-pc" />
     <NavigationMobile class="nav-mobile" />
 
     <main class="content-area content">
@@ -31,9 +34,11 @@ import { useRoute } from "vue-router";
 import { SettingOutlined } from "@ant-design/icons-vue";
 import { useAppStore } from "@/store/app";
 import { navigationItems } from "@/shared/navigation/items";
+import { usePanelCollapse } from "@/shared/composables/usePanelCollapse";
 import NavigationPC from "./NavigationPC.vue";
 import NavigationMobile from "./NavigationMobile.vue";
 import "@/assets/styles/layout.css";
+const navCollapsed = usePanelCollapse("navigation");
 const app = useAppStore();
 const route = useRoute();
 const pageTitle = computed(

@@ -174,7 +174,9 @@ watch(
 .messages-area {
   flex: 1;
   overflow-y: auto;
-  padding: 28px clamp(16px, 4vw, 48px);
+  min-height: 0;
+  padding: 16px;
+  container-type: inline-size;
   background: var(--color-bg-panel);
   display: flex;
   flex-direction: column;
@@ -185,8 +187,11 @@ watch(
 .empty-state {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-height: 100%;
+  justify-content: flex-start;
+  padding: 20px 0;
+  border: 0;
+  background: transparent;
+  min-height: 0;
   max-width: 760px;
   width: 100%;
   margin: 0 auto;
@@ -455,23 +460,36 @@ watch(
   color: var(--color-primary) !important;
 }
 
+@container (max-width: 420px) {
+  .empty-copy h2 {
+    font-size: 22px;
+  }
+  .empty-state {
+    gap: 14px;
+  }
+  .prompt-card {
+    min-height: 72px;
+    padding: 12px;
+  }
+}
+@container (max-width: 300px) {
+  .prompt-grid {
+    grid-template-columns: 1fr;
+  }
+}
 @media (max-width: 768px) {
   .messages-area {
-    padding: 20px 14px;
+    padding: 12px;
     gap: 16px;
   }
 
   .empty-state {
     justify-content: flex-start;
-    padding-top: 24px;
+    padding-top: 12px;
   }
 
   .empty-copy h2 {
     font-size: 22px;
-  }
-
-  .prompt-grid {
-    grid-template-columns: 1fr;
   }
 
   .message-row,

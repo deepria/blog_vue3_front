@@ -366,12 +366,20 @@ function cancelRename() {
   height: 34px;
 }
 
+.directory-panel :deep(.base-card-body) {
+  min-width: 0;
+}
+
 .directory-list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   gap: 6px;
 }
 
 .directory-row {
+  min-width: 0;
+  max-width: 100%;
   width: 100%;
   min-height: 38px;
   display: flex;

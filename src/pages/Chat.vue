@@ -20,7 +20,12 @@
       </a-button>
     </div>
 
-    <aside class="sidebar" v-if="!isMobile">
+    <aside
+      id="chat-session-list"
+      class="sidebar"
+      v-show="!sidebarCollapsed"
+      v-if="!isMobile"
+    >
       <ChatSessionSidebar
         :sessions="chatStore.sortedSessions"
         :current-session-id="chatStore.currentSessionId"
@@ -53,6 +58,21 @@
     <main class="chat-container">
       <header class="chat-header" v-if="!isMobile">
         <div class="session-heading">
+          <button
+            class="toolbar-button"
+            type="button"
+            :aria-label="
+              sidebarCollapsed ? '대화 목록 펼치기' : '대화 목록 접기'
+            "
+            :title="sidebarCollapsed ? '대화 목록 펼치기' : '대화 목록 접기'"
+            :aria-expanded="!sidebarCollapsed"
+            aria-controls="chat-session-list"
+            @click="sidebarCollapsed = !sidebarCollapsed"
+          >
+            <MenuUnfoldOutlined v-if="sidebarCollapsed" /><MenuFoldOutlined
+              v-else
+            />
+          </button>
           <span class="session-avatar"><message-outlined /></span>
           <div>
             <h1>{{ currentSessionTitle }}</h1>
@@ -100,6 +120,8 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import {
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
   MenuOutlined,
   MessageOutlined,
   PlusOutlined,
@@ -109,12 +131,14 @@ import ChatComposer from "@/features/chat/components/ChatComposer.vue";
 import ChatMessageList from "@/features/chat/components/ChatMessageList.vue";
 import ChatSessionSidebar from "@/features/chat/components/ChatSessionSidebar.vue";
 import { useWorkProtection } from "@/shared/composables/useWorkProtection";
+import { usePanelCollapse } from "@/shared/composables/usePanelCollapse";
 import { useChatStore } from "@/features/chat/store/chatStore";
 
+const sidebarCollapsed = usePanelCollapse("chat-list");
 const chatStore = useChatStore();
 const userInput = ref("");
 useWorkProtection("대화 작성", () => !!userInput.value.trim());
-const isMobile = ref(false);
+const isMobile = ref(window.innerWidth <= 1024);
 const drawerVisible = ref(false);
 
 const currentMessages = computed(
@@ -131,6 +155,7 @@ const messageCountLabel = computed(() => {
 
 function checkMobile() {
   isMobile.value = window.innerWidth <= 1024;
+  if (!isMobile.value) drawerVisible.value = false;
 }
 
 async function handleSendMessage() {
@@ -247,6 +272,7 @@ onUnmounted(() => {
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-bg-surface);
   backdrop-filter: none;
+  gap: 12px;
   z-index: 10;
 }
 
@@ -254,6 +280,10 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+}
+
+.session-heading > div {
   min-width: 0;
 }
 
@@ -270,7 +300,7 @@ onUnmounted(() => {
 }
 
 .chat-header h1 {
-  max-width: min(52vw, 720px);
+  max-width: 720px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -288,6 +318,7 @@ onUnmounted(() => {
 
 .header-actions {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 8px;
 }
@@ -299,6 +330,7 @@ onUnmounted(() => {
   justify-content: center;
   width: 36px;
   height: 36px;
+  flex-shrink: 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg-surface);

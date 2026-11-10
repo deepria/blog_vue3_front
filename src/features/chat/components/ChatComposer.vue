@@ -57,8 +57,7 @@ function submit() {
 
 <style scoped>
 .composer-area {
-  padding: 14px clamp(14px, 3vw, 28px)
-    calc(14px + env(safe-area-inset-bottom, 0px));
+  padding: 8px;
   background: var(--color-bg-surface);
   border-top: 1px solid var(--color-border);
 }
@@ -69,7 +68,7 @@ function submit() {
   gap: 8px;
   max-width: 920px;
   margin: 0 auto;
-  padding: 8px 8px 8px 14px;
+  padding: 4px 4px 4px 10px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-bg-panel);
@@ -86,7 +85,9 @@ function submit() {
   box-shadow: 0 0 0 3px var(--color-primary-glow);
 }
 
-:deep(.ant-input-textarea textarea) {
+:deep(textarea.ant-input) {
+  flex: 1;
+  min-width: 0;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -97,7 +98,7 @@ function submit() {
   resize: none;
 }
 
-:deep(.ant-input-textarea textarea)::placeholder {
+:deep(textarea.ant-input)::placeholder {
   color: var(--color-text-muted);
 }
 
@@ -138,7 +139,7 @@ function submit() {
 
 @media (max-width: 768px) {
   .composer-area {
-    padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    padding: 6px;
   }
 }
 </style>

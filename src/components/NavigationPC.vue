@@ -1,17 +1,30 @@
 <template>
-  <aside class="navigation-pc">
-    <router-link to="/" class="brand"
+  <aside class="navigation-pc" :class="{ collapsed }">
+    <button
+      class="nav-collapse-toggle"
+      type="button"
+      :aria-label="collapsed ? '메뉴 펼치기' : '메뉴 접기'"
+      :title="collapsed ? '메뉴 펼치기' : '메뉴 접기'"
+      :aria-expanded="!collapsed"
+      aria-controls="workspace-navigation"
+      @click="collapsed = !collapsed"
+    >
+      <MenuUnfoldOutlined v-if="collapsed" /><MenuFoldOutlined v-else />
+    </button>
+    <router-link to="/" class="brand" aria-label="홈"
       ><span class="brand-symbol" aria-hidden="true">✳</span
       ><span
         >deepria<small>cloud</small><em>나만의 작업 공간</em></span
       ></router-link
     >
     <p class="nav-caption">내 작업 공간 <span>01</span></p>
-    <nav class="nav-menu" aria-label="작업 공간">
+    <nav id="workspace-navigation" class="nav-menu" aria-label="작업 공간">
       <router-link
         v-for="(item, index) in workspaceItems"
         :key="item.to"
         :to="item.to"
+        :aria-label="item.label"
+        :title="collapsed ? item.label : undefined"
         class="nav-item"
         active-class="active"
         ><span class="nav-index" aria-hidden="true">{{
@@ -27,13 +40,18 @@
       <small>{{ sidebarCopy[2] }}</small>
     </div>
     <footer class="footer-area">
-      <router-link to="/account" class="settings-link"
+      <router-link
+        to="/account"
+        class="settings-link"
+        aria-label="설정"
+        title="설정"
         ><SettingOutlined /><span>설정</span
         ><span class="current-design">{{ designName }}</span></router-link
       ><button
         class="theme-toggle"
         type="button"
         :aria-pressed="isDarkMode"
+        :aria-label="isDarkMode ? '라이트 모드로 전환' : '다크 모드로 전환'"
         @click="app.toggleTheme"
       >
         <component :is="isDarkMode ? BulbFilled : BulbOutlined" /><span>{{
@@ -56,6 +74,8 @@
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 import {
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
   BulbFilled,
   BulbOutlined,
   LogoutOutlined,
@@ -64,6 +84,7 @@ import {
 import { navigationItems } from "@/shared/navigation/items";
 import { designOptions } from "@/features/appearance/lib/themes";
 import { useAppStore } from "@/store/app";
+const collapsed = defineModel("collapsed", { type: Boolean, default: false });
 const app = useAppStore();
 const router = useRouter();
 const sidebarCopy = computed(
@@ -102,11 +123,57 @@ async function logout() {
   z-index: 100;
   background: var(--nav-bg);
   color: var(--nav-ink);
-  padding: 34px 20px 22px;
+  padding: 54px 20px 22px;
+  transition: width 0.2s ease;
   border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+}
+.nav-collapse-toggle {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--nav-bg);
+  color: var(--nav-ink);
+  cursor: pointer;
+}
+.navigation-pc.collapsed {
+  padding: 54px 10px 16px;
+}
+.navigation-pc.collapsed .brand {
+  justify-content: center;
+}
+.navigation-pc.collapsed .brand > span:not(.brand-symbol),
+.navigation-pc.collapsed .nav-caption,
+.navigation-pc.collapsed .nav-item > span:not(.anticon),
+.navigation-pc.collapsed .nav-item > i,
+.navigation-pc.collapsed .sidebar-note,
+.navigation-pc.collapsed .settings-link > span:not(.anticon),
+.navigation-pc.collapsed .theme-toggle > span:not(.anticon),
+.navigation-pc.collapsed .user-area > a,
+.navigation-pc.collapsed .user-avatar {
+  display: none;
+}
+.navigation-pc.collapsed .nav-menu {
+  margin-top: 30px;
+}
+.navigation-pc.collapsed .nav-item,
+.navigation-pc.collapsed .settings-link,
+.navigation-pc.collapsed .theme-toggle,
+.navigation-pc.collapsed .user-area {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+.navigation-pc.collapsed .footer-area {
+  margin-top: auto;
 }
 .brand {
   display: flex;

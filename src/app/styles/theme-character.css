@@ -614,3 +614,26 @@
     border-radius: var(--radius-md);
   }
 }
+
+/* Keep the navigation controls and compact rail consistent in every design. */
+:root[data-design][data-theme] .navigation-pc {
+  padding-top: 54px;
+}
+:root[data-design][data-theme] .navigation-pc.collapsed {
+  padding: 54px 10px 16px;
+}
+:root[data-design][data-theme] .navigation-pc.collapsed .brand {
+  padding: 0;
+  border: 0;
+  gap: 0;
+}
+:root[data-design][data-theme] .navigation-pc.collapsed .brand-symbol {
+  font-size: 34px;
+}
+:root[data-design][data-theme] .navigation-pc.collapsed .nav-menu {
+  grid-template-columns: minmax(0, 1fr);
+}
+:root[data-design][data-theme] .navigation-pc.collapsed .nav-item {
+  min-width: 0;
+  padding-inline: 0;
+}

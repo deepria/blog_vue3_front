@@ -67,8 +67,26 @@
           >
         </div>
 
-        <section v-else class="memo-layout">
+        <section
+          v-else
+          class="memo-layout"
+          :class="{ 'list-collapsed': listCollapsed }"
+        >
           <aside class="memo-list-panel" aria-label="메모 목록">
+            <button
+              class="desktop-memo-list-toggle"
+              type="button"
+              :aria-label="
+                listCollapsed ? '메모 목록 펼치기' : '메모 목록 접기'
+              "
+              :title="listCollapsed ? '메모 목록 펼치기' : '메모 목록 접기'"
+              :aria-expanded="!listCollapsed"
+              aria-controls="memo-list-content"
+              @click="listCollapsed = !listCollapsed"
+            >
+              <span v-if="!listCollapsed">메모 목록</span>
+              <RightOutlined v-if="listCollapsed" /><LeftOutlined v-else />
+            </button>
             <button
               class="mobile-memo-list-toggle"
               type="button"
@@ -80,6 +98,7 @@
             </button>
 
             <div
+              id="memo-list-content"
               class="memo-list-content"
               :class="{ 'mobile-open': isMobileListOpen }"
             >
@@ -227,6 +246,8 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { App, message } from "ant-design-vue";
 import {
+  LeftOutlined,
+  RightOutlined,
   DeleteOutlined,
   DownOutlined,
   CloseOutlined,
@@ -238,6 +259,7 @@ import {
 } from "@ant-design/icons-vue";
 import { readListState, writeListState } from "@/shared/lib/listState";
 import { useAppStore } from "@/store/app";
+import { usePanelCollapse } from "@/shared/composables/usePanelCollapse";
 import { useMemo } from "@/features/memo/composables/useMemo";
 import { useMemoSelection } from "@/features/memo/composables/useMemoSelection";
 import BaseButton from "@/shared/ui/BaseButton.vue";
@@ -246,6 +268,7 @@ import BaseSkeleton from "@/shared/ui/BaseSkeleton.vue";
 import MarkdownViewer from "@/components/ui/MarkdownViewer.vue";
 import PageShell from "@/shared/ui/PageShell.vue";
 
+const listCollapsed = usePanelCollapse("memo-list");
 const router = useRouter();
 const app = useAppStore();
 const previousList = readListState(app.user?.id, "memos");
@@ -452,6 +475,38 @@ onMounted(async () => {
   overflow: hidden;
 }
 
+.desktop-memo-list-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+@media (min-width: 901px) {
+  .memo-layout.list-collapsed {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  .list-collapsed .memo-list-content {
+    display: none;
+  }
+  .list-collapsed .desktop-memo-list-toggle {
+    justify-content: center;
+    padding: 0;
+  }
+}
+@media (max-width: 900px) {
+  .desktop-memo-list-toggle {
+    display: none;
+  }
+}
 .mobile-memo-list-toggle {
   display: none;
 }

@@ -55,8 +55,8 @@
 }
 :root[data-design] .chat-workspace {
   height: calc(100dvh - var(--header-height));
-  padding: 24px;
-  gap: 18px;
+  padding: 16px;
+  gap: 12px;
 }
 :root[data-design] .chat-workspace > .sidebar {
   width: 240px;
